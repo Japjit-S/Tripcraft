@@ -3,6 +3,14 @@
  * Per ENGINE_BRIEF.md specifications.
  */
 
+export type Persona =
+  | 'Backpacker'
+  | 'Culture Seeker'
+  | 'Comfort Traveller'
+  | 'Family';
+
+export type ArrivalMode = 'flight' | 'train' | 'bus';
+
 export type DayWeatherState =
   | 'CLEAR'
   | 'RAIN'

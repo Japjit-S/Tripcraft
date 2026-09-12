@@ -1,5 +1,5 @@
-export type Persona = 'Backpacker' | 'Culture Seeker' | 'Comfort Traveller' | 'Family';
-export type ArrivalMode = 'flight' | 'train' | 'bus';
+import { Persona, ArrivalMode } from './types/engine';
+export type { Persona, ArrivalMode };
 
 export interface ItineraryItem {
   id: string;
