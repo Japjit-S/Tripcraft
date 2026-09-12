@@ -1,5 +1,3 @@
-import { DayWeatherState } from '../types/engine';
-
 /**
  * Open-Meteo WMO Weather Interpretation Codes (WW)
  * Reference: https://open-meteo.com/en/docs
