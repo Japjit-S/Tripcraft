@@ -1,0 +1,98 @@
+[
+  {
+    "id": "pack:varanasi-kashi-vishwanath",
+    "title": "Kashi Vishwanath Temple & Corridor",
+    "category": "LANDMARK",
+    "indoor": true,
+    "intensity": "MEDIUM",
+    "typicalDurationMin": 90,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.96,
+    "coords": { "lat": 25.3109, "lon": 83.0107 },
+    "tags": ["temple", "sacred", "heritage", "spiritual", "culture", "jyotirlinga"]
+  },
+  {
+    "id": "pack:varanasi-ganga-aarti",
+    "title": "Dashashwamedh Ghat Evening Ganga Aarti",
+    "category": "CULTURE",
+    "indoor": false,
+    "intensity": "LOW",
+    "typicalDurationMin": 90,
+    "slotAffinity": ["EVENING"],
+    "prominence": 0.95,
+    "coords": { "lat": 25.3060, "lon": 83.0100 },
+    "tags": ["ceremony", "evening", "river", "spiritual", "iconic", "ritual"]
+  },
+  {
+    "id": "pack:varanasi-sunrise-boat",
+    "title": "Sunrise Rowing Boat Ride on the Ganges",
+    "category": "NATURE",
+    "indoor": false,
+    "intensity": "LOW",
+    "typicalDurationMin": 75,
+    "slotAffinity": ["MORNING"],
+    "prominence": 0.93,
+    "coords": { "lat": 25.3050, "lon": 83.0120 },
+    "tags": ["river", "boat", "sunrise", "scenic", "morning", "peaceful"]
+  },
+  {
+    "id": "pack:varanasi-sarnath-stupa",
+    "title": "Sarnath Deer Park & Dhamek Stupa",
+    "category": "LANDMARK",
+    "indoor": false,
+    "intensity": "LOW",
+    "typicalDurationMin": 120,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.90,
+    "coords": { "lat": 25.3811, "lon": 83.0243 },
+    "tags": ["buddhist", "unesco", "historic", "peaceful", "ancient"]
+  },
+  {
+    "id": "pack:varanasi-sarnath-museum",
+    "title": "Sarnath Archaeological Museum",
+    "category": "CULTURE",
+    "indoor": true,
+    "intensity": "LOW",
+    "typicalDurationMin": 75,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.85,
+    "coords": { "lat": 25.3789, "lon": 83.0225 },
+    "tags": ["museum", "ashoka", "ancient", "art", "indoor", "history"]
+  },
+  {
+    "id": "pack:varanasi-ghats-walk",
+    "title": "Old City Alleys & Assi to Manikarnika Ghat Walk",
+    "category": "CULTURE",
+    "indoor": false,
+    "intensity": "HIGH",
+    "typicalDurationMin": 120,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.84,
+    "coords": { "lat": 25.2970, "lon": 83.0060 },
+    "tags": ["walking_tour", "ghats", "heritage", "culture", "walkable", "budget"]
+  },
+  {
+    "id": "pack:varanasi-street-food",
+    "title": "Kachori Gali & Thatheri Bazaar Street Food Crawl",
+    "category": "FOOD",
+    "indoor": false,
+    "intensity": "MEDIUM",
+    "typicalDurationMin": 90,
+    "slotAffinity": ["MORNING", "EVENING"],
+    "prominence": 0.82,
+    "coords": { "lat": 25.3110, "lon": 83.0130 },
+    "tags": ["street_food", "local_food", "chaat", "sweets", "market", "bazaar"]
+  },
+  {
+    "id": "pack:varanasi-ramnagar-fort",
+    "title": "Ramnagar Fort & Royal Museum",
+    "category": "CULTURE",
+    "indoor": true,
+    "intensity": "MEDIUM",
+    "typicalDurationMin": 90,
+    "slotAffinity": ["AFTERNOON"],
+    "prominence": 0.78,
+    "coords": { "lat": 25.2710, "lon": 83.0250 },
+    "tags": ["fort", "museum", "cars", "palace", "indoor", "history"]
+  }
+]

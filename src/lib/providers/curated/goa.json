@@ -1,0 +1,98 @@
+[
+  {
+    "id": "pack:goa-bom-jesus",
+    "title": "Basilica of Bom Jesus (Old Goa)",
+    "category": "LANDMARK",
+    "indoor": true,
+    "intensity": "LOW",
+    "typicalDurationMin": 60,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.94,
+    "coords": { "lat": 15.5008, "lon": 73.9116 },
+    "tags": ["unesco", "church", "historic", "heritage", "architecture", "indoor", "portuguese"]
+  },
+  {
+    "id": "pack:goa-fort-aguada",
+    "title": "Fort Aguada & 19th-Century Lighthouse",
+    "category": "LANDMARK",
+    "indoor": false,
+    "intensity": "MEDIUM",
+    "typicalDurationMin": 90,
+    "slotAffinity": ["MORNING", "EVENING"],
+    "prominence": 0.92,
+    "coords": { "lat": 15.4924, "lon": 73.7736 },
+    "tags": ["fort", "sea_view", "historic", "lighthouse", "sunset", "scenic"]
+  },
+  {
+    "id": "pack:goa-palolem-beach",
+    "title": "Palolem Beach Kayaking & Coastal Relaxation",
+    "category": "NATURE",
+    "indoor": false,
+    "intensity": "LOW",
+    "typicalDurationMin": 180,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.91,
+    "coords": { "lat": 15.0100, "lon": 74.0230 },
+    "tags": ["beach", "relaxing", "kayak", "nature", "scenic", "coastal"]
+  },
+  {
+    "id": "pack:goa-fontainhas-walk",
+    "title": "Fontainhas Latin Quarter Architectural Heritage Walk",
+    "category": "CULTURE",
+    "indoor": false,
+    "intensity": "MEDIUM",
+    "typicalDurationMin": 90,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.89,
+    "coords": { "lat": 15.4989, "lon": 73.8340 },
+    "tags": ["walking_tour", "portuguese", "colorful", "heritage", "photography", "walkable"]
+  },
+  {
+    "id": "pack:goa-state-museum",
+    "title": "Goa State Central Museum",
+    "category": "CULTURE",
+    "indoor": true,
+    "intensity": "LOW",
+    "typicalDurationMin": 75,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.80,
+    "coords": { "lat": 15.4930, "lon": 73.8260 },
+    "tags": ["museum", "history", "art", "indoor", "culture"]
+  },
+  {
+    "id": "pack:goa-anjuna-market",
+    "title": "Anjuna Beach Flea & Night Market",
+    "category": "MARKET",
+    "indoor": false,
+    "intensity": "HIGH",
+    "typicalDurationMin": 150,
+    "slotAffinity": ["EVENING"],
+    "prominence": 0.87,
+    "coords": { "lat": 15.5780, "lon": 73.7430 },
+    "tags": ["market", "evening", "music", "shopping", "food", "night", "beach"]
+  },
+  {
+    "id": "pack:goa-dudhsagar-falls",
+    "title": "Dudhsagar Falls & Bhagwan Mahaveer Sanctuary",
+    "category": "NATURE",
+    "indoor": false,
+    "intensity": "HIGH",
+    "typicalDurationMin": 240,
+    "slotAffinity": ["MORNING"],
+    "prominence": 0.88,
+    "coords": { "lat": 15.3144, "lon": 74.3143 },
+    "tags": ["waterfall", "nature", "trekking", "jungle", "adventure", "scenic"]
+  },
+  {
+    "id": "pack:goa-seafood-dining",
+    "title": "Riverside Traditional Goan Seafood Experience",
+    "category": "FOOD",
+    "indoor": false,
+    "intensity": "LOW",
+    "typicalDurationMin": 120,
+    "slotAffinity": ["EVENING"],
+    "prominence": 0.86,
+    "coords": { "lat": 15.2280, "lon": 73.9390 },
+    "tags": ["food", "seafood", "dinner", "sunset", "evening", "local_food", "relaxed"]
+  }
+]

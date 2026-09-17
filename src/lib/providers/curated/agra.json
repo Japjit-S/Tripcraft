@@ -1,0 +1,97 @@
+[
+  {
+    "id": "pack:agra-taj-mahal",
+    "title": "Taj Mahal",
+    "category": "LANDMARK",
+    "indoor": false,
+    "intensity": "MEDIUM",
+    "typicalDurationMin": 180,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.99,
+    "coords": { "lat": 27.1751, "lon": 78.0421 },
+    "tags": ["wonder", "unesco", "mausoleum", "marble", "iconic", "photography"],
+    "sourceUrl": "https://en.wikipedia.org/wiki/Taj_Mahal",
+    "openingHours": {
+      "monday": [{ "open": "06:00", "close": "18:30" }],
+      "tuesday": [{ "open": "06:00", "close": "18:30" }],
+      "wednesday": [{ "open": "06:00", "close": "18:30" }],
+      "thursday": [{ "open": "06:00", "close": "18:30" }],
+      "friday": "closed",
+      "saturday": [{ "open": "06:00", "close": "18:30" }],
+      "sunday": [{ "open": "06:00", "close": "18:30" }]
+    }
+  },
+  {
+    "id": "pack:agra-agra-fort",
+    "title": "Agra Fort (Red Fort of Agra)",
+    "category": "LANDMARK",
+    "indoor": false,
+    "intensity": "MEDIUM",
+    "typicalDurationMin": 120,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.94,
+    "coords": { "lat": 27.1795, "lon": 78.0211 },
+    "tags": ["unesco", "fort", "mughal", "royal", "palace", "historic"],
+    "sourceUrl": "https://en.wikipedia.org/wiki/Agra_Fort"
+  },
+  {
+    "id": "pack:agra-fatehpur-sikri",
+    "title": "Fatehpur Sikri Royal Complex",
+    "category": "LANDMARK",
+    "indoor": false,
+    "intensity": "HIGH",
+    "typicalDurationMin": 180,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.90,
+    "coords": { "lat": 27.0945, "lon": 77.6679 },
+    "tags": ["unesco", "ancient_city", "historic", "architecture", "monument"]
+  },
+  {
+    "id": "pack:agra-mehtab-bagh",
+    "title": "Mehtab Bagh (Moonlight Garden & Sunset View)",
+    "category": "NATURE",
+    "indoor": false,
+    "intensity": "LOW",
+    "typicalDurationMin": 60,
+    "slotAffinity": ["EVENING"],
+    "prominence": 0.86,
+    "coords": { "lat": 27.1800, "lon": 78.0420 },
+    "tags": ["sunset", "garden", "taj_view", "viewpoint", "photography", "scenic"]
+  },
+  {
+    "id": "pack:agra-baby-taj",
+    "title": "Tomb of I'timād-ud-Daulah (Baby Taj)",
+    "category": "CULTURE",
+    "indoor": true,
+    "intensity": "LOW",
+    "typicalDurationMin": 60,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.83,
+    "coords": { "lat": 27.1929, "lon": 78.0310 },
+    "tags": ["marble", "tomb", "mughal", "indoor", "architecture", "peaceful"]
+  },
+  {
+    "id": "pack:agra-sadar-bazaar",
+    "title": "Sadar Bazaar & Agra Street Food Trail",
+    "category": "FOOD",
+    "indoor": false,
+    "intensity": "MEDIUM",
+    "typicalDurationMin": 90,
+    "slotAffinity": ["EVENING"],
+    "prominence": 0.80,
+    "coords": { "lat": 27.1620, "lon": 78.0090 },
+    "tags": ["food", "sweets", "market", "shopping", "street_food", "local_food"]
+  },
+  {
+    "id": "pack:agra-taj-nature-walk",
+    "title": "Taj Nature Walk & Biodiversity Trail",
+    "category": "NATURE",
+    "indoor": false,
+    "intensity": "LOW",
+    "typicalDurationMin": 60,
+    "slotAffinity": ["MORNING"],
+    "prominence": 0.74,
+    "coords": { "lat": 27.1720, "lon": 78.0480 },
+    "tags": ["nature", "trail", "quiet", "birds", "morning", "scenic"]
+  }
+]

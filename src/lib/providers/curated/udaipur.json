@@ -1,0 +1,98 @@
+[
+  {
+    "id": "pack:udaipur-city-palace",
+    "title": "City Palace Complex Udaipur",
+    "category": "LANDMARK",
+    "indoor": true,
+    "intensity": "MEDIUM",
+    "typicalDurationMin": 150,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.96,
+    "coords": { "lat": 24.5764, "lon": 73.6835 },
+    "tags": ["palace", "museum", "lake", "mewar", "royal", "heritage", "art"]
+  },
+  {
+    "id": "pack:udaipur-lake-pichola",
+    "title": "Lake Pichola Sunset Boat Cruise",
+    "category": "NATURE",
+    "indoor": false,
+    "intensity": "LOW",
+    "typicalDurationMin": 60,
+    "slotAffinity": ["AFTERNOON", "EVENING"],
+    "prominence": 0.94,
+    "coords": { "lat": 24.5730, "lon": 73.6780 },
+    "tags": ["lake", "boat", "sunset", "scenic", "photography", "evening"]
+  },
+  {
+    "id": "pack:udaipur-jag-mandir",
+    "title": "Jag Mandir Island Palace",
+    "category": "LANDMARK",
+    "indoor": false,
+    "intensity": "LOW",
+    "typicalDurationMin": 75,
+    "slotAffinity": ["AFTERNOON", "EVENING"],
+    "prominence": 0.89,
+    "coords": { "lat": 24.5676, "lon": 73.6761 },
+    "tags": ["island_palace", "dining", "scenic", "romantic", "lake"]
+  },
+  {
+    "id": "pack:udaipur-saheliyon-ki-bari",
+    "title": "Saheliyon-ki-Bari (Courtyard of Maidens)",
+    "category": "NATURE",
+    "indoor": false,
+    "intensity": "LOW",
+    "typicalDurationMin": 60,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.85,
+    "coords": { "lat": 24.6030, "lon": 73.6870 },
+    "tags": ["garden", "fountains", "royal", "relaxed", "family_friendly"]
+  },
+  {
+    "id": "pack:udaipur-bagore-ki-haveli",
+    "title": "Bagore Ki Haveli Folk Dance & Museum",
+    "category": "CULTURE",
+    "indoor": true,
+    "intensity": "LOW",
+    "typicalDurationMin": 90,
+    "slotAffinity": ["EVENING"],
+    "prominence": 0.88,
+    "coords": { "lat": 24.5794, "lon": 73.6811 },
+    "tags": ["culture", "folk_dance", "museum", "evening", "heritage", "show"]
+  },
+  {
+    "id": "pack:udaipur-sajjangarh",
+    "title": "Sajjangarh (Monsoon Palace) Hilltop Viewpoint",
+    "category": "LANDMARK",
+    "indoor": false,
+    "intensity": "MEDIUM",
+    "typicalDurationMin": 90,
+    "slotAffinity": ["EVENING"],
+    "prominence": 0.87,
+    "coords": { "lat": 24.5936, "lon": 73.6372 },
+    "tags": ["fort", "hilltop", "sunset", "panoramic", "viewpoint", "evening"]
+  },
+  {
+    "id": "pack:udaipur-vintage-cars",
+    "title": "Vintage & Classic Car Museum",
+    "category": "CULTURE",
+    "indoor": true,
+    "intensity": "LOW",
+    "typicalDurationMin": 60,
+    "slotAffinity": ["MORNING", "AFTERNOON"],
+    "prominence": 0.79,
+    "coords": { "lat": 24.5770, "lon": 73.6940 },
+    "tags": ["museum", "cars", "vintage", "royal", "indoor", "kid_friendly"]
+  },
+  {
+    "id": "pack:udaipur-bada-bazaar",
+    "title": "Bada Bazaar & Clock Tower Markets",
+    "category": "MARKET",
+    "indoor": false,
+    "intensity": "MEDIUM",
+    "typicalDurationMin": 90,
+    "slotAffinity": ["AFTERNOON", "EVENING"],
+    "prominence": 0.81,
+    "coords": { "lat": 24.5820, "lon": 73.6880 },
+    "tags": ["shopping", "handicrafts", "textiles", "market", "budget", "street_food"]
+  }
+]
