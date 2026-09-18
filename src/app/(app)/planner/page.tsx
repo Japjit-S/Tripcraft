@@ -17,9 +17,12 @@ const ARRIVAL_MODES = [
   { id: 'bus', icon: Bus, label: 'Bus' },
 ];
 
+import { saveTripToStorage, GeneratedTrip } from '@/lib/tripStore';
+
 export default function PlannerPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Form State
   const [destination, setDestination] = useState('');
@@ -30,14 +33,57 @@ export default function PlannerPage() {
   const [arrivalMode, setArrivalMode] = useState('flight');
   const [arrivalTime, setArrivalTime] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Mock submission latency
-    setTimeout(() => {
-      // Redirect to the mock trip we created
-      router.push('/trip/trip-1');
-    }, 1000);
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch('/api/itineraries/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          city: destination,
+          startDate,
+          days: Number(duration),
+          persona,
+          originCity,
+          arrivalMode,
+          arrivalTime,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setErrorMessage(data.error || 'Failed to generate itinerary.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const tripId = `trip-${Date.now()}`;
+      const newTrip: GeneratedTrip = {
+        id: tripId,
+        destination: data.destination.city,
+        persona: data.persona,
+        startDate: data.startDate,
+        days: data.days,
+        originCity: data.originCity || originCity,
+        arrivalMode: (data.arrivalMode as any) || arrivalMode,
+        arrivalAt: data.arrivalTime || arrivalTime || '10:00 AM',
+        arrivalTime: data.arrivalTime || arrivalTime || '10:00 AM',
+        itineraryDays: data.itineraryDays,
+        auditLog: data.auditLog,
+        warnings: data.warnings,
+        feasibilityStatus: data.feasibilityStatus,
+      };
+
+      saveTripToStorage(newTrip);
+      router.push(`/trip/${tripId}`);
+    } catch (err: any) {
+      setErrorMessage(err.message || 'An unexpected error occurred during generation.');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -46,6 +92,13 @@ export default function PlannerPage() {
         <h1 className="text-5xl font-black text-slate-900 mb-4 tracking-tight">Design your journey.</h1>
         <p className="text-lg text-slate-500 font-medium max-w-2xl">Drop in your details and we'll craft a deeply personalized, weather-aware itinerary in seconds.</p>
       </div>
+
+      {errorMessage && (
+        <div className="mb-8 p-5 bg-rose-50 border border-rose-200/80 rounded-2xl flex items-center gap-3 text-rose-700 font-bold text-sm shadow-sm animate-in fade-in duration-200">
+          <span className="text-lg">⚠️</span>
+          <span>{errorMessage}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         
