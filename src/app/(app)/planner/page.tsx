@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { MapPin, Calendar, Clock, Plane, Train, Bus, Compass, Coffee, Baby, Backpack, Navigation } from 'lucide-react';
+import { saveTripToStorage, GeneratedTrip } from '@/lib/tripStore';
+import { Destination } from '@/lib/types';
 
 const PERSONAS = [
   { id: 'Backpacker', icon: Backpack, title: 'Backpacker', desc: 'Walkable, local food, highly social' },
@@ -17,8 +19,6 @@ const ARRIVAL_MODES = [
   { id: 'bus', icon: Bus, label: 'Bus' },
 ];
 
-import { saveTripToStorage, GeneratedTrip } from '@/lib/tripStore';
-
 export default function PlannerPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,6 +32,52 @@ export default function PlannerPage() {
   const [originCity, setOriginCity] = useState('');
   const [arrivalMode, setArrivalMode] = useState('flight');
   const [arrivalTime, setArrivalTime] = useState('');
+
+  // Autocomplete suggestions state
+  const [suggestions, setSuggestions] = useState<Destination[]>([]);
+  const [isSearchingCities, setIsSearchingCities] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const autocompleteContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        autocompleteContainerRef.current &&
+        !autocompleteContainerRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const trimmed = destination.trim();
+    if (trimmed.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearchingCities(true);
+      try {
+        const res = await fetch(`/api/destinations/search?q=${encodeURIComponent(trimmed)}`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.results)) {
+          setSuggestions(data.results);
+          setShowSuggestions(data.results.length > 0);
+        }
+      } catch {
+        // Silently tolerate autocomplete network errors
+      } finally {
+        setIsSearchingCities(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [destination]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,11 +111,15 @@ export default function PlannerPage() {
       const newTrip: GeneratedTrip = {
         id: tripId,
         destination: data.destination.city,
+        destinationCoords: {
+          lat: data.destination.latitude,
+          lon: data.destination.longitude,
+        },
         persona: data.persona,
         startDate: data.startDate,
         days: data.days,
         originCity: data.originCity || originCity,
-        arrivalMode: (data.arrivalMode as any) || arrivalMode,
+        arrivalMode: (data.arrivalMode as GeneratedTrip['arrivalMode']) || arrivalMode,
         arrivalAt: data.arrivalTime || arrivalTime || '10:00 AM',
         arrivalTime: data.arrivalTime || arrivalTime || '10:00 AM',
         itineraryDays: data.itineraryDays,
@@ -80,8 +130,9 @@ export default function PlannerPage() {
 
       saveTripToStorage(newTrip);
       router.push(`/trip/${tripId}`);
-    } catch (err: any) {
-      setErrorMessage(err.message || 'An unexpected error occurred during generation.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred during generation.';
+      setErrorMessage(message);
       setIsSubmitting(false);
     }
   };
@@ -113,19 +164,63 @@ export default function PlannerPage() {
             </h3>
             
             <div className="space-y-6">
-              <div className="space-y-2.5">
+              <div ref={autocompleteContainerRef} className="space-y-2.5 relative">
                 <label className="text-sm font-bold text-slate-700 ml-2">Destination City</label>
                 <div className="relative">
                   <MapPin className="absolute left-4 top-4 h-6 w-6 text-slate-400" />
                   <input 
                     required
                     value={destination}
-                    onChange={e => setDestination(e.target.value)}
+                    onChange={e => {
+                      setDestination(e.target.value);
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => {
+                      if (suggestions.length > 0) setShowSuggestions(true);
+                    }}
                     type="text" 
                     placeholder="Where are you heading? (e.g. Jaipur)" 
-                    className="w-full pl-14 pr-4 py-4 bg-[#f8f9fc] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1d6b8f]/30 transition-all text-slate-900 font-bold placeholder:font-normal placeholder:text-slate-400 text-lg"
+                    className="w-full pl-14 pr-12 py-4 bg-[#f8f9fc] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1d6b8f]/30 transition-all text-slate-900 font-bold placeholder:font-normal placeholder:text-slate-400 text-lg"
                   />
+                  {isSearchingCities && (
+                    <div className="absolute right-4 top-5 w-5 h-5 border-2 border-[#1d6b8f]/30 border-t-[#1d6b8f] rounded-full animate-spin"></div>
+                  )}
                 </div>
+
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden divide-y divide-slate-50 animate-in fade-in duration-150 max-h-64 overflow-y-auto">
+                    {suggestions.map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => {
+                          setDestination(s.city);
+                          setShowSuggestions(false);
+                        }}
+                        className="w-full text-left px-5 py-3.5 hover:bg-slate-50 flex items-center justify-between transition-colors group cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-[#1d6b8f]/10 text-[#1d6b8f] flex items-center justify-center font-bold text-xs shrink-0">
+                            <MapPin className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <span className="font-bold text-slate-900 group-hover:text-[#1d6b8f] transition-colors">
+                              {s.city}
+                            </span>
+                            <span className="text-xs text-slate-400 ml-2 font-medium">
+                              {[s.admin1, s.country].filter(Boolean).join(', ')}
+                            </span>
+                          </div>
+                        </div>
+                        {s.countryCode && (
+                          <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md">
+                            {s.countryCode}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

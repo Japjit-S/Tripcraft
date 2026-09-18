@@ -74,9 +74,53 @@ export class WeatherProvider {
       city: first.name,
       country: first.country || '',
       countryCode: first.country_code || '',
+      admin1: first.admin1 || '',
       latitude: first.latitude,
       longitude: first.longitude,
     };
+  }
+
+  /**
+   * Searches for matching cities matching the query with debouncing/capping.
+   */
+  async searchCities(query: string, count = 6): Promise<Destination[]> {
+    const cleaned = query.trim();
+    if (cleaned.length < 2) return [];
+
+    const url = `${GEOCODING_API_URL}?name=${encodeURIComponent(cleaned)}&count=${Math.min(count, 10)}&language=en&format=json`;
+    const res = await fetch(url, {
+      headers: { 'User-Agent': USER_AGENT },
+      signal: AbortSignal.timeout(8000),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Open-Meteo geocoding search failed with HTTP ${res.status}`);
+    }
+
+    interface RawGeocodingItem {
+      id: number;
+      name: string;
+      country?: string;
+      country_code?: string;
+      admin1?: string;
+      latitude: number;
+      longitude: number;
+    }
+
+    const data = (await res.json()) as { results?: RawGeocodingItem[] };
+    if (!data.results || !Array.isArray(data.results)) {
+      return [];
+    }
+
+    return data.results.map((r) => ({
+      id: `openmeteo:${r.id}`,
+      city: r.name,
+      country: r.country || '',
+      countryCode: r.country_code || '',
+      admin1: r.admin1 || '',
+      latitude: r.latitude,
+      longitude: r.longitude,
+    }));
   }
 
   /**

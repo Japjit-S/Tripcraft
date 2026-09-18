@@ -61,3 +61,20 @@ export function getAllStoredTrips(): GeneratedTrip[] {
   }
   return [];
 }
+
+/**
+ * Deletes a trip by ID from client storage
+ */
+export function deleteTripFromStorage(id: string): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    localStorage.removeItem(`${STORAGE_PREFIX}${id}`);
+    const existing = getAllStoredTrips();
+    const updated = existing.filter((t) => t.id !== id);
+    localStorage.setItem(LIST_KEY, JSON.stringify(updated));
+  } catch (err) {
+    console.warn('Failed to delete trip from localStorage:', err);
+  }
+}
+

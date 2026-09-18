@@ -7,6 +7,9 @@ export interface ItineraryItem {
   category: string;
   reason: string;
   indoor: boolean;
+  coords?: { lat: number; lon: number };
+  isFlex?: boolean;
+  flexReason?: string;
 }
 
 export interface TripDay {
@@ -22,6 +25,7 @@ export interface TripDay {
 export interface Trip {
   id: string;
   destination: string;
+  destinationCoords?: { lat: number; lon: number };
   persona: Persona;
   startDate: string;
   days: number;

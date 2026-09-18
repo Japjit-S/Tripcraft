@@ -57,11 +57,11 @@ export default function TripWorkspacePage({
 
   const selectedDay = trip.itineraryDays[selectedDayIndex] || trip.itineraryDays[0];
 
-  // Helper to find title of selected item
-  const selectedItemTitle = selectedItemId
+  // Helper to find selected item with title and coordinates
+  const selectedItem = selectedItemId
     ? [...selectedDay.morning, ...selectedDay.afternoon, ...selectedDay.evening].find(
         (i) => i.id === selectedItemId
-      )?.title
+      )
     : undefined;
 
   const isJaipur = trip.destination.toLowerCase().includes('jaipur');
@@ -177,7 +177,16 @@ export default function TripWorkspacePage({
             <div className="sticky top-0">
               <MapPlaceholder
                 destination={trip.destination}
-                selectedItemTitle={selectedItemTitle}
+                destinationCoords={trip.destinationCoords}
+                selectedItem={
+                  selectedItem
+                    ? {
+                        title: selectedItem.title,
+                        coords: selectedItem.coords,
+                      }
+                    : undefined
+                }
+                selectedItemTitle={selectedItem?.title}
                 className="h-[500px]"
               />
             </div>
