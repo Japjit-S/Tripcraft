@@ -1,8 +1,26 @@
 import { Trip } from './types';
+import { resolveLocalDestinationArtwork } from './images/sceneCatalog';
+
+const jaipurArtwork = resolveLocalDestinationArtwork({
+  id: 'curated:jaipur',
+  city: 'Jaipur',
+  country: 'India',
+  countryCode: 'IN',
+  admin1: 'Rajasthan',
+  latitude: 26.9124,
+  longitude: 75.7873,
+});
 
 export const mockJaipurTrip: Trip = {
   id: 'trip-1',
   destination: 'Jaipur',
+  destinationId: 'curated:jaipur',
+  destinationCountry: 'India',
+  destinationCountryCode: 'IN',
+  destinationAdmin1: 'Rajasthan',
+  destinationCoords: { lat: 26.9124, lon: 75.7873 },
+  bannerUrl: jaipurArtwork.assetPath,
+  artwork: jaipurArtwork,
   persona: 'Culture Seeker',
   startDate: '2026-10-15',
   days: 3,

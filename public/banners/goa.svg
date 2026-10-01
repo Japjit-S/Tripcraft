@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" fill="none">
+  <defs>
+    <linearGradient id="go-sky" x1="0" y1="0" x2="0" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F4A261"/>
+      <stop offset="55%" stop-color="#F8CE8B"/>
+      <stop offset="100%" stop-color="#FFF4E0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="500" fill="url(#go-sky)"/>
+  <circle cx="885" cy="170" r="130" fill="#F6B868" opacity="0.35"/>
+  <circle cx="885" cy="170" r="92" fill="#FFF9E4"/>
+  <!-- Coastal Headland, Aguada Lighthouse & Fontainhas Villas -->
+  <path d="M420 415 Q640 290 920 340 L1200 325 L1200 430 L420 430 Z" fill="#CE8559"/>
+  <g transform="translate(620, 125)">
+    <!-- Baroque Church & Gable -->
+    <rect x="60" y="110" width="170" height="175" fill="#C2593B"/>
+    <path d="M60 110 L145 35 L230 110 Z" fill="#E08258"/>
+    <circle cx="145" cy="85" r="16" fill="#FDF0D5"/>
+    <rect x="125" y="195" width="40" height="90" rx="20" fill="#233D47"/>
+    <!-- Fontainhas Stepped Villas -->
+    <rect x="245" y="155" width="125" height="130" fill="#E08258"/>
+    <path d="M245 155 L307 105 L370 155 Z" fill="#FDF0D5"/>
+    <!-- Aguada Lighthouse -->
+    <polygon points="435,285 450,75 485,75 500,285" fill="#FDF0D5"/>
+    <rect x="445" y="52" width="45" height="25" fill="#C2593B"/>
+    <path d="M445 52 Q467 28 490 52 Z" fill="#233D47"/>
+  </g>
+  <!-- Arabian Sea & Coconut Palms -->
+  <rect x="0" y="410" width="1200" height="90" fill="#1D6B8F"/>
+  <path d="M480 442 Q600 430 720 442 T960 442 T1160 442" stroke="#94C9D8" stroke-width="3" fill="none"/>
+  <g stroke="#1E5549" stroke-width="7" stroke-linecap="round">
+    <path d="M560 415 Q545 330 515 275" fill="none"/>
+    <path d="M1110 415 Q1125 320 1155 265" fill="none"/>
+  </g>
+  <g fill="#1E5549">
+    <ellipse cx="505" cy="275" rx="38" ry="12" transform="rotate(-20 505 275)"/>
+    <ellipse cx="535" cy="272" rx="38" ry="12" transform="rotate(25 535 272)"/>
+    <ellipse cx="1140" cy="265" rx="38" ry="12" transform="rotate(-25 1140 265)"/>
+    <ellipse cx="1170" cy="268" rx="38" ry="12" transform="rotate(20 1170 268)"/>
+  </g>
+</svg>

@@ -8,7 +8,7 @@ export default function SidebarNav() {
   const pathname = usePathname();
 
   const navItems = [
-    { name: 'Home', href: '/planner', icon: Compass },
+    { name: 'Home', href: '/dashboard', icon: Compass },
     { name: 'All trips', href: '/trips', icon: Map },
   ];
 

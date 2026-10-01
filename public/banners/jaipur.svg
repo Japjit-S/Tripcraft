@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" fill="none">
+  <defs>
+    <linearGradient id="jp-sky" x1="0" y1="0" x2="0" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F7A072"/>
+      <stop offset="55%" stop-color="#F9C784"/>
+      <stop offset="100%" stop-color="#FFF1DC"/>
+    </linearGradient>
+    <linearGradient id="jp-sun" x1="880" y1="60" x2="880" y2="280" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFF8E1"/>
+      <stop offset="100%" stop-color="#FDB863"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="500" fill="url(#jp-sky)"/>
+  <circle cx="900" cy="175" r="135" fill="#FDB863" opacity="0.35"/>
+  <circle cx="900" cy="175" r="98" fill="url(#jp-sun)"/>
+  <path d="M120 140 C160 120 210 120 250 140 L310 140 C330 140 345 155 315 162 L100 162 Z" fill="#FFF8EE" opacity="0.65"/>
+  <path d="M1010 110 C1040 94 1080 94 1110 110 L1155 110 C1170 110 1180 122 1155 128 L995 128 Z" fill="#FFF8EE" opacity="0.7"/>
+  <path d="M180 210 Q340 125 510 175 T760 130" stroke="#9E3B24" stroke-width="2.5" stroke-dasharray="7 7" opacity="0.45" fill="none"/>
+  <polygon points="765,127 748,122 753,130 749,138" fill="#9E3B24" opacity="0.65"/>
+  <path d="M0 365 Q180 280 390 335 Q560 245 760 315 Q960 240 1200 320 L1200 500 L0 500 Z" fill="#E08A64" opacity="0.75"/>
+  <path d="M350 305 L350 265 L375 265 L375 278 L395 278 L395 260 L435 260 L435 278 L455 278 L455 265 L480 265 L480 315 Z" fill="#C96846"/>
+  <path d="M0 405 Q260 355 540 395 Q860 360 1200 390 L1200 500 L0 500 Z" fill="#C96846"/>
+  <!-- Hawa Mahal Tiered Facade -->
+  <g transform="translate(560, 120)">
+    <rect x="40" y="180" width="440" height="160" rx="4" fill="#B84B31"/>
+    <rect x="85" y="130" width="350" height="190" rx="4" fill="#C85538"/>
+    <rect x="130" y="85" width="260" height="220" rx="4" fill="#D46244"/>
+    <rect x="175" y="45" width="170" height="240" rx="4" fill="#DF7050"/>
+    <rect x="220" y="15" width="80" height="250" rx="4" fill="#E67E5D"/>
+    <!-- Domes and Kalash finials -->
+    <path d="M220 15 Q260 -18 300 15 Z" fill="#FBE3C6"/>
+    <path d="M175 45 Q200 18 225 45 Z" fill="#FBE3C6"/>
+    <path d="M295 45 Q320 18 345 45 Z" fill="#FBE3C6"/>
+    <path d="M130 85 Q155 58 180 85 Z" fill="#FBE3C6"/>
+    <path d="M340 85 Q365 58 390 85 Z" fill="#FBE3C6"/>
+    <path d="M85 130 Q110 104 135 130 Z" fill="#FBE3C6"/>
+    <path d="M385 130 Q410 104 435 130 Z" fill="#FBE3C6"/>
+    <path d="M40 180 Q65 154 90 180 Z" fill="#FBE3C6"/>
+    <path d="M430 180 Q455 154 480 180 Z" fill="#FBE3C6"/>
+    <!-- Jharokha Arched Windows Grid -->
+    <g fill="#5E2118" stroke="#FBE3C6" stroke-width="1.5">
+      <rect x="242" y="32" width="36" height="42" rx="18"/>
+      <rect x="192" y="65" width="32" height="40" rx="16"/>
+      <rect x="244" y="65" width="32" height="40" rx="16"/>
+      <rect x="296" y="65" width="32" height="40" rx="16"/>
+      <rect x="148" y="105" width="30" height="40" rx="15"/>
+      <rect x="196" y="105" width="30" height="40" rx="15"/>
+      <rect x="245" y="105" width="30" height="40" rx="15"/>
+      <rect x="294" y="105" width="30" height="40" rx="15"/>
+      <rect x="342" y="105" width="30" height="40" rx="15"/>
+      <rect x="102" y="150" width="30" height="42" rx="15"/>
+      <rect x="150" y="150" width="30" height="42" rx="15"/>
+      <rect x="198" y="150" width="30" height="42" rx="15"/>
+      <rect x="245" y="150" width="30" height="42" rx="15"/>
+      <rect x="292" y="150" width="30" height="42" rx="15"/>
+      <rect x="340" y="150" width="30" height="42" rx="15"/>
+      <rect x="388" y="150" width="30" height="42" rx="15"/>
+      <rect x="58" y="200" width="30" height="48" rx="15"/>
+      <rect x="105" y="200" width="30" height="48" rx="15"/>
+      <rect x="152" y="200" width="30" height="48" rx="15"/>
+      <rect x="199" y="200" width="30" height="48" rx="15"/>
+      <rect x="245" y="200" width="30" height="48" rx="15"/>
+      <rect x="291" y="200" width="30" height="48" rx="15"/>
+      <rect x="338" y="200" width="30" height="48" rx="15"/>
+      <rect x="385" y="200" width="30" height="48" rx="15"/>
+      <rect x="432" y="200" width="30" height="48" rx="15"/>
+    </g>
+    <!-- Horizontal Sandstone Cornices -->
+    <line x1="40" y1="192" x2="480" y2="192" stroke="#FBE3C6" stroke-width="2.5"/>
+    <line x1="85" y1="142" x2="435" y2="142" stroke="#FBE3C6" stroke-width="2.5"/>
+    <line x1="130" y1="98" x2="390" y2="98" stroke="#FBE3C6" stroke-width="2.5"/>
+    <line x1="40" y1="262" x2="480" y2="262" stroke="#FBE3C6" stroke-width="3"/>
+  </g>
+  <!-- Foreground Courtyard & Palms -->
+  <rect x="0" y="430" width="1200" height="70" fill="#8C3522"/>
+  <rect x="0" y="422" width="1200" height="10" fill="#FBE3C6" opacity="0.6"/>
+  <g fill="#24594C">
+    <circle cx="535" cy="405" r="34"/>
+    <circle cx="570" cy="415" r="26"/>
+    <circle cx="1075" cy="398" r="38"/>
+    <circle cx="1115" cy="412" r="28"/>
+  </g>
+</svg>

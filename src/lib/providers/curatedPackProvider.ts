@@ -1,8 +1,13 @@
 import {
   ActivityProvider,
   CandidateActivity,
+  CuratedCityKey,
   Destination,
 } from '../types/engine';
+import {
+  DestinationIdentityInput,
+  resolveCuratedCityKey,
+} from '../images/canonicalDestination';
 
 import agraPack from './curated/agra.json';
 import delhiPack from './curated/delhi.json';
@@ -11,7 +16,7 @@ import jaipurPack from './curated/jaipur.json';
 import udaipurPack from './curated/udaipur.json';
 import varanasiPack from './curated/varanasi.json';
 
-const CURATED_PACKS: Record<string, CandidateActivity[]> = {
+const CURATED_PACKS: Record<CuratedCityKey, CandidateActivity[]> = {
   jaipur: jaipurPack as CandidateActivity[],
   delhi: delhiPack as CandidateActivity[],
   agra: agraPack as CandidateActivity[],
@@ -19,42 +24,6 @@ const CURATED_PACKS: Record<string, CandidateActivity[]> = {
   udaipur: udaipurPack as CandidateActivity[],
   goa: goaPack as CandidateActivity[],
 };
-
-const CITY_ALIASES: Record<string, string> = {
-  'new delhi': 'delhi',
-  'dilli': 'delhi',
-  'amer': 'jaipur',
-  'banaras': 'varanasi',
-  'kashi': 'varanasi',
-  'panaji': 'goa',
-  'panjim': 'goa',
-  'north goa': 'goa',
-  'south goa': 'goa',
-};
-
-/**
- * Normalizes city string to match supported curated pack keys.
- */
-function resolveCityKey(cityName: string): string | null {
-  const cleaned = cityName.trim().toLowerCase();
-  if (CURATED_PACKS[cleaned]) {
-    return cleaned;
-  }
-  if (CITY_ALIASES[cleaned]) {
-    return CITY_ALIASES[cleaned];
-  }
-  for (const [alias, canonical] of Object.entries(CITY_ALIASES)) {
-    if (cleaned.includes(alias) || alias.includes(cleaned)) {
-      return canonical;
-    }
-  }
-  for (const key of Object.keys(CURATED_PACKS)) {
-    if (cleaned.includes(key) || key.includes(cleaned)) {
-      return key;
-    }
-  }
-  return null;
-}
 
 /**
  * Provider A: Hand-curated candidate activity provider.
@@ -73,15 +42,15 @@ export class CuratedPackProvider implements ActivityProvider {
   /**
    * Checks if a destination city has a curated pack available.
    */
-  hasPack(cityName: string): boolean {
-    return resolveCityKey(cityName) !== null;
+  hasPack(cityOrDest: string | DestinationIdentityInput): boolean {
+    return resolveCuratedCityKey(cityOrDest) !== null;
   }
 
   /**
    * Retrieves normalized candidates for the given destination.
    */
   async getCandidates(dest: Destination): Promise<CandidateActivity[]> {
-    const key = resolveCityKey(dest.city);
+    const key = resolveCuratedCityKey(dest);
     if (!key || !CURATED_PACKS[key]) {
       const supported = this.getAvailableCities().join(', ');
       throw new Error(

@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { MapPin, Calendar, Clock, Plane, Train, Bus, Compass, Coffee, Baby, Backpack, Navigation } from 'lucide-react';
+import { MapPin, Clock, Plane, Train, Bus, Compass, Coffee, Baby, Backpack, Navigation } from 'lucide-react';
 import { saveTripToStorage, GeneratedTrip } from '@/lib/tripStore';
 import { Destination } from '@/lib/types';
+import { DatePicker } from '@/components/ui/DatePicker';
+import { TimePicker } from '@/components/ui/TimePicker';
 
 const PERSONAS = [
   { id: 'Backpacker', icon: Backpack, title: 'Backpacker', desc: 'Walkable, local food, highly social' },
@@ -55,9 +57,11 @@ export default function PlannerPage() {
   useEffect(() => {
     const trimmed = destination.trim();
     if (trimmed.length < 2) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
+      const resetTimer = setTimeout(() => {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }, 0);
+      return () => clearTimeout(resetTimer);
     }
 
     const timer = setTimeout(async () => {
@@ -108,13 +112,23 @@ export default function PlannerPage() {
       }
 
       const tripId = `trip-${Date.now()}`;
+      const resolvedArtwork = data.artwork || data.destination?.artwork;
       const newTrip: GeneratedTrip = {
         id: tripId,
         destination: data.destination.city,
+        destinationId: data.destination.id,
+        destinationCountry: data.destination.country,
+        destinationCountryCode: data.destination.countryCode,
+        destinationAdmin1: data.destination.admin1,
         destinationCoords: {
           lat: data.destination.latitude,
           lon: data.destination.longitude,
         },
+        bannerUrl:
+          resolvedArtwork?.imageUrl ||
+          resolvedArtwork?.assetPath ||
+          data.destination.imageUrl,
+        artwork: resolvedArtwork,
         persona: data.persona,
         startDate: data.startDate,
         days: data.days,
@@ -141,7 +155,7 @@ export default function PlannerPage() {
     <div className="max-w-6xl mx-auto py-12 px-6 lg:px-12">
       <div className="mb-12">
         <h1 className="text-5xl font-black text-slate-900 mb-4 tracking-tight">Design your journey.</h1>
-        <p className="text-lg text-slate-500 font-medium max-w-2xl">Drop in your details and we'll craft a deeply personalized, weather-aware itinerary in seconds.</p>
+        <p className="text-lg text-slate-500 font-medium max-w-2xl">Drop in your details and we&apos;ll craft a deeply personalized, weather-aware itinerary in seconds.</p>
       </div>
 
       {errorMessage && (
@@ -226,16 +240,10 @@ export default function PlannerPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2.5">
                   <label className="text-sm font-bold text-slate-700 ml-2">Start Date</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-4 top-4 h-5 w-5 text-slate-400" />
-                    <input 
-                      required
-                      value={startDate}
-                      onChange={e => setStartDate(e.target.value)}
-                      type="date" 
-                      className="w-full pl-12 pr-4 py-4 bg-[#f8f9fc] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1d6b8f]/30 transition-all text-slate-900 font-bold"
-                    />
-                  </div>
+                  <DatePicker 
+                    value={startDate}
+                    onChange={setStartDate}
+                  />
                 </div>
 
                 <div className="space-y-2.5">
@@ -301,12 +309,9 @@ export default function PlannerPage() {
 
                 <div className="space-y-2.5">
                   <label className="text-sm font-bold text-slate-700 ml-2">Arrival Time</label>
-                  <input 
-                    required
+                  <TimePicker 
                     value={arrivalTime}
-                    onChange={e => setArrivalTime(e.target.value)}
-                    type="time" 
-                    className="w-full px-4 py-4 h-[72px] bg-[#f8f9fc] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1d6b8f]/30 transition-all text-slate-900 font-bold"
+                    onChange={setArrivalTime}
                   />
                 </div>
               </div>

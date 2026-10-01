@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" fill="none">
+  <defs>
+    <linearGradient id="ud-sky" x1="0" y1="0" x2="0" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F29A76"/>
+      <stop offset="55%" stop-color="#FAD09C"/>
+      <stop offset="100%" stop-color="#FFF5E6"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="500" fill="url(#ud-sky)"/>
+  <circle cx="870" cy="165" r="125" fill="#F7B277" opacity="0.35"/>
+  <circle cx="870" cy="165" r="88" fill="#FFF8E5"/>
+  <!-- Aravalli Hills -->
+  <path d="M0 385 Q240 275 520 355 Q820 235 1200 345 L1200 500 L0 500 Z" fill="#D4836A" opacity="0.65"/>
+  <!-- Udaipur City Palace Complex -->
+  <g transform="translate(560, 115)">
+    <rect x="60" y="135" width="490" height="165" fill="#E58F6B"/>
+    <rect x="130" y="85" width="350" height="215" fill="#C85D44"/>
+    <rect x="205" y="45" width="200" height="255" fill="#FFF0D9"/>
+    <path d="M130 85 Q165 42 200 85 Z" fill="#FFF0D9"/>
+    <path d="M260 45 Q305 -5 350 45 Z" fill="#C85D44"/>
+    <path d="M410 85 Q445 42 480 85 Z" fill="#FFF0D9"/>
+    <g fill="#3D262A">
+      <rect x="235" y="75" width="26" height="40" rx="13"/>
+      <rect x="292" y="75" width="26" height="40" rx="13"/>
+      <rect x="348" y="75" width="26" height="40" rx="13"/>
+      <rect x="158" y="135" width="26" height="44" rx="13"/>
+      <rect x="235" y="135" width="26" height="44" rx="13"/>
+      <rect x="292" y="135" width="26" height="44" rx="13"/>
+      <rect x="348" y="135" width="26" height="44" rx="13"/>
+      <rect x="425" y="135" width="26" height="44" rx="13"/>
+    </g>
+    <rect x="30" y="285" width="550" height="22" fill="#FFF0D9"/>
+  </g>
+  <!-- Lake Pichola -->
+  <rect x="0" y="415" width="1200" height="85" fill="#1D6B8F"/>
+  <path d="M580 445 L1120 445 M650 470 L1040 470" stroke="#80BBD0" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+</svg>

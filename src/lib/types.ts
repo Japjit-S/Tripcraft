@@ -1,4 +1,4 @@
-import { Persona, ArrivalMode } from './types/engine';
+import { Persona, ArrivalMode, DestinationArtworkDescriptor } from './types/engine';
 export type { Persona, ArrivalMode };
 
 export interface ItineraryItem {
@@ -25,7 +25,13 @@ export interface TripDay {
 export interface Trip {
   id: string;
   destination: string;
+  destinationId?: string;
+  destinationCountry?: string;
+  destinationCountryCode?: string;
+  destinationAdmin1?: string;
   destinationCoords?: { lat: number; lon: number };
+  bannerUrl?: string;
+  artwork?: DestinationArtworkDescriptor;
   persona: Persona;
   startDate: string;
   days: number;

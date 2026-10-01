@@ -2,14 +2,15 @@
 
 import { useState, useEffect, use } from 'react';
 import { notFound } from 'next/navigation';
-import { ChevronLeft, ChevronRight, SlidersHorizontal, MapPin } from 'lucide-react';
+import { ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { getMockTrip } from '@/lib/mockData';
-import { getTripFromStorage, GeneratedTrip } from '@/lib/tripStore';
+import { ensureTripArtwork, getTripFromStorage, GeneratedTrip } from '@/lib/tripStore';
+import { ItineraryItem } from '@/lib/types';
+import { DestinationBanner } from '@/components/artwork/DestinationBanner';
 import MapPlaceholder from '@/components/workspace/MapPlaceholder';
 import DayNotes from '@/components/workspace/DayNotes';
 import WeatherSummary from '@/components/workspace/WeatherSummary';
 import DecisionLogDrawer from '@/components/workspace/DecisionLogDrawer';
-import Image from 'next/image';
 
 export default function TripWorkspacePage({
   params,
@@ -24,20 +25,23 @@ export default function TripWorkspacePage({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
-    // 1. Try loading from client storage (real generated trip)
-    const stored = getTripFromStorage(resolvedParams.id);
-    if (stored) {
-      setTrip(stored);
-      setIsLoaded(true);
-      return;
-    }
+    const timer = setTimeout(() => {
+      // 1. Try loading from client storage (real generated trip)
+      const stored = getTripFromStorage(resolvedParams.id);
+      if (stored) {
+        setTrip(stored);
+        setIsLoaded(true);
+        return;
+      }
 
-    // 2. Fall back to mock trip if matching
-    const mock = getMockTrip(resolvedParams.id);
-    if (mock) {
-      setTrip(mock as GeneratedTrip);
-    }
-    setIsLoaded(true);
+      // 2. Fall back to mock trip if matching
+      const mock = getMockTrip(resolvedParams.id);
+      if (mock) {
+        setTrip(ensureTripArtwork(mock as GeneratedTrip));
+      }
+      setIsLoaded(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [resolvedParams.id]);
 
   if (isLoaded && !trip) {
@@ -64,8 +68,6 @@ export default function TripWorkspacePage({
       )
     : undefined;
 
-  const isJaipur = trip.destination.toLowerCase().includes('jaipur');
-
   return (
     <div className="h-full flex overflow-hidden bg-transparent">
       {/* Center Main Content */}
@@ -73,55 +75,29 @@ export default function TripWorkspacePage({
         {/* Banner Row */}
         <div className="flex flex-col xl:flex-row gap-8 mb-8">
           {/* Destination Banner */}
-          <div className="flex-1 relative bg-gradient-to-br from-[#FFF5ED] to-[#FFE8D6] rounded-[2rem] overflow-hidden p-8 flex items-center shadow-sm min-h-[220px]">
-            <div className="relative z-10 w-2/3 md:w-1/2">
+          <div className="flex-1 relative bg-gradient-to-br from-[#FFF5ED] to-[#FFE8D6] rounded-[2rem] overflow-hidden p-6 sm:p-8 flex items-center shadow-sm min-h-[220px]">
+            <div className="relative z-10 max-w-[62%] sm:max-w-[55%] pr-3">
               <p className="text-xs font-bold text-orange-900/50 mb-2 tracking-widest uppercase">
                 Active Itinerary
               </p>
-              <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-4 sm:mb-6 tracking-tight break-words">
                 {trip.destination}
               </h1>
-              <div className="flex gap-2">
-                <button
-                  onClick={() =>
-                    setSelectedDayIndex((prev) =>
-                      prev > 0 ? prev - 1 : trip.itineraryDays.length - 1
-                    )
-                  }
-                  className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow text-slate-700 transition-all hover:scale-105"
-                  title="Previous Day"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() =>
-                    setSelectedDayIndex((prev) =>
-                      prev < trip.itineraryDays.length - 1 ? prev + 1 : 0
-                    )
-                  }
-                  className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow text-slate-700 transition-all hover:scale-105"
-                  title="Next Day"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
             </div>
 
             {/* Illustration Mask */}
-            <div className="absolute right-0 top-0 bottom-0 w-2/3 md:w-1/2 pointer-events-none">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#FFE8D6] via-[#FFE8D6]/30 to-transparent z-10"></div>
-              {isJaipur ? (
-                <Image
-                  src="/jaipur-banner.jpg"
-                  alt="Jaipur"
-                  fill
-                  className="object-cover object-left opacity-90 mix-blend-multiply"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-tr from-[#1d6b8f]/20 via-[#1d6b8f]/5 to-transparent flex items-center justify-center">
-                  <MapPin className="w-28 h-28 text-[#1d6b8f]/20" />
-                </div>
-              )}
+            <div className="absolute right-0 top-0 bottom-0 w-[62%] sm:w-3/5 md:w-7/12">
+              <DestinationBanner
+                artwork={trip.artwork}
+                destination={trip.destination}
+                destinationId={trip.destinationId}
+                country={trip.destinationCountry}
+                countryCode={trip.destinationCountryCode}
+                admin1={trip.destinationAdmin1}
+                coords={trip.destinationCoords}
+                surface="workspace"
+                className="w-full h-full"
+              />
             </div>
           </div>
 
@@ -197,28 +173,54 @@ export default function TripWorkspacePage({
             <div className="flex flex-wrap justify-between items-center gap-4 mb-6 pb-4 border-b border-slate-100">
               <div>
                 <h2 className="text-3xl font-black text-slate-900">Itinerary</h2>
-                {trip.auditLog && trip.auditLog.length > 0 && (
-                  <p className="text-xs text-slate-400 font-bold mt-1">
-                    {trip.auditLog.length} engine rule evaluations recorded
-                  </p>
-                )}
               </div>
-
               <div className="flex items-center gap-3">
                 {/* Decision Log Drawer Trigger Button */}
                 {trip.auditLog && trip.auditLog.length > 0 && (
                   <button
                     onClick={() => setIsDrawerOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-[#1d6b8f] text-white rounded-full text-xs font-bold hover:bg-[#155370] shadow-md shadow-[#1d6b8f]/20 transition-all hover:scale-105"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-[#1d6b8f] text-white rounded-full text-xs font-bold hover:bg-[#155370] shadow-md shadow-[#1d6b8f]/20 transition-all hover:scale-105 cursor-pointer"
                   >
                     <SlidersHorizontal className="w-3.5 h-3.5" />
                     Decision Log ({trip.auditLog.length})
                   </button>
                 )}
 
-                <span className="text-sm font-bold text-slate-700 bg-[#f8f9fc] px-4 py-2 rounded-full border border-slate-100">
-                  Day {selectedDay.dayNumber}
-                </span>
+                <div className="flex items-center gap-2 bg-[#f8f9fc] p-1.5 rounded-full border border-slate-100">
+                  <button
+                    disabled={selectedDayIndex === 0}
+                    onClick={() =>
+                      setSelectedDayIndex((prev) => (prev > 0 ? prev - 1 : prev))
+                    }
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                      selectedDayIndex === 0 
+                        ? 'bg-transparent text-slate-300 cursor-not-allowed' 
+                        : 'bg-white shadow-sm text-slate-700 hover:text-[#1d6b8f]'
+                    }`}
+                    title="Previous Day"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-sm font-bold text-slate-700 px-2 min-w-[3rem] text-center">
+                    Day {selectedDay.dayNumber}
+                  </span>
+                  <button
+                    disabled={selectedDayIndex === trip.itineraryDays.length - 1}
+                    onClick={() =>
+                      setSelectedDayIndex((prev) =>
+                        prev < trip.itineraryDays.length - 1 ? prev + 1 : prev
+                      )
+                    }
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                      selectedDayIndex === trip.itineraryDays.length - 1 
+                        ? 'bg-transparent text-slate-300 cursor-not-allowed' 
+                        : 'bg-white shadow-sm text-slate-700 hover:text-[#1d6b8f]'
+                    }`}
+                    title="Next Day"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -264,34 +266,68 @@ export default function TripWorkspacePage({
           </div>
 
           <div className="grid grid-cols-7 gap-y-2 gap-x-1 text-center">
-            {/* Render days of trip */}
-            {trip.itineraryDays.map((d, tripDayIndex) => {
-              const dateObj = new Date(d.date);
-              const dayNum = dateObj.getUTCDate() || d.dayNumber;
-              const isSelected = selectedDayIndex === tripDayIndex;
-
-              let className =
-                'py-2 text-xs font-bold rounded-full cursor-pointer transition-all mx-auto w-8 h-8 flex items-center justify-center ';
-              if (isSelected) {
-                className += 'bg-[#1d6b8f] text-white shadow-md scale-110';
-              } else {
-                className += 'bg-blue-500/15 text-blue-600 hover:bg-blue-500/25';
+            {(() => {
+              const start = new Date(trip.startDate);
+              const year = start.getUTCFullYear();
+              const month = start.getUTCMonth();
+              const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+              
+              // 0 = Sunday, 1 = Monday. We want Monday = 0, Sunday = 6
+              const firstDayOfWeek = new Date(Date.UTC(year, month, 1)).getUTCDay();
+              const offset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+              
+              const grid = [];
+              // Empty slots for padding
+              for (let i = 0; i < offset; i++) {
+                grid.push(<div key={`empty-${i}`} className="w-8 h-8 mx-auto" />);
               }
+              
+              // Map trip dates for easy lookup
+              const tripDates = trip.itineraryDays.map(d => ({
+                dayNum: new Date(d.date).getUTCDate(),
+                tripDayIndex: trip.itineraryDays.indexOf(d),
+                id: d.id
+              }));
 
-              return (
-                <div key={d.id} className="flex justify-center items-center">
-                  <div
-                    className={className}
-                    onClick={() => {
-                      setSelectedDayIndex(tripDayIndex);
-                      setSelectedItemId(null);
-                    }}
-                  >
-                    {dayNum}
-                  </div>
-                </div>
-              );
-            })}
+              // Fill month days
+              for (let i = 1; i <= daysInMonth; i++) {
+                const tripDayInfo = tripDates.find(td => td.dayNum === i);
+                
+                if (tripDayInfo) {
+                  const isSelected = selectedDayIndex === tripDayInfo.tripDayIndex;
+                  let className = 'py-2 text-xs font-bold rounded-full cursor-pointer transition-all mx-auto w-8 h-8 flex items-center justify-center ';
+                  if (isSelected) {
+                    className += 'bg-[#1d6b8f] text-white shadow-md scale-110';
+                  } else {
+                    className += 'bg-blue-500/15 text-blue-600 hover:bg-blue-500/25';
+                  }
+
+                  grid.push(
+                    <div key={`day-${i}`} className="flex justify-center items-center">
+                      <div
+                        className={className}
+                        onClick={() => {
+                          setSelectedDayIndex(tripDayInfo.tripDayIndex);
+                          setSelectedItemId(null);
+                        }}
+                      >
+                        {i}
+                      </div>
+                    </div>
+                  );
+                } else {
+                  // Non-trip days
+                  grid.push(
+                    <div key={`day-${i}`} className="flex justify-center items-center">
+                      <div className="py-2 text-xs font-medium text-slate-300 w-8 h-8 flex items-center justify-center">
+                        {i}
+                      </div>
+                    </div>
+                  );
+                }
+              }
+              return grid;
+            })()}
           </div>
         </div>
 
@@ -334,7 +370,7 @@ function ItinerarySection({
   onSelect,
 }: {
   title: string;
-  items: any[];
+  items: ItineraryItem[];
   startIndex: number;
   selectedId: string | null;
   onSelect: (id: string) => void;

@@ -19,6 +19,7 @@ import {
   GeneratedTrip,
 } from '@/lib/tripStore';
 import { mockTripsList, mockJaipurTrip } from '@/lib/mockData';
+import { DestinationBanner } from '@/components/artwork/DestinationBanner';
 
 export default function TripsPage() {
   const [trips, setTrips] = useState<GeneratedTrip[]>([]);
@@ -26,18 +27,21 @@ export default function TripsPage() {
   const [tripToDelete, setTripToDelete] = useState<GeneratedTrip | null>(null);
 
   useEffect(() => {
-    let stored = getAllStoredTrips();
-    // If no trips in storage yet, seed initial mock trip so the user has immediate data
-    if (stored.length === 0) {
-      const seeded: GeneratedTrip[] = mockTripsList.map((m) => ({
-        ...m,
-        itineraryDays: m.id === mockJaipurTrip.id ? mockJaipurTrip.itineraryDays : [],
-      }));
-      seeded.forEach((t) => saveTripToStorage(t));
-      stored = seeded;
-    }
-    setTrips(stored);
-    setIsLoaded(true);
+    const timer = setTimeout(() => {
+      let stored = getAllStoredTrips();
+      // If no trips in storage yet, seed initial mock trip so the user has immediate data
+      if (stored.length === 0) {
+        const seeded: GeneratedTrip[] = mockTripsList.map((m) => ({
+          ...m,
+          itineraryDays: m.id === mockJaipurTrip.id ? mockJaipurTrip.itineraryDays : [],
+        }));
+        seeded.forEach((t) => saveTripToStorage(t));
+        stored = getAllStoredTrips();
+      }
+      setTrips(stored);
+      setIsLoaded(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleDelete = (trip: GeneratedTrip) => {
@@ -82,7 +86,7 @@ export default function TripsPage() {
           </div>
           <h3 className="text-2xl font-black text-slate-900 mb-2">No trips saved yet</h3>
           <p className="text-slate-500 font-medium mb-8 max-w-md mx-auto">
-            You haven't generated any itineraries yet. Start planning your next adventure to see it appear here.
+            You haven&apos;t generated any itineraries yet. Start planning your next adventure to see it appear here.
           </p>
           <Link 
             href="/planner" 
@@ -100,12 +104,26 @@ export default function TripsPage() {
               href={`/trip/${trip.id}`}
               className="block bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-slate-100 hover:border-[#1d6b8f]/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all group overflow-hidden"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center p-6 gap-6">
+              <div className="flex flex-col sm:flex-row sm:items-center p-5 gap-6">
                 
-                {/* Left: Destination & Badge */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-2xl font-black text-slate-900 group-hover:text-[#1d6b8f] transition-colors">{trip.destination}</h3>
+                {/* Focal-Point Destination Illustration Thumbnail */}
+                <DestinationBanner
+                  artwork={trip.artwork}
+                  destination={trip.destination}
+                  destinationId={trip.destinationId}
+                  country={trip.destinationCountry}
+                  countryCode={trip.destinationCountryCode}
+                  admin1={trip.destinationAdmin1}
+                  coords={trip.destinationCoords}
+                  surface="card"
+                  showAttribution={false}
+                  className="w-full h-40 sm:w-52 sm:h-32 rounded-xl shrink-0"
+                />
+
+                {/* Center: Destination & Badge */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-3 mb-2">
+                    <h3 className="text-2xl font-black text-slate-900 group-hover:text-[#1d6b8f] transition-colors truncate">{trip.destination}</h3>
                     <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-black tracking-wide uppercase bg-[#1d6b8f]/10 text-[#1d6b8f]">
                       {trip.persona}
                     </span>
@@ -135,7 +153,7 @@ export default function TripsPage() {
                 </div>
 
                 {/* Right: Actions */}
-                <div className="flex items-center gap-4 pt-4 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                <div className="flex items-center justify-end gap-4 pt-4 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
                   <button 
                     type="button"
                     className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"

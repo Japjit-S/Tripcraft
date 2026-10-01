@@ -3,7 +3,7 @@ import { describe, it } from 'node:test';
 import { NextRequest } from 'next/server';
 import { POST } from '../../src/app/api/itineraries/generate/route';
 
-function createMockRequest(body: Record<string, any>): NextRequest {
+function createMockRequest(body: Record<string, unknown>): NextRequest {
   return new NextRequest('http://localhost:3000/api/itineraries/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -82,12 +82,16 @@ describe('POST /api/itineraries/generate API Route', () => {
     assert.equal(data.days, 3);
     assert.equal(data.itineraryDays.length, 3);
     assert.ok(data.auditLog.length > 0);
+    assert.ok(data.artwork);
+    assert.equal(data.artwork.kind, 'curated_local');
+    assert.equal(data.artwork.curatedCityKey, 'jaipur');
+    assert.equal(data.destination.artwork.artworkId, data.artwork.artworkId);
 
     // Verify day 1 arrival gate handled late train arrival
     const day1 = data.itineraryDays[0];
     const morningItems = day1.morning;
     assert.ok(
-      morningItems.some((item: any) => item.id.includes('transit')),
+      morningItems.some((item: { id: string }) => item.id.includes('transit')),
       'Day 1 morning should collapse to arrival transit'
     );
   });

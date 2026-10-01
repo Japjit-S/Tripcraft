@@ -14,7 +14,7 @@ export default function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (email === 'japjit31@gmail.com' && password === 'Japjit12') {
-      router.push('/planner');
+      router.push('/dashboard');
     } else {
       setError('Invalid email or password.');
     }

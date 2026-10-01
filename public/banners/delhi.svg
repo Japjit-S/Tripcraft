@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" fill="none">
+  <defs>
+    <linearGradient id="dl-sky" x1="0" y1="0" x2="0" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F39C6B"/>
+      <stop offset="55%" stop-color="#F7C578"/>
+      <stop offset="100%" stop-color="#FFF3DF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="500" fill="url(#dl-sky)"/>
+  <circle cx="880" cy="170" r="130" fill="#F5B041" opacity="0.32"/>
+  <circle cx="880" cy="170" r="92" fill="#FFF9E2"/>
+  <path d="M160 190 Q350 110 530 155 T740 120" stroke="#7B3418" stroke-width="2.5" stroke-dasharray="7 7" opacity="0.45" fill="none"/>
+  <!-- Red Fort Domes Silhouette -->
+  <path d="M460 410 L460 320 L680 320 L680 410 Z" fill="#C96846" opacity="0.85"/>
+  <path d="M490 320 Q530 255 570 320 Z" fill="#B96334"/>
+  <path d="M585 320 Q625 265 665 320 Z" fill="#B96334"/>
+  <!-- India Gate Triumphal Arch -->
+  <g transform="translate(715, 110)">
+    <rect x="45" y="18" width="190" height="22" fill="#CC6F3D"/>
+    <rect x="25" y="38" width="230" height="28" fill="#B96334"/>
+    <rect x="10" y="64" width="260" height="255" fill="#9C4522"/>
+    <path d="M85 319 L85 155 A55 55 0 0 1 195 155 L195 319 Z" fill="url(#dl-sky)"/>
+    <path d="M80 319 L80 155 A60 60 0 0 1 200 155 L200 319" stroke="#FDE8C4" stroke-width="3" fill="none"/>
+    <rect x="34" y="110" width="28" height="46" rx="14" fill="#4D1F11" stroke="#FDE8C4" stroke-width="1.5"/>
+    <rect x="218" y="110" width="28" height="46" rx="14" fill="#4D1F11" stroke="#FDE8C4" stroke-width="1.5"/>
+    <rect x="34" y="185" width="28" height="58" rx="14" fill="#4D1F11" stroke="#FDE8C4" stroke-width="1.5"/>
+    <rect x="218" y="185" width="28" height="58" rx="14" fill="#4D1F11" stroke="#FDE8C4" stroke-width="1.5"/>
+    <line x1="10" y1="90" x2="270" y2="90" stroke="#FDE8C4" stroke-width="2.5"/>
+    <path d="M110 18 Q140 -2 170 18 Z" fill="#FDE8C4"/>
+  </g>
+  <!-- Boulevard & Canopy -->
+  <g fill="#234E46">
+    <circle cx="660" cy="395" r="42"/>
+    <circle cx="710" cy="408" r="32"/>
+    <circle cx="1015" cy="392" r="44"/>
+    <circle cx="1065" cy="406" r="34"/>
+  </g>
+  <rect x="0" y="425" width="1200" height="75" fill="#7B3418"/>
+  <rect x="420" y="438" width="780" height="18" rx="9" fill="#1D6B8F" opacity="0.65"/>
+</svg>

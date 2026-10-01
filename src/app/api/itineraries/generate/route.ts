@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateItinerary } from '@/lib/engine';
+import { resolveDestinationArtwork } from '@/lib/images/imageResolver';
 import { CuratedPackProvider } from '@/lib/providers/curatedPackProvider';
 import { OsmActivityProvider } from '@/lib/providers/osmProvider';
 import { WeatherProvider } from '@/lib/providers/weatherProvider';
@@ -105,16 +106,17 @@ export async function POST(req: NextRequest) {
     // 4. Candidate Activity Sourcing (Provider A with fallback to Provider B)
     let candidates: CandidateActivity[] = [];
 
-    if (curatedProvider.hasPack(destination.city)) {
+    if (curatedProvider.hasPack(destination)) {
       candidates = await curatedProvider.getCandidates(destination);
     } else {
       try {
         candidates = await osmProvider.getCandidates(destination);
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
         return NextResponse.json(
           {
             success: false,
-            error: `Failed to retrieve open-data activities for ${destination.city}: ${err.message}`,
+            error: `Failed to retrieve open-data activities for ${destination.city}: ${message}`,
           },
           { status: 502 }
         );
@@ -157,10 +159,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 6. Return Structured Itinerary & Audit Trail
+    // 6. Server-Side Destination Artwork Resolution (Non-Blocking Fallback Guaranteed)
+    const artwork = await resolveDestinationArtwork(destination);
+    const enrichedDestination = {
+      ...destination,
+      imageUrl: artwork.imageUrl || artwork.assetPath,
+      artwork,
+    };
+
+    // 7. Return Structured Itinerary, Artwork Descriptor & Audit Trail
     return NextResponse.json({
       success: true,
-      destination,
+      destination: enrichedDestination,
+      artwork,
       persona,
       startDate,
       days: daysNum,
@@ -172,11 +183,15 @@ export async function POST(req: NextRequest) {
       warnings: output.warnings,
       feasibilityStatus: output.feasibilityStatus,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Internal server error during itinerary generation.';
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Internal server error during itinerary generation.',
+        error: message,
       },
       { status: 500 }
     );

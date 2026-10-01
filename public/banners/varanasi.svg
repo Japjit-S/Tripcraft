@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" fill="none">
+  <defs>
+    <linearGradient id="vn-sky" x1="0" y1="0" x2="0" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F39C6B"/>
+      <stop offset="55%" stop-color="#F7C578"/>
+      <stop offset="100%" stop-color="#FFF3DF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="500" fill="url(#vn-sky)"/>
+  <circle cx="910" cy="165" r="128" fill="#F5B041" opacity="0.35"/>
+  <circle cx="910" cy="165" r="90" fill="#FFF9E2"/>
+  <!-- Temple Shikharas & Riverfront Palaces -->
+  <g transform="translate(520, 95)">
+    <path d="M120 245 L165 45 L210 245 Z" fill="#B96334" stroke="#FDE8C4" stroke-width="1.5"/>
+    <path d="M295 245 L350 20 L405 245 Z" fill="#9C4522" stroke="#FDE8C4" stroke-width="1.5"/>
+    <path d="M470 245 L515 65 L560 245 Z" fill="#B96334" stroke="#FDE8C4" stroke-width="1.5"/>
+    <rect x="65" y="165" width="540" height="105" fill="#CC6F3D"/>
+    <rect x="195" y="130" width="280" height="140" fill="#9C4522"/>
+    <g fill="#4D1F11" stroke="#FDE8C4" stroke-width="1.5">
+      <rect x="220" y="155" width="28" height="44" rx="14"/>
+      <rect x="270" y="155" width="28" height="44" rx="14"/>
+      <rect x="320" y="155" width="28" height="44" rx="14"/>
+      <rect x="370" y="155" width="28" height="44" rx="14"/>
+      <rect x="420" y="155" width="28" height="44" rx="14"/>
+    </g>
+    <!-- Stepped Ghats -->
+    <rect x="20" y="270" width="620" height="18" fill="#FDE8C4"/>
+    <rect x="0" y="288" width="640" height="18" fill="#E59866"/>
+    <rect x="-20" y="306" width="660" height="20" fill="#CC6F3D"/>
+  </g>
+  <!-- Sacred Ganges River & Boats -->
+  <rect x="0" y="420" width="1200" height="80" fill="#1D6B8F"/>
+  <path d="M620 450 Q690 468 760 450 Z" fill="#4D1F11"/>
+  <path d="M880 462 Q940 478 1000 462 Z" fill="#4D1F11"/>
+  <path d="M520 442 L1140 442 M580 475 L1080 475" stroke="#F8D48D" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+</svg>

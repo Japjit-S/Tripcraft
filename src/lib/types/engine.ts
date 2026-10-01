@@ -92,6 +92,84 @@ export interface AuditEntry {
   scoreBreakdown?: ScoreBreakdown; // present on SCORING / SELECTED
 }
 
+export type DestinationArtKind =
+  | 'curated_local'
+  | 'external_illustration'
+  | 'generated_local_scene';
+
+export type CuratedCityKey =
+  | 'jaipur'
+  | 'delhi'
+  | 'agra'
+  | 'varanasi'
+  | 'udaipur'
+  | 'goa';
+
+export type LocalSceneTemplateId =
+  | 'coastal-harbor'
+  | 'alpine-valley'
+  | 'historic-old-town'
+  | 'metropolitan-skyline'
+  | 'tropical-island'
+  | 'desert-oasis';
+
+export type LocalScenePaletteId =
+  | 'terracotta-sun'
+  | 'saffron-amber'
+  | 'coral-cerulean'
+  | 'ochre-olive'
+  | 'rose-sandstone'
+  | 'apricot-teal';
+
+export type LocalSceneMotifId =
+  | 'plane-route'
+  | 'balloon-route'
+  | 'birds-compass'
+  | 'sail-route';
+
+export interface LocalSceneParameters {
+  templateId: LocalSceneTemplateId;
+  paletteId: LocalScenePaletteId;
+  skyVariant: 0 | 1 | 2;
+  skylineVariant: 0 | 1 | 2;
+  terrainVariant: 0 | 1 | 2;
+  motifVariant: LocalSceneMotifId;
+  seedHash: string;
+}
+
+export interface ArtworkFocalPoint {
+  x: number;
+  y: number;
+}
+
+export interface ExternalArtworkAttribution {
+  sourceTitle: string;
+  sourcePageUrl: string;
+  author: string;
+  license: string;
+  licenseUrl?: string;
+  attributionText: string;
+}
+
+export interface DestinationArtworkDescriptor {
+  schemaVersion: number;
+  artVersion: string;
+  destinationId: string;
+  artworkId: string;
+  kind: DestinationArtKind;
+  curatedCityKey?: CuratedCityKey;
+  assetPath?: string;
+  imageUrl?: string;
+  fallbackScene: LocalSceneParameters;
+  alt: string;
+  landmarkVerified: boolean;
+  landmarkName?: string;
+  focalPoint: ArtworkFocalPoint;
+  attribution?: ExternalArtworkAttribution;
+  resolvedAt: string;
+  contentHash?: string;
+}
+
 export interface Destination {
   id: string;
   city: string;
@@ -100,6 +178,8 @@ export interface Destination {
   admin1?: string;
   latitude: number;
   longitude: number;
+  imageUrl?: string;
+  artwork?: DestinationArtworkDescriptor;
 }
 
 export interface FeasibilityRule {

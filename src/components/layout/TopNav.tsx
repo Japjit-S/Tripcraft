@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, Bell } from 'lucide-react';
+import { Bell } from 'lucide-react';
 
 export default function TopNav() {
   const pathname = usePathname();
@@ -20,9 +20,7 @@ export default function TopNav() {
         
         {isTrip ? (
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/trips" className="text-sm font-bold text-slate-800 hover:text-blue-600 transition-colors">Travels</Link>
-            <div className="h-4 w-px bg-slate-200"></div>
-            <span className="text-sm font-bold text-slate-400">Search</span>
+            <Link href="/trips" className="text-sm font-bold text-slate-800 hover:text-[#1d6b8f] transition-colors">Travels</Link>
           </div>
         ) : (
           <div className="hidden md:flex items-center gap-6">
@@ -34,11 +32,6 @@ export default function TopNav() {
       </div>
 
       <div className="flex items-center gap-8">
-        <div className="relative hidden md:block w-72">
-          <Search className="w-4 h-4 absolute left-4 top-3 text-slate-400" />
-          <input type="text" placeholder="Search..." className="w-full pl-12 pr-4 py-2.5 bg-slate-50 border-none rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-slate-100 placeholder:text-slate-400" />
-        </div>
-
         <button className="relative text-slate-400 hover:text-slate-600 transition-colors">
           <Bell className="w-5 h-5" />
           <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
