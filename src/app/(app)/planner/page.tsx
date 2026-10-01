@@ -142,8 +142,29 @@ export default function PlannerPage() {
         feasibilityStatus: data.feasibilityStatus,
       };
 
-      saveTripToStorage(newTrip);
-      router.push(`/trip/${tripId}`);
+      let finalTripId = tripId;
+      try {
+        const persistRes = await fetch('/api/itineraries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ trip: newTrip }),
+        });
+        if (persistRes.ok) {
+          const persistData = await persistRes.json();
+          if (persistData.trip?.id) {
+            finalTripId = persistData.trip.id;
+            saveTripToStorage(persistData.trip);
+          } else {
+            saveTripToStorage(newTrip);
+          }
+        } else {
+          saveTripToStorage(newTrip);
+        }
+      } catch {
+        saveTripToStorage(newTrip);
+      }
+
+      router.push(`/trip/${finalTripId}`);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An unexpected error occurred during generation.';
       setErrorMessage(message);

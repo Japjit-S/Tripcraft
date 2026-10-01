@@ -25,23 +25,51 @@ export default function TripWorkspacePage({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // 1. Try loading from client storage (real generated trip)
+    let isMounted = true;
+    const loadTrip = async () => {
+      // 1. Try loading from client storage (fast local cache)
       const stored = getTripFromStorage(resolvedParams.id);
       if (stored) {
-        setTrip(stored);
-        setIsLoaded(true);
+        if (isMounted) {
+          setTrip(stored);
+          setIsLoaded(true);
+        }
         return;
       }
 
       // 2. Fall back to mock trip if matching
       const mock = getMockTrip(resolvedParams.id);
       if (mock) {
-        setTrip(ensureTripArtwork(mock as GeneratedTrip));
+        if (isMounted) {
+          setTrip(ensureTripArtwork(mock as GeneratedTrip));
+          setIsLoaded(true);
+        }
+        return;
       }
-      setIsLoaded(true);
-    }, 0);
-    return () => clearTimeout(timer);
+
+      // 3. Try fetching from Supabase database API
+      try {
+        const res = await fetch(`/api/itineraries/${encodeURIComponent(resolvedParams.id)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.itinerary && isMounted) {
+            const upgraded = ensureTripArtwork(data.itinerary);
+            setTrip(upgraded);
+            setIsLoaded(true);
+            return;
+          }
+        }
+      } catch {
+        // tolerate network error
+      }
+
+      if (isMounted) setIsLoaded(true);
+    };
+
+    loadTrip();
+    return () => {
+      isMounted = false;
+    };
   }, [resolvedParams.id]);
 
   if (isLoaded && !trip) {

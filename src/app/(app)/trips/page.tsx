@@ -27,7 +27,8 @@ export default function TripsPage() {
   const [tripToDelete, setTripToDelete] = useState<GeneratedTrip | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    let isMounted = true;
+    async function loadAllTrips() {
       let stored = getAllStoredTrips();
       // If no trips in storage yet, seed initial mock trip so the user has immediate data
       if (stored.length === 0) {
@@ -38,16 +39,53 @@ export default function TripsPage() {
         seeded.forEach((t) => saveTripToStorage(t));
         stored = getAllStoredTrips();
       }
-      setTrips(stored);
-      setIsLoaded(true);
-    }, 0);
-    return () => clearTimeout(timer);
+
+      try {
+        const res = await fetch('/api/itineraries');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.itineraries) && data.itineraries.length > 0) {
+            const dbTrips: GeneratedTrip[] = data.itineraries;
+            // Merge dbTrips with stored, preferring dbTrips
+            const tripMap = new Map<string, GeneratedTrip>();
+            stored.forEach((t) => tripMap.set(t.id, t));
+            dbTrips.forEach((t) => tripMap.set(t.id, t));
+            const merged = Array.from(tripMap.values());
+            if (isMounted) {
+              setTrips(merged);
+              setIsLoaded(true);
+            }
+            return;
+          }
+        }
+      } catch {
+        // tolerate network failure
+      }
+
+      if (isMounted) {
+        setTrips(stored);
+        setIsLoaded(true);
+      }
+    }
+
+    loadAllTrips();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const handleDelete = (trip: GeneratedTrip) => {
+  const handleDelete = async (trip: GeneratedTrip) => {
     deleteTripFromStorage(trip.id);
     setTrips((prev) => prev.filter((t) => t.id !== trip.id));
     setTripToDelete(null);
+
+    try {
+      await fetch(`/api/itineraries/${encodeURIComponent(trip.id)}`, {
+        method: 'DELETE',
+      });
+    } catch {
+      // ignore
+    }
   };
 
   if (!isLoaded) {
