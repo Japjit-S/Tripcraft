@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { generateItinerary } from '../../src/lib/engine/index';
+import { scoreCandidate } from '../../src/lib/engine/scoring';
+import { CandidateActivity } from '../../src/lib/types/engine';
 import {
   blockFeasibilityRule,
   cautionFeasibilityRule,
@@ -297,4 +299,61 @@ describe('Deterministic Itinerary Engine', () => {
       }
     }
   });
+
+  it('Multi-slot activity spans: anchor with typicalDurationMin >= 240 marks afternoon as relaxed buffer', () => {
+    const expeditionCandidate: CandidateActivity = {
+      id: 'pack:himalayan-peak-trek',
+      title: 'Himalayan Ridge Summit Trek',
+      category: 'NATURE',
+      indoor: false,
+      intensity: 'HIGH',
+      typicalDurationMin: 300,
+      slotAffinity: ['MORNING'],
+      prominence: 0.99,
+      coords: { lat: 26.9124, lon: 75.7873 },
+      tags: ['trek', 'summit', 'nature', 'mountain'],
+    };
+
+    const output = generateItinerary({
+      destination: mockDestination,
+      startDate: '2026-10-15',
+      days: 1,
+      persona: 'Backpacker',
+      weatherForecast: clearForecast3Days.slice(0, 1),
+      candidates: [expeditionCandidate, ...mockCandidates],
+    });
+
+    assert.equal(output.success, true);
+    const day1 = output.itineraryDays[0];
+    assert.equal(day1.morning[0].candidateId, 'pack:himalayan-peak-trek');
+    assert.equal(day1.afternoon[0].candidateId, 'buffer-afternoon');
+    assert.equal(day1.afternoon[0].category, 'RELAXATION');
+    assert.ok(
+      output.auditLog.some((e) => e.ruleId === 'MULTI_SLOT_SPAN_BUFFER'),
+      'Audit log must record MULTI_SLOT_SPAN_BUFFER rule'
+    );
+  });
+
+  it('Continuous proximity decay: candidate 25km from anchor receives non-zero proximity score', () => {
+    const scoreClose = scoreCandidate({
+      candidate: mockCandidates[0],
+      persona: 'Culture Seeker',
+      weatherState: 'CLEAR',
+      slot: 'MORNING',
+      anchorCoords: { lat: 26.9239, lon: 75.8267 },
+    });
+    const scoreFar = scoreCandidate({
+      candidate: {
+        ...mockCandidates[0],
+        coords: { lat: 27.15, lon: 75.8267 }, // ~25 km away
+      },
+      persona: 'Culture Seeker',
+      weatherState: 'CLEAR',
+      slot: 'MORNING',
+      anchorCoords: { lat: 26.9239, lon: 75.8267 },
+    });
+    assert.ok(scoreFar.breakdown.proximityToDayAnchor > 0.1, 'Outlying candidate retains smooth non-zero proximity');
+    assert.ok(scoreClose.breakdown.proximityToDayAnchor > scoreFar.breakdown.proximityToDayAnchor);
+  });
 });
+

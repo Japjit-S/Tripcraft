@@ -92,6 +92,11 @@ export function allocateItinerarySlots(
         anchorAssignedSlot = 'EVENING';
       }
 
+      const anchorWeatherAdvisory =
+        day.weatherState === 'RAIN' && !anchor.indoor
+          ? ' (Gear advisory: carry light umbrella/rain jacket for outdoor sections).'
+          : '';
+
       const anchorItem: EngineItineraryItem = {
         id: `item-${day.dayNumber}-${anchor.id}`,
         candidateId: anchor.id,
@@ -99,7 +104,7 @@ export function allocateItinerarySlots(
         category: anchor.category,
         indoor: anchor.indoor,
         slot: anchorAssignedSlot,
-        reason: `Day anchor landmark with highest city prominence (${Math.round(anchor.prominence * 100)}%).`,
+        reason: `Day anchor landmark with highest city prominence (${Math.round(anchor.prominence * 100)}%).${anchorWeatherAdvisory}`,
         intensity: anchor.intensity,
         typicalDurationMin: anchor.typicalDurationMin,
         coords: anchor.coords,
@@ -133,6 +138,43 @@ export function allocateItinerarySlots(
         continue;
       }
 
+      // Multi-slot activity spans (Bug 4): When morning anchor has typicalDurationMin >= 240 (4+ hours, e.g. mountain trek or Solang Valley excursion),
+      // mark afternoon as relaxed buffer/continuation rather than scheduling a second strenuous tour.
+      if (
+        slot === 'AFTERNOON' &&
+        anchorAssignedSlot === 'MORNING' &&
+        anchor &&
+        anchor.typicalDurationMin >= 240
+      ) {
+        const bufferItem: EngineItineraryItem = {
+          id: `buffer-${day.dayNumber}-afternoon`,
+          candidateId: `buffer-afternoon`,
+          title: `${anchor.title} — Rest & Transit Buffer`,
+          category: 'RELAXATION',
+          indoor: false,
+          slot: 'AFTERNOON',
+          reason: `Multi-slot continuation: Anchor activity requires 4+ hours (${anchor.typicalDurationMin}m); afternoon is reserved for relaxed pacing and transit buffer.`,
+          intensity: 'LOW',
+          typicalDurationMin: 120,
+          coords: anchor.coords,
+        };
+
+        slotItems.AFTERNOON.push(bufferItem);
+        dayCategories.push('RELAXATION');
+        dayIntensityLoad += 1;
+
+        auditEntries.push({
+          dayNumber: day.dayNumber,
+          stage: 'ALLOCATION',
+          candidateId: bufferItem.id,
+          candidateTitle: bufferItem.title,
+          verdict: 'SELECTED',
+          ruleId: 'MULTI_SLOT_SPAN_BUFFER',
+          reason: `Anchor excursion (${anchor.typicalDurationMin}m) spans into afternoon; reserved relaxation buffer.`,
+        });
+        continue;
+      }
+
       // 2. Score remaining candidate survivors for this slot
       const availableCandidates = day.survivors.filter(
         (c) => !usedCandidateIds.has(c.id)
@@ -156,6 +198,11 @@ export function allocateItinerarySlots(
         const best = sorted[0];
         usedCandidateIds.add(best.candidate.id);
 
+        const itemWeatherAdvisory =
+          day.weatherState === 'RAIN' && !best.candidate.indoor
+            ? ' (Gear advisory: carry light rain protection for outdoor sections).'
+            : '';
+
         const chosenItem: EngineItineraryItem = {
           id: `item-${day.dayNumber}-${best.candidate.id}`,
           candidateId: best.candidate.id,
@@ -163,7 +210,7 @@ export function allocateItinerarySlots(
           category: best.candidate.category,
           indoor: best.candidate.indoor,
           slot,
-          reason: `Selected for ${persona} based on high affinity (${best.breakdown.personaAffinity}) and weather fit (${best.breakdown.weatherFit}).`,
+          reason: `Selected for ${persona} based on high affinity (${best.breakdown.personaAffinity}) and weather fit (${best.breakdown.weatherFit}).${itemWeatherAdvisory}`,
           intensity: best.candidate.intensity,
           typicalDurationMin: best.candidate.typicalDurationMin,
           coords: best.candidate.coords,

@@ -7,7 +7,6 @@ import {
   RawOsmElement,
 } from '../../src/lib/providers/normalize';
 import { OsmActivityProvider } from '../../src/lib/providers/osmProvider';
-import { mockDestination } from './fixtures';
 
 describe('Normalize Layer & Declarative Tag Mapping', () => {
   it('correctly maps OSM tags to engine attributes', () => {

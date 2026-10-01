@@ -19,8 +19,8 @@ export interface ScoreCandidateParams {
   weatherState: DayWeatherState;
   slot: Slot;
   anchorCoords?: { lat: number; lon: number };
-  categoriesSelectedInDay: ActivityCategory[];
-  intensityLoadSoFar: number; // sum of intensity values (LOW=1, MED=2, HIGH=3)
+  categoriesSelectedInDay?: ActivityCategory[];
+  intensityLoadSoFar?: number; // sum of intensity values (LOW=1, MED=2, HIGH=3)
 }
 
 export interface ScoredCandidate {
@@ -36,8 +36,8 @@ export function scoreCandidate(params: ScoreCandidateParams): ScoredCandidate {
     weatherState,
     slot,
     anchorCoords,
-    categoriesSelectedInDay,
-    intensityLoadSoFar,
+    categoriesSelectedInDay = [],
+    intensityLoadSoFar = 0,
   } = params;
 
   const weights = PERSONA_WEIGHTS[persona];
@@ -60,7 +60,14 @@ export function scoreCandidate(params: ScoreCandidateParams): ScoredCandidate {
   if (weatherState === 'STORM') {
     normWeatherFit = candidate.indoor ? 1.0 : 0.0;
   } else if (weatherState === 'RAIN') {
-    normWeatherFit = candidate.indoor ? 1.0 : 0.4;
+    if (candidate.indoor) {
+      normWeatherFit = 1.0;
+    } else if (candidate.category === 'LANDMARK' || candidate.category === 'CULTURE') {
+      // Keep outdoor cultural/historic landmarks viable during drizzle/light rain
+      normWeatherFit = candidate.intensity === 'LOW' ? 0.7 : 0.55;
+    } else {
+      normWeatherFit = 0.4;
+    }
   } else if (weatherState === 'CLEAR') {
     normWeatherFit = candidate.indoor ? 0.8 : 1.0;
   } else if (weatherState === 'EXTREME_HEAT') {
@@ -89,11 +96,12 @@ export function scoreCandidate(params: ScoreCandidateParams): ScoredCandidate {
     normSlotFit = isNightSuited ? 1.0 : candidate.slotAffinity.includes('EVENING') ? 0.7 : 0.2;
   }
 
-  // 5. Proximity to Day Anchor (0 to 1)
+  // 5. Proximity to Day Anchor (0 to 1) - Smooth Continuous Proximity Decay Curve
   let normProximity = 1.0;
   if (anchorCoords) {
     const distanceKm = calculateDistanceKm(candidate.coords, anchorCoords);
-    normProximity = Math.max(0, 1 - distanceKm / 15);
+    // Smooth continuous exponential decay: outlying excursions (15-30 km) aren't artificially zeroed out
+    normProximity = Math.exp(-distanceKm / 15);
   }
 
   // 6. Category Repetition Penalty (0 to 1)
