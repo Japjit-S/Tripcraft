@@ -2,7 +2,7 @@
 
 Tripcraft is a full-stack, weather-aware deterministic itinerary planner built for the GDG Dev Recruitment Task. It procedurally synthesizes realistic, feasible daily travel plans (1–7 days) for any destination worldwide based on live meteorological forecasts, open geospatial data, and traveler persona constraints—with zero opaque LLM hallucination and zero reliance on paid Places APIs.
 
-**Status:** Full-Stack Complete & Production-Ready. Verified with 32 unit tests passing and live Supabase PostgreSQL integration.
+**Status:** Full-Stack Complete & Production-Ready. Verified with 87 unit and engine integration tests passing across 15 test suites, zero TypeScript errors (`npx tsc --noEmit`), zero ESLint errors, and live Supabase PostgreSQL integration.
 
 ---
 
@@ -72,7 +72,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Running Verification Tests & Build
 ```bash
-# Run unit & engine test suite (32 tests)
+# Run unit & engine test suite (87 tests across 15 suites)
 npm test
 
 # Run strict TypeScript check
@@ -105,7 +105,7 @@ Each itinerary request passes through 8 deterministic stages:
      │ Checks internal geopolitical/advisory rules -> PASSED, CAUTION, or BLOCKED
      ▼
 5. Procedural Candidate Discovery
-     │ Queries Wikipedia GeoSearch + Overpass OSM (18km radius) + Wikidata prominence sitelinks
+     │ Queries Wikipedia GeoSearch + Overpass OSM (adaptive search radius) + Wikidata prominence sitelinks
      ▼
 6. Hard Filters & Arrival Cutoffs
      │ Arrival time drops unusable morning/afternoon slots; Storm drops hazardous outdoor activities
@@ -124,14 +124,14 @@ Each itinerary request passes through 8 deterministic stages:
 
 | Endpoint | Method | Auth | Description |
 |---|---|---|---|
-| `/api/destinations/search?q=` | GET | Public | Debounced city search returning geocoded coordinates & administrative region |
+| `/api/destinations/search?q=` | GET | Public | Debounced city search returning geocoded coordinates & administrative region (rate limited) |
 | `/api/destinations/artwork?destinationId=&city=&admin1=&country=` | GET | Public | Resolves high-resolution destination photography via Wikimedia |
-| `/api/itineraries/generate` | POST | Public | Validates input, fetches weather, executes engine, and returns complete plan with audit log |
+| `/api/itineraries/generate` | POST | Public | Validates input, bounds payload to 32KB, executes engine, and returns complete plan with audit log |
 | `/api/itineraries` | GET | Authenticated | Lists saved itineraries for the authenticated user |
-| `/api/itineraries` | POST | Authenticated | Saves a generated itinerary and all nested days/items to Supabase |
-| `/api/itineraries/[id]` | GET | Owner | Retrieves a specific saved itinerary by UUID |
+| `/api/itineraries` | POST | Authenticated | Saves a generated itinerary and all nested days/items to Supabase with atomic rollback guard |
+| `/api/itineraries/[id]` | GET | Owner | Retrieves a specific saved itinerary by UUID (strictly user-scoped) |
 | `/api/itineraries/[id]` | DELETE | Owner | Deletes a saved itinerary (cascades to days, items, and notes) |
-| `/api/itineraries/days/[dayId]/notes` | GET/POST | Owner | Retrieves or persists collaborative notes for a specific day |
+| `/api/itineraries/days/[dayId]/notes` | GET/POST/DELETE | Owner | Retrieves, persists, or deletes day notes with server & local synchronization |
 
 ---
 

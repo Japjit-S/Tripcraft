@@ -5,6 +5,7 @@ import { OsmActivityProvider } from '@/lib/providers/osmProvider';
 import { WeatherProvider } from '@/lib/providers/weatherProvider';
 import { CandidateActivity, Destination, Persona } from '@/lib/types/engine';
 import { isValidCoordinate } from '@/lib/engine/geography';
+import { checkRateLimit, getClientIp } from '@/lib/security/rateLimit';
 
 const osmProvider = new OsmActivityProvider();
 const weatherProvider = new WeatherProvider();
@@ -24,6 +25,37 @@ const VALID_PERSONAS: Persona[] = [
  */
 export async function POST(req: NextRequest) {
   try {
+    // 0. Abuse & Rate Limit Gates
+    const ip = getClientIp(req);
+    const rateCheck = checkRateLimit(ip, { maxRequests: 20, windowMs: 60 * 1000 });
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Rate limit exceeded. Please wait a moment before generating another itinerary.',
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateCheck.resetSeconds),
+            'X-RateLimit-Limit': String(rateCheck.limit),
+            'X-RateLimit-Remaining': '0',
+          },
+        }
+      );
+    }
+
+    const contentLength = req.headers.get('content-length');
+    if (contentLength && parseInt(contentLength, 10) > 32768) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Payload too large (maximum 32KB).',
+        },
+        { status: 413 }
+      );
+    }
+
     const body = await req.json();
     const {
       city,
@@ -208,14 +240,24 @@ export async function POST(req: NextRequest) {
       feasibilityStatus: output.feasibilityStatus,
     });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : 'Internal server error during itinerary generation.';
+    const rawMessage = error instanceof Error ? error.message : '';
+    const isInternalLeak =
+      rawMessage.includes('/') ||
+      rawMessage.includes('\\') ||
+      rawMessage.includes('SELECT') ||
+      rawMessage.includes('INSERT') ||
+      rawMessage.includes('password') ||
+      rawMessage.includes('token');
+
+    const safeMessage =
+      isInternalLeak || !rawMessage
+        ? 'An unexpected error occurred during itinerary generation. Please try again.'
+        : rawMessage;
+
     return NextResponse.json(
       {
         success: false,
-        error: message,
+        error: safeMessage,
       },
       { status: 500 }
     );

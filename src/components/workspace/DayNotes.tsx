@@ -104,7 +104,7 @@ export default function DayNotes({ dayId }: DayNotesProps) {
     }
   };
 
-  const handleDeleteNote = (noteId: string) => {
+  const handleDeleteNote = async (noteId: string) => {
     const updated = notes.filter((n) => n.id !== noteId);
     setNotes(updated);
     if (typeof window !== 'undefined') {
@@ -113,6 +113,15 @@ export default function DayNotes({ dayId }: DayNotesProps) {
       } catch {
         // ignore
       }
+    }
+
+    try {
+      await fetch(
+        `/api/itineraries/days/${encodeURIComponent(dayId)}/notes?noteId=${encodeURIComponent(noteId)}`,
+        { method: 'DELETE' }
+      );
+    } catch {
+      // server sync failure fallback is handled gracefully
     }
   };
 

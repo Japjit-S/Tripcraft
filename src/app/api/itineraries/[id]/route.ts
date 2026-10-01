@@ -26,7 +26,11 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const itinerary = await getItineraryByIdFromDb(supabase, id);
+  if (!id || typeof id !== 'string' || id.length > 100) {
+    return NextResponse.json({ error: 'Invalid itinerary identifier' }, { status: 400 });
+  }
+
+  const itinerary = await getItineraryByIdFromDb(supabase, id, user.id);
   if (!itinerary) {
     return NextResponse.json({ error: 'Itinerary not found' }, { status: 404 });
   }
@@ -39,6 +43,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+
+  if (!id || typeof id !== 'string' || id.length > 100) {
+    return NextResponse.json({ error: 'Invalid itinerary identifier' }, { status: 400 });
+  }
 
   if (!isSupabaseConfigured()) {
     return NextResponse.json({ error: 'Supabase not configured' }, { status: 404 });
@@ -57,6 +65,6 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const deleted = await deleteItineraryFromDb(supabase, id);
+  const deleted = await deleteItineraryFromDb(supabase, id, user.id);
   return NextResponse.json({ success: deleted });
 }

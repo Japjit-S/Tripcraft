@@ -149,15 +149,22 @@ function PlannerForm() {
   const [isSearchingCities, setIsSearchingCities] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const autocompleteContainerRef = useRef<HTMLDivElement>(null);
+  const activeSearchQueryRef = useRef<string>('');
 
-  // Quick picks selector helper
+  // Quick picks selector helper with race safety
   const handleSelectPopularCity = async (cityName: string) => {
+    activeSearchQueryRef.current = cityName;
     setDestination(cityName);
     setIsSearchingCities(true);
     try {
       const res = await fetch(`/api/destinations/search?q=${encodeURIComponent(cityName)}`);
       const data = await res.json();
-      if (data.success && Array.isArray(data.results) && data.results.length > 0) {
+      if (
+        activeSearchQueryRef.current === cityName &&
+        data.success &&
+        Array.isArray(data.results) &&
+        data.results.length > 0
+      ) {
         const match = data.results[0];
         setSelectedCityObj(match);
         const display = [match.city, match.admin1, match.countryCode || match.country].filter(Boolean).join(', ');
@@ -166,7 +173,9 @@ function PlannerForm() {
     } catch {
       // Tolerate network search errors
     } finally {
-      setIsSearchingCities(false);
+      if (activeSearchQueryRef.current === cityName) {
+        setIsSearchingCities(false);
+      }
     }
   };
 
@@ -216,6 +225,7 @@ function PlannerForm() {
   }, []);
 
   useEffect(() => {
+    let isCurrent = true;
     const trimmed = destination.trim();
     if (trimmed.length < 2) {
       const resetTimer = setTimeout(() => {
@@ -225,23 +235,32 @@ function PlannerForm() {
       return () => clearTimeout(resetTimer);
     }
 
+    const controller = new AbortController();
     const timer = setTimeout(async () => {
       setIsSearchingCities(true);
       try {
-        const res = await fetch(`/api/destinations/search?q=${encodeURIComponent(trimmed)}`);
+        const res = await fetch(`/api/destinations/search?q=${encodeURIComponent(trimmed)}`, {
+          signal: controller.signal,
+        });
         const data = await res.json();
-        if (data.success && Array.isArray(data.results)) {
+        if (isCurrent && data.success && Array.isArray(data.results)) {
           setSuggestions(data.results);
           setShowSuggestions(data.results.length > 0);
         }
-      } catch {
-        // Silently tolerate autocomplete network errors
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') return;
       } finally {
-        setIsSearchingCities(false);
+        if (isCurrent) {
+          setIsSearchingCities(false);
+        }
       }
     }, 300);
 
-    return () => clearTimeout(timer);
+    return () => {
+      isCurrent = false;
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [destination]);
 
   const handleSubmit = async (e: React.FormEvent) => {

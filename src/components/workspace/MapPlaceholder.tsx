@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Map, ExternalLink, Navigation, Compass } from 'lucide-react';
+import { Map, ExternalLink, Navigation, Compass, Layers } from 'lucide-react';
 
 interface MapItem {
   title: string;
@@ -24,11 +24,26 @@ export default function MapPlaceholder({
   className = 'h-[300px]',
 }: MapPlaceholderProps) {
   const [providerError, setProviderError] = useState(false);
+  // Default to Satellite view ('k') per Master's explicit directive
+  const [mapType, setMapType] = useState<'k' | 'm'>('k');
 
-  // Determine active item title and coordinates
+  // Determine active item title and valid coordinates
   const activeTitle = selectedItem?.title || selectedItemTitle;
-  const lat = selectedItem?.coords?.lat ?? destinationCoords?.lat;
-  const lon = selectedItem?.coords?.lon ?? destinationCoords?.lon;
+  const rawLat = selectedItem?.coords?.lat ?? destinationCoords?.lat;
+  const rawLon = selectedItem?.coords?.lon ?? destinationCoords?.lon;
+
+  const isValidCoords =
+    rawLat !== undefined &&
+    rawLon !== undefined &&
+    !Number.isNaN(rawLat) &&
+    !Number.isNaN(rawLon) &&
+    rawLat >= -90 &&
+    rawLat <= 90 &&
+    rawLon >= -180 &&
+    rawLon <= 180;
+
+  const lat = isValidCoords ? rawLat : undefined;
+  const lon = isValidCoords ? rawLon : undefined;
 
   const searchQuery = activeTitle
     ? `${activeTitle}, ${destination}`
@@ -57,7 +72,7 @@ export default function MapPlaceholder({
   const zoomLevel = activeTitle ? 15 : 13;
   const googleEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(
     embedQuery
-  )}&t=m&z=${zoomLevel}&output=embed&iwloc=near`;
+  )}&t=${mapType}&z=${zoomLevel}&output=embed&iwloc=near`;
 
   return (
     <div
@@ -71,7 +86,7 @@ export default function MapPlaceholder({
         >
           {googleEmbedUrl && !providerError ? (
             <iframe
-              key={embedQuery}
+              key={`${embedQuery}-${mapType}`}
               title={`Map of ${searchQuery}`}
               src={googleEmbedUrl}
               className="w-full h-full border-0 absolute inset-0 transition-opacity duration-300"
@@ -86,7 +101,7 @@ export default function MapPlaceholder({
               </div>
               <p className="font-bold text-slate-800 text-sm">{destination}</p>
               <p className="text-xs text-slate-400 mt-1 max-w-[200px]">
-                Interactive map ready. Hover over an activity to pin GPS coordinates.
+                Map ready. Hover over an activity to pin GPS coordinates.
               </p>
             </div>
           )}
@@ -95,6 +110,16 @@ export default function MapPlaceholder({
 
       {/* Top Custom Styled Action Buttons */}
       <div className="absolute top-4 right-4 z-10 flex gap-2">
+        <button
+          type="button"
+          onClick={() => setMapType((prev) => (prev === 'k' ? 'm' : 'k'))}
+          className="bg-white/90 backdrop-blur-md hover:bg-white text-slate-800 px-3 py-2 rounded-xl shadow-md border border-slate-200/80 transition-all hover:scale-105 flex items-center justify-center gap-1.5 text-xs font-bold cursor-pointer"
+          title={`Toggle between Satellite and Roadmap view (Current: ${mapType === 'k' ? 'Satellite' : 'Roadmap'})`}
+        >
+          <Layers className="w-3.5 h-3.5 text-emerald-600" />
+          <span className="hidden sm:inline">{mapType === 'k' ? 'Satellite' : 'Roadmap'}</span>
+        </button>
+
         <a
           href={directionsUrl}
           target="_blank"

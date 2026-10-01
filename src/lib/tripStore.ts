@@ -117,6 +117,9 @@ export function upgradeLegacyTrip(trip: GeneratedTrip): GeneratedTrip {
       weatherSource,
       weatherConfidence,
       weatherResolution,
+      morning: morningItems,
+      afternoon: afternoonItems,
+      evening: eveningItems,
       timeline: [...morningItems, ...afternoonItems, ...eveningItems],
     };
   });

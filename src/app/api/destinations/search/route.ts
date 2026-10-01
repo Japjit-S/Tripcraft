@@ -1,10 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { WeatherProvider } from '@/lib/providers/weatherProvider';
+import { checkRateLimit, getClientIp } from '@/lib/security/rateLimit';
 
 const weatherProvider = new WeatherProvider();
 
 export async function GET(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const rateCheck = checkRateLimit(ip, { maxRequests: 60, windowMs: 60 * 1000 });
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Rate limit exceeded. Please try again shortly.',
+          results: [],
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateCheck.resetSeconds),
+            'X-RateLimit-Limit': String(rateCheck.limit),
+            'X-RateLimit-Remaining': '0',
+          },
+        }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
 

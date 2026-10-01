@@ -8,6 +8,14 @@ import {
 } from '../types/engine';
 import { normalizeOsmElement, RawOsmElement } from './normalize';
 import { deduplicateCandidates, resolveSearchRadius } from '../engine/geography';
+import { isCircuitAvailable, recordFailure, recordSuccess } from './circuitBreaker';
+
+export type CandidateDiscoveryOutcome =
+  | 'fresh'
+  | 'cached'
+  | 'partial'
+  | 'fallback'
+  | 'unavailable';
 
 interface CacheEntry {
   timestamp: number;
@@ -262,12 +270,16 @@ out center tags;`;
   }
 
   /**
-   * Queries Overpass API across multiple reliable mirrors with strict timeouts
+   * Queries Overpass API across multiple reliable mirrors with circuit breaker and bounded timeouts
    */
   private async queryOverpass(lat: number, lon: number, radiusM = 18000): Promise<RawOsmElement[]> {
     const query = this.buildOverpassQuery(lat, lon, radiusM);
 
     for (const endpoint of OVERPASS_ENDPOINTS) {
+      if (!isCircuitAvailable(endpoint)) {
+        continue;
+      }
+
       try {
         const response = await fetch(endpoint, {
           method: 'POST',
@@ -276,16 +288,20 @@ out center tags;`;
             'User-Agent': 'Tripcraft/1.0 (travel-planner-app)',
           },
           body: `data=${encodeURIComponent(query)}`,
-          signal: AbortSignal.timeout(7000),
+          signal: AbortSignal.timeout(3500),
         });
 
         if (response.ok) {
           const data = await response.json();
           if (Array.isArray(data.elements) && data.elements.length > 0) {
+            recordSuccess(endpoint);
             return data.elements as RawOsmElement[];
           }
+        } else {
+          recordFailure(endpoint);
         }
       } catch {
+        recordFailure(endpoint);
         continue; // Try next mirror if this one fails
       }
     }
@@ -298,11 +314,22 @@ out center tags;`;
    * 100% authentic data with zero synthetic offset coordinates or fabricated venues.
    */
   async getCandidates(dest: Destination): Promise<CandidateActivity[]> {
+    const result = await this.getCandidatesWithOutcome(dest);
+    return result.candidates;
+  }
+
+  /**
+   * Discovers candidates with explicit typed provider outcome for degradation transparency.
+   */
+  async getCandidatesWithOutcome(dest: Destination): Promise<{
+    candidates: CandidateActivity[];
+    outcome: CandidateDiscoveryOutcome;
+  }> {
     const cacheKey = `${dest.latitude.toFixed(3)},${dest.longitude.toFixed(3)}`;
     const cached = this.cache.get(cacheKey);
 
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-      return cached.candidates;
+      return { candidates: cached.candidates, outcome: 'cached' };
     }
 
     const radius = resolveSearchRadius(dest);
@@ -344,7 +371,6 @@ out center tags;`;
     }
 
     // Step 4: Spatial proximity deduplication and identity merging
-    // Merges overlapping venues (< 80m or matching titles) to eliminate duplicate stops
     const deduplicated = deduplicateCandidates(candidates, 80);
 
     // Sort by prominence descending
@@ -355,7 +381,14 @@ out center tags;`;
       candidates: deduplicated,
     });
 
-    return deduplicated;
+    let outcome: CandidateDiscoveryOutcome = 'fresh';
+    if (deduplicated.length === 0) {
+      outcome = 'unavailable';
+    } else if (rawOsmElements.length === 0 && wikiCandidates.length > 0) {
+      outcome = 'partial';
+    }
+
+    return { candidates: deduplicated, outcome };
   }
 }
 

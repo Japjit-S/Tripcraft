@@ -33,6 +33,15 @@ interface DbItineraryItemRow {
   longitude?: number;
   is_flex?: boolean;
   flex_reason?: string;
+  start_time?: string;
+  end_time?: string;
+  duration_min?: number;
+  event_kind?: string;
+  linked_expedition_id?: string;
+  distance_from_previous_km?: number;
+  transit_from_previous_min?: number;
+  source?: string;
+  is_verified?: boolean;
 }
 
 interface DbItineraryDayRow {
@@ -40,11 +49,18 @@ interface DbItineraryDayRow {
   day_number: number;
   date: string;
   weather_summary: string;
+  weather_state?: string;
+  is_estimated_weather?: boolean;
+  weather_source?: 'forecast' | 'historical_estimate' | 'fallback_estimate';
+  weather_confidence?: 'high' | 'medium' | 'low';
+  weather_resolution?: 'daily' | 'hourly';
   itinerary_items?: DbItineraryItemRow[];
 }
 
 interface DbItineraryRow {
   id: string;
+  version?: number;
+  destination_timezone?: string;
   persona: GeneratedTrip['persona'];
   start_date: string;
   days: number;
@@ -66,7 +82,7 @@ interface DbDayNoteRow {
   updated_at: string;
 }
 
-function mapDbRowToGeneratedTrip(row: DbItineraryRow): GeneratedTrip {
+export function mapDbRowToGeneratedTrip(row: DbItineraryRow): GeneratedTrip {
   const dest = row.destinations || {};
   const daysRaw = (row.itinerary_days || []).slice().sort(
     (a, b) => a.day_number - b.day_number
@@ -80,6 +96,7 @@ function mapDbRowToGeneratedTrip(row: DbItineraryRow): GeneratedTrip {
     const morning: ItineraryItem[] = [];
     const afternoon: ItineraryItem[] = [];
     const evening: ItineraryItem[] = [];
+    const timeline: ItineraryItem[] = [];
 
     for (const item of itemsRaw) {
       const mapped: ItineraryItem = {
@@ -94,7 +111,18 @@ function mapDbRowToGeneratedTrip(row: DbItineraryRow): GeneratedTrip {
             : undefined,
         isFlex: item.is_flex,
         flexReason: item.flex_reason,
+        startTime: item.start_time,
+        endTime: item.end_time,
+        durationMin: item.duration_min,
+        eventKind: item.event_kind,
+        linkedExpeditionId: item.linked_expedition_id,
+        distanceFromPreviousKm: item.distance_from_previous_km,
+        transitFromPreviousMin: item.transit_from_previous_min,
+        source: item.source,
+        isVerified: item.is_verified,
       };
+
+      timeline.push(mapped);
 
       if (item.slot === 'MORNING') morning.push(mapped);
       else if (item.slot === 'AFTERNOON') afternoon.push(mapped);
@@ -106,6 +134,12 @@ function mapDbRowToGeneratedTrip(row: DbItineraryRow): GeneratedTrip {
       dayNumber: d.day_number,
       date: d.date,
       weatherSummary: d.weather_summary,
+      weatherState: d.weather_state,
+      isEstimatedWeather: d.is_estimated_weather,
+      weatherSource: d.weather_source || (d.is_estimated_weather ? 'historical_estimate' : 'forecast'),
+      weatherConfidence: d.weather_confidence || (d.is_estimated_weather ? 'low' : 'high'),
+      weatherResolution: d.weather_resolution || 'daily',
+      timeline,
       morning,
       afternoon,
       evening,
@@ -114,11 +148,13 @@ function mapDbRowToGeneratedTrip(row: DbItineraryRow): GeneratedTrip {
 
   return {
     id: row.id,
+    version: row.version ?? 2,
     destination: dest.city || 'Destination',
     destinationId: dest.id,
     destinationCountry: dest.country,
     destinationCountryCode: dest.country_code,
     destinationAdmin1: dest.admin1,
+    destinationTimezone: row.destination_timezone || 'UTC',
     destinationCoords:
       dest.latitude !== undefined && dest.longitude !== undefined
         ? { lat: dest.latitude, lon: dest.longitude }
@@ -139,6 +175,8 @@ function mapDbRowToGeneratedTrip(row: DbItineraryRow): GeneratedTrip {
 
 /**
  * Saves a GeneratedTrip to PostgreSQL via Supabase with complete relational hierarchy.
+ * Enforces atomic rollback: if any day or item fails to insert, the parent itinerary is deleted
+ * immediately so that partial, corrupt trips are never persisted.
  */
 export async function saveItineraryToDb(
   supabase: SupabaseClient,
@@ -167,6 +205,8 @@ export async function saveItineraryToDb(
     .insert({
       user_id: userId,
       destination_id: destId,
+      version: trip.version ?? 2,
+      destination_timezone: trip.destinationTimezone || 'UTC',
       persona: trip.persona,
       start_date: trip.startDate,
       days: trip.days,
@@ -187,74 +227,107 @@ export async function saveItineraryToDb(
   const savedItineraryId = itineraryRow.id as string;
   const savedDays: TripDay[] = [];
 
-  // 3. Insert Days and Items
-  for (const day of trip.itineraryDays) {
-    const { data: dayRow, error: dayErr } = await supabase
-      .from('itinerary_days')
-      .insert({
-        itinerary_id: savedItineraryId,
-        day_number: day.dayNumber,
-        date: day.date,
-        weather_summary: day.weatherSummary,
-      })
-      .select('id')
-      .single();
+  // 3. Insert Days and Items with Atomic Rollback Guard
+  try {
+    for (const day of trip.itineraryDays) {
+      const { data: dayRow, error: dayErr } = await supabase
+        .from('itinerary_days')
+        .insert({
+          itinerary_id: savedItineraryId,
+          day_number: day.dayNumber,
+          date: day.date,
+          weather_summary: day.weatherSummary,
+          weather_state: day.weatherState || 'CLEAR',
+          is_estimated_weather: Boolean(day.isEstimatedWeather),
+          weather_source: day.weatherSource || (day.isEstimatedWeather ? 'historical_estimate' : 'forecast'),
+          weather_confidence: day.weatherConfidence || (day.isEstimatedWeather ? 'low' : 'high'),
+          weather_resolution: day.weatherResolution || 'daily',
+        })
+        .select('id')
+        .single();
 
-    if (dayErr || !dayRow) {
-      throw new Error(`Failed to save itinerary day ${day.dayNumber}: ${dayErr?.message}`);
-    }
-
-    const savedDayId = dayRow.id as string;
-
-    const itemsToInsert: Array<{
-      itinerary_day_id: string;
-      candidate_id?: string;
-      slot: 'MORNING' | 'AFTERNOON' | 'EVENING';
-      sort_order: number;
-      title: string;
-      category: string;
-      reason: string;
-      indoor: boolean;
-      latitude?: number;
-      longitude?: number;
-      is_flex: boolean;
-      flex_reason?: string;
-    }> = [];
-
-    const appendItems = (items: ItineraryItem[], slot: 'MORNING' | 'AFTERNOON' | 'EVENING') => {
-      items.forEach((item, idx) => {
-        itemsToInsert.push({
-          itinerary_day_id: savedDayId,
-          candidate_id: item.id,
-          slot,
-          sort_order: idx,
-          title: item.title,
-          category: item.category,
-          reason: item.reason,
-          indoor: Boolean(item.indoor),
-          latitude: item.coords?.lat,
-          longitude: item.coords?.lon,
-          is_flex: Boolean(item.isFlex),
-          flex_reason: item.flexReason,
-        });
-      });
-    };
-
-    appendItems(day.morning, 'MORNING');
-    appendItems(day.afternoon, 'AFTERNOON');
-    appendItems(day.evening, 'EVENING');
-
-    if (itemsToInsert.length > 0) {
-      const { error: itemsErr } = await supabase.from('itinerary_items').insert(itemsToInsert);
-      if (itemsErr) {
-        throw new Error(`Failed to save items for day ${day.dayNumber}: ${itemsErr.message}`);
+      if (dayErr || !dayRow) {
+        throw new Error(`Failed to save itinerary day ${day.dayNumber}: ${dayErr?.message}`);
       }
-    }
 
-    savedDays.push({
-      ...day,
-      id: savedDayId,
-    });
+      const savedDayId = dayRow.id as string;
+
+      const itemsToInsert: Array<{
+        itinerary_day_id: string;
+        candidate_id?: string;
+        slot: 'MORNING' | 'AFTERNOON' | 'EVENING';
+        sort_order: number;
+        title: string;
+        category: string;
+        reason: string;
+        indoor: boolean;
+        latitude?: number;
+        longitude?: number;
+        is_flex: boolean;
+        flex_reason?: string;
+        start_time?: string;
+        end_time?: string;
+        duration_min?: number;
+        event_kind?: string;
+        linked_expedition_id?: string;
+        distance_from_previous_km?: number;
+        transit_from_previous_min?: number;
+        source?: string;
+        is_verified?: boolean;
+      }> = [];
+
+      const appendItems = (items: ItineraryItem[], slot: 'MORNING' | 'AFTERNOON' | 'EVENING') => {
+        items.forEach((item, idx) => {
+          itemsToInsert.push({
+            itinerary_day_id: savedDayId,
+            candidate_id: item.id,
+            slot,
+            sort_order: idx,
+            title: item.title,
+            category: item.category,
+            reason: item.reason,
+            indoor: Boolean(item.indoor),
+            latitude: item.coords?.lat,
+            longitude: item.coords?.lon,
+            is_flex: Boolean(item.isFlex),
+            flex_reason: item.flexReason,
+            start_time: item.startTime,
+            end_time: item.endTime,
+            duration_min: item.durationMin,
+            event_kind: item.eventKind,
+            linked_expedition_id: item.linkedExpeditionId,
+            distance_from_previous_km: item.distanceFromPreviousKm,
+            transit_from_previous_min: item.transitFromPreviousMin,
+            source: item.source,
+            is_verified: Boolean(item.isVerified),
+          });
+        });
+      };
+
+      appendItems(day.morning, 'MORNING');
+      appendItems(day.afternoon, 'AFTERNOON');
+      appendItems(day.evening, 'EVENING');
+
+      if (itemsToInsert.length > 0) {
+        const { error: itemsErr } = await supabase.from('itinerary_items').insert(itemsToInsert);
+        if (itemsErr) {
+          throw new Error(`Failed to save items for day ${day.dayNumber}: ${itemsErr.message}`);
+        }
+      }
+
+      savedDays.push({
+        ...day,
+        id: savedDayId,
+      });
+    }
+  } catch (rollbackErr) {
+    // Atomic rollback: clean up partial itinerary record
+    try {
+      await supabase.from('itineraries').delete().eq('id', savedItineraryId);
+    } catch {
+      // suppress secondary rollback errors to re-throw primary cause
+    }
+    throw rollbackErr;
   }
 
   return {
@@ -275,6 +348,8 @@ export async function getUserItinerariesFromDb(
     .from('itineraries')
     .select(`
       id,
+      version,
+      destination_timezone,
       persona,
       start_date,
       days,
@@ -298,6 +373,11 @@ export async function getUserItinerariesFromDb(
         day_number,
         date,
         weather_summary,
+        weather_state,
+        is_estimated_weather,
+        weather_source,
+        weather_confidence,
+        weather_resolution,
         itinerary_items (
           id,
           candidate_id,
@@ -310,7 +390,16 @@ export async function getUserItinerariesFromDb(
           latitude,
           longitude,
           is_flex,
-          flex_reason
+          flex_reason,
+          start_time,
+          end_time,
+          duration_min,
+          event_kind,
+          linked_expedition_id,
+          distance_from_previous_km,
+          transit_from_previous_min,
+          source,
+          is_verified
         )
       )
     `)
@@ -329,12 +418,15 @@ export async function getUserItinerariesFromDb(
  */
 export async function getItineraryByIdFromDb(
   supabase: SupabaseClient,
-  tripId: string
+  tripId: string,
+  userId?: string
 ): Promise<GeneratedTrip | null> {
-  const { data: row, error } = await supabase
+  let query = supabase
     .from('itineraries')
     .select(`
       id,
+      version,
+      destination_timezone,
       persona,
       start_date,
       days,
@@ -358,6 +450,11 @@ export async function getItineraryByIdFromDb(
         day_number,
         date,
         weather_summary,
+        weather_state,
+        is_estimated_weather,
+        weather_source,
+        weather_confidence,
+        weather_resolution,
         itinerary_items (
           id,
           candidate_id,
@@ -370,12 +467,26 @@ export async function getItineraryByIdFromDb(
           latitude,
           longitude,
           is_flex,
-          flex_reason
+          flex_reason,
+          start_time,
+          end_time,
+          duration_min,
+          event_kind,
+          linked_expedition_id,
+          distance_from_previous_km,
+          transit_from_previous_min,
+          source,
+          is_verified
         )
       )
     `)
-    .eq('id', tripId)
-    .single();
+    .eq('id', tripId);
+
+  if (userId) {
+    query = query.eq('user_id', userId);
+  }
+
+  const { data: row, error } = await query.single();
 
   if (error || !row) {
     return null;
@@ -389,9 +500,14 @@ export async function getItineraryByIdFromDb(
  */
 export async function deleteItineraryFromDb(
   supabase: SupabaseClient,
-  tripId: string
+  tripId: string,
+  userId?: string
 ): Promise<boolean> {
-  const { error } = await supabase.from('itineraries').delete().eq('id', tripId);
+  let query = supabase.from('itineraries').delete().eq('id', tripId);
+  if (userId) {
+    query = query.eq('user_id', userId);
+  }
+  const { error } = await query;
   return !error;
 }
 
@@ -448,4 +564,19 @@ export async function getDayNotesFromDb(
     createdAt: d.created_at,
     updatedAt: d.updated_at,
   }));
+}
+
+/**
+ * Deletes a note by ID from the database.
+ */
+export async function deleteDayNoteFromDb(
+  supabase: SupabaseClient,
+  noteId: string
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('itinerary_day_notes')
+    .delete()
+    .eq('id', noteId);
+
+  return !error;
 }
