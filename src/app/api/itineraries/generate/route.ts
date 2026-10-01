@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateItinerary } from '@/lib/engine';
 import { resolveDestinationArtwork } from '@/lib/images/imageResolver';
-import { CuratedPackProvider } from '@/lib/providers/curatedPackProvider';
 import { OsmActivityProvider } from '@/lib/providers/osmProvider';
 import { WeatherProvider } from '@/lib/providers/weatherProvider';
 import { CandidateActivity, Persona } from '@/lib/types/engine';
 
-const curatedProvider = new CuratedPackProvider();
 const osmProvider = new OsmActivityProvider();
 const weatherProvider = new WeatherProvider();
 
@@ -103,24 +101,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 4. Candidate Activity Sourcing (Provider A with fallback to Provider B)
+    // 4. Procedural Candidate Activity Sourcing (Live Wikipedia GeoSearch + OpenStreetMap)
     let candidates: CandidateActivity[] = [];
-
-    if (curatedProvider.hasPack(destination)) {
-      candidates = await curatedProvider.getCandidates(destination);
-    } else {
-      try {
-        candidates = await osmProvider.getCandidates(destination);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        return NextResponse.json(
-          {
-            success: false,
-            error: `Failed to retrieve open-data activities for ${destination.city}: ${message}`,
-          },
-          { status: 502 }
-        );
-      }
+    try {
+      candidates = await osmProvider.getCandidates(destination);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Failed to retrieve procedural activities for ${destination.city}: ${message}`,
+        },
+        { status: 502 }
+      );
     }
 
     if (candidates.length === 0) {

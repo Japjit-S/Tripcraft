@@ -133,6 +133,126 @@ export const TAG_MAPPING_TABLE: Record<string, TagRule> = {
     typicalDurationMin: 60,
     slotAffinity: ['MORNING', 'AFTERNOON'],
   },
+
+  // Natural & Landscape
+  'natural=peak': {
+    category: 'NATURE',
+    indoor: false,
+    intensity: 'HIGH',
+    typicalDurationMin: 180,
+    slotAffinity: ['MORNING', 'AFTERNOON'],
+  },
+  'natural=waterfall': {
+    category: 'NATURE',
+    indoor: false,
+    intensity: 'MEDIUM',
+    typicalDurationMin: 90,
+    slotAffinity: ['MORNING', 'AFTERNOON'],
+  },
+  'natural=valley': {
+    category: 'NATURE',
+    indoor: false,
+    intensity: 'MEDIUM',
+    typicalDurationMin: 180,
+    slotAffinity: ['MORNING', 'AFTERNOON'],
+  },
+  'natural=glacier': {
+    category: 'NATURE',
+    indoor: false,
+    intensity: 'HIGH',
+    typicalDurationMin: 240,
+    slotAffinity: ['MORNING', 'AFTERNOON'],
+  },
+  'natural=beach': {
+    category: 'NATURE',
+    indoor: false,
+    intensity: 'LOW',
+    typicalDurationMin: 120,
+    slotAffinity: ['MORNING', 'EVENING'],
+  },
+  'natural=hot_spring': {
+    category: 'RELAXATION',
+    indoor: false,
+    intensity: 'LOW',
+    typicalDurationMin: 90,
+    slotAffinity: ['MORNING', 'AFTERNOON'],
+  },
+  'natural=cave_entrance': {
+    category: 'NATURE',
+    indoor: true,
+    intensity: 'HIGH',
+    typicalDurationMin: 120,
+    slotAffinity: ['MORNING', 'AFTERNOON'],
+  },
+
+  // Routes & Hiking
+  'route=hiking': {
+    category: 'NATURE',
+    indoor: false,
+    intensity: 'HIGH',
+    typicalDurationMin: 240,
+    slotAffinity: ['MORNING', 'AFTERNOON'],
+  },
+  'information=trailhead': {
+    category: 'NATURE',
+    indoor: false,
+    intensity: 'HIGH',
+    typicalDurationMin: 180,
+    slotAffinity: ['MORNING', 'AFTERNOON'],
+  },
+
+  // Stadiums & Reserves
+  'leisure=stadium': {
+    category: 'ENTERTAINMENT',
+    indoor: false,
+    intensity: 'MEDIUM',
+    typicalDurationMin: 90,
+    slotAffinity: ['AFTERNOON', 'EVENING'],
+  },
+  'leisure=nature_reserve': {
+    category: 'NATURE',
+    indoor: false,
+    intensity: 'MEDIUM',
+    typicalDurationMin: 180,
+    slotAffinity: ['MORNING', 'AFTERNOON'],
+  },
+
+  // Sports & Outdoors
+  'tourism=camp_site': {
+    category: 'NATURE',
+    indoor: false,
+    intensity: 'MEDIUM',
+    typicalDurationMin: 180,
+    slotAffinity: ['AFTERNOON', 'EVENING'],
+  },
+  'tourism=alpine_hut': {
+    category: 'NATURE',
+    indoor: true,
+    intensity: 'HIGH',
+    typicalDurationMin: 120,
+    slotAffinity: ['AFTERNOON', 'EVENING'],
+  },
+  'sport=climbing': {
+    category: 'NATURE',
+    indoor: false,
+    intensity: 'HIGH',
+    typicalDurationMin: 180,
+    slotAffinity: ['MORNING', 'AFTERNOON'],
+  },
+  'sport=paragliding': {
+    category: 'NATURE',
+    indoor: false,
+    intensity: 'HIGH',
+    typicalDurationMin: 120,
+    slotAffinity: ['MORNING', 'AFTERNOON'],
+  },
+  'sport=rafting': {
+    category: 'NATURE',
+    indoor: false,
+    intensity: 'HIGH',
+    typicalDurationMin: 150,
+    slotAffinity: ['MORNING', 'AFTERNOON'],
+  },
 };
 
 /**
@@ -182,6 +302,10 @@ export function matchOsmRule(tags: Record<string, string>): TagRule {
   const candidateKeys = [
     `tourism=${tags.tourism}`,
     `historic=${tags.historic}`,
+    `natural=${tags.natural}`,
+    `route=${tags.route}`,
+    `information=${tags.information}`,
+    `sport=${tags.sport}`,
     `leisure=${tags.leisure}`,
     `amenity=${tags.amenity}`,
   ];
