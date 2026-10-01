@@ -21,7 +21,7 @@ export default function SidebarNav() {
   };
 
   return (
-    <nav className="w-64 bg-white h-full flex flex-col z-10 shrink-0 border-r border-slate-100">
+    <nav className="w-64 bg-white h-full hidden md:flex flex-col z-10 shrink-0 border-r border-slate-100">
       <div className="px-6 mt-8 mb-6">
         <Link 
           href="/planner" 

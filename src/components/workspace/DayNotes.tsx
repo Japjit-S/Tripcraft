@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Plus, StickyNote, Loader2 } from 'lucide-react';
+import { Plus, StickyNote, Loader2, Trash2 } from 'lucide-react';
 
 interface NoteItem {
   id: string;
@@ -104,6 +104,18 @@ export default function DayNotes({ dayId }: DayNotesProps) {
     }
   };
 
+  const handleDeleteNote = (noteId: string) => {
+    const updated = notes.filter((n) => n.id !== noteId);
+    setNotes(updated);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(`tripcraft_day_notes_${dayId}`, JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-slate-50/70 rounded-2xl border border-slate-100 p-5">
       <div className="flex items-center gap-2 mb-3">
@@ -128,12 +140,22 @@ export default function DayNotes({ dayId }: DayNotesProps) {
           notes.map((note) => (
             <div
               key={note.id}
-              className="bg-white border border-slate-100 rounded-xl p-3 shadow-2xs text-xs text-slate-700"
+              className="bg-white border border-slate-100 rounded-xl p-3 shadow-2xs text-xs text-slate-700 flex justify-between items-start group"
             >
-              <p className="whitespace-pre-wrap">{note.content}</p>
-              <span className="block mt-1 text-[10px] text-slate-400 font-medium">
-                {note.createdAt}
-              </span>
+              <div className="flex-1 pr-2">
+                <p className="whitespace-pre-wrap">{note.content}</p>
+                <span className="block mt-1 text-[10px] text-slate-400 font-medium">
+                  {note.createdAt}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleDeleteNote(note.id)}
+                className="text-slate-300 hover:text-rose-600 transition-colors opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-rose-50 cursor-pointer"
+                title="Delete note"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
             </div>
           ))
         )}

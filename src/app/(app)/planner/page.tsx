@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   MapPin,
   Clock,
@@ -27,6 +27,14 @@ import { saveTripToStorage, GeneratedTrip } from '@/lib/tripStore';
 import { Destination } from '@/lib/types';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { TimePicker } from '@/components/ui/TimePicker';
+
+const POPULAR_DESTINATIONS = [
+  { name: 'Manali', label: 'Manali, HP' },
+  { name: 'Jaipur', label: 'Jaipur, RJ' },
+  { name: 'Tokyo', label: 'Tokyo, JP' },
+  { name: 'Paris', label: 'Paris, FR' },
+  { name: 'Cape Town', label: 'Cape Town, ZA' },
+];
 
 const PERSONAS = [
   {
@@ -93,22 +101,45 @@ const DISCOVERY_STAGES = [
   { label: 'Running constraint satisfaction & multi-slot temporal allocation', icon: ShieldCheck },
 ];
 
-export default function PlannerPage() {
+function PlannerForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Read URL query params once for initial state
+  const initialCity = searchParams.get('city') || searchParams.get('destination') || '';
+  const initialPersonaParam = searchParams.get('persona');
+  const initialPersona =
+    initialPersonaParam &&
+    PERSONAS.some(
+      (p) =>
+        p.title.toLowerCase() === initialPersonaParam.toLowerCase() ||
+        p.id.toLowerCase() === initialPersonaParam.toLowerCase()
+    )
+      ? PERSONAS.find(
+          (p) =>
+            p.title.toLowerCase() === initialPersonaParam.toLowerCase() ||
+            p.id.toLowerCase() === initialPersonaParam.toLowerCase()
+        )!.id
+      : 'Culture Seeker';
+  const initialDaysParam = searchParams.get('days') || searchParams.get('duration');
+  const initialDays = initialDaysParam
+    ? Math.min(7, Math.max(1, parseInt(initialDaysParam, 10) || 3))
+    : 3;
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeStageIndex, setActiveStageIndex] = useState(0);
 
   // Form State
-  const [destination, setDestination] = useState('');
+  const [destination, setDestination] = useState(initialCity);
   const [selectedCityObj, setSelectedCityObj] = useState<Destination | null>(null);
   const [startDate, setStartDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 1);
     return d.toISOString().split('T')[0];
   });
-  const [duration, setDuration] = useState<number>(3);
-  const [persona, setPersona] = useState('Culture Seeker');
+  const [duration, setDuration] = useState<number>(initialDays);
+  const [persona, setPersona] = useState(initialPersona);
   const [originCity, setOriginCity] = useState('');
   const [arrivalMode, setArrivalMode] = useState('flight');
   const [arrivalTime, setArrivalTime] = useState('10:00 AM');
@@ -118,6 +149,47 @@ export default function PlannerPage() {
   const [isSearchingCities, setIsSearchingCities] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const autocompleteContainerRef = useRef<HTMLDivElement>(null);
+
+  // Quick picks selector helper
+  const handleSelectPopularCity = async (cityName: string) => {
+    setDestination(cityName);
+    setIsSearchingCities(true);
+    try {
+      const res = await fetch(`/api/destinations/search?q=${encodeURIComponent(cityName)}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.results) && data.results.length > 0) {
+        const match = data.results[0];
+        setSelectedCityObj(match);
+        const display = [match.city, match.admin1, match.countryCode || match.country].filter(Boolean).join(', ');
+        setDestination(display);
+      }
+    } catch {
+      // Tolerate network search errors
+    } finally {
+      setIsSearchingCities(false);
+    }
+  };
+
+  // Resolve initial city geocoding in the background if provided via URL
+  useEffect(() => {
+    if (!initialCity) return;
+    let isCurrent = true;
+    fetch(`/api/destinations/search?q=${encodeURIComponent(initialCity)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (isCurrent && data.success && Array.isArray(data.results) && data.results.length > 0) {
+          const match = data.results[0];
+          setSelectedCityObj(match);
+          const display = [match.city, match.admin1, match.countryCode || match.country].filter(Boolean).join(', ');
+          setDestination(display);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [initialCity]);
 
   // Handle stage timer when submitting
   useEffect(() => {
@@ -372,6 +444,21 @@ export default function PlannerPage() {
                     ))}
                   </div>
                 )}
+
+                {/* Popular Quick Picks */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[11px] font-bold text-slate-400 mr-0.5">Quick picks:</span>
+                  {POPULAR_DESTINATIONS.map((pop) => (
+                    <button
+                      key={pop.name}
+                      type="button"
+                      onClick={() => handleSelectPopularCity(pop.name)}
+                      className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-orange-50 text-slate-600 hover:text-orange-700 hover:border-orange-200 border border-transparent transition-all cursor-pointer"
+                    >
+                      {pop.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Start Date & Duration */}
@@ -688,3 +775,21 @@ export default function PlannerPage() {
     </div>
   );
 }
+
+export default function PlannerPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-full flex items-center justify-center bg-transparent py-20">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-4 border-[#1d6b8f]/30 border-t-[#1d6b8f] rounded-full animate-spin"></div>
+            <p className="text-sm font-bold text-slate-500">Loading planner...</p>
+          </div>
+        </div>
+      }
+    >
+      <PlannerForm />
+    </Suspense>
+  );
+}
+

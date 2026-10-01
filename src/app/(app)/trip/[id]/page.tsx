@@ -10,6 +10,9 @@ import {
   Clock,
   ShieldCheck,
   AlertTriangle,
+  Share2,
+  Printer,
+  Check,
 } from 'lucide-react';
 import { ensureTripArtwork, getTripFromStorage, GeneratedTrip } from '@/lib/tripStore';
 import { ItineraryItem } from '@/lib/types';
@@ -41,6 +44,25 @@ export default function TripWorkspacePage({
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    if (typeof window !== 'undefined') {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2200);
+      } catch {
+        // Silently tolerate clipboard access refusal
+      }
+    }
+  };
+
+  const handlePrint = () => {
+    if (typeof window !== 'undefined') {
+      window.print();
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -216,7 +238,7 @@ export default function TripWorkspacePage({
         {/* Content Area: Map + Itinerary */}
         <div className="flex flex-col lg:flex-row gap-8 pb-8">
           {/* Left: Interactive Map with Pan-on-Hover */}
-          <div className="w-full lg:w-1/3 shrink-0">
+          <div className="w-full lg:w-1/3 shrink-0 no-print">
             <div className="sticky top-4">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -259,10 +281,42 @@ export default function TripWorkspacePage({
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 no-print">
+                {/* Share Link Button */}
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all shadow-2xs hover:scale-102 cursor-pointer"
+                  title="Copy shareable link"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-700">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-3.5 h-3.5 text-slate-500" />
+                      <span className="hidden sm:inline">Share</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Print / PDF Button */}
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all shadow-2xs hover:scale-102 cursor-pointer"
+                  title="Print or Export to PDF"
+                >
+                  <Printer className="w-3.5 h-3.5 text-slate-500" />
+                  <span className="hidden sm:inline">Print / PDF</span>
+                </button>
+
                 {/* Decision Log Drawer Trigger Button */}
                 {trip.auditLog && trip.auditLog.length > 0 && (
                   <button
+                    type="button"
                     onClick={() => setIsDrawerOpen(true)}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all shadow-xs hover:scale-102 cursor-pointer"
                   >
@@ -346,7 +400,7 @@ export default function TripWorkspacePage({
       </div>
 
       {/* Right Sidebar: Calendar, Notes */}
-      <div className="w-80 shrink-0 bg-white border-l border-slate-100 flex flex-col h-full overflow-y-auto hidden xl:flex">
+      <div className="w-80 shrink-0 bg-white border-l border-slate-100 flex flex-col h-full overflow-y-auto hidden xl:flex no-print">
         {/* Calendar Widget */}
         <div className="px-6 pt-6 py-4">
           <h3 className="text-xl font-black text-slate-900 mb-4">Journey Calendar</h3>
