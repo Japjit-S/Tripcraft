@@ -42,3 +42,8 @@ next-env.d.ts
 
 # backups
 .backups/
+
+# internal agent & notes files
+AGENTS.md
+CLAUDE.md
+things of note.md
