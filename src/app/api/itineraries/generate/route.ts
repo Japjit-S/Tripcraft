@@ -3,7 +3,7 @@ import { generateItinerary } from '@/lib/engine';
 import { resolveDestinationArtwork } from '@/lib/images/imageResolver';
 import { OsmActivityProvider } from '@/lib/providers/osmProvider';
 import { WeatherProvider } from '@/lib/providers/weatherProvider';
-import { CandidateActivity, Persona } from '@/lib/types/engine';
+import { CandidateActivity, Destination, Persona } from '@/lib/types/engine';
 
 const osmProvider = new OsmActivityProvider();
 const weatherProvider = new WeatherProvider();
@@ -71,8 +71,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Geocoding
-    const destination = await weatherProvider.geocodeCity(city);
+    // 2. Geocoding & Disambiguation
+    let destination: Destination | null = null;
+    if (
+      body.latitude !== undefined &&
+      body.longitude !== undefined &&
+      typeof body.latitude === 'number' &&
+      typeof body.longitude === 'number'
+    ) {
+      destination = {
+        id: body.destinationId || `dest:${city.toLowerCase().replace(/\s+/g, '-')}`,
+        city: body.cityName || city.split(',')[0].trim(),
+        country: body.country || '',
+        countryCode: body.countryCode || '',
+        admin1: body.admin1 || '',
+        latitude: body.latitude,
+        longitude: body.longitude,
+      };
+    } else {
+      destination = await weatherProvider.geocodeCity(city, {
+        admin1: body.admin1,
+        country: body.country,
+        countryCode: body.countryCode,
+      });
+    }
+
     if (!destination) {
       return NextResponse.json(
         {

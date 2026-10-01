@@ -28,6 +28,7 @@ export default function PlannerPage() {
 
   // Form State
   const [destination, setDestination] = useState('');
+  const [selectedCityObj, setSelectedCityObj] = useState<Destination | null>(null);
   const [startDate, setStartDate] = useState('');
   const [duration, setDuration] = useState('');
   const [persona, setPersona] = useState('Culture Seeker');
@@ -93,7 +94,14 @@ export default function PlannerPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          city: destination,
+          city: selectedCityObj?.city || destination,
+          cityName: selectedCityObj?.city,
+          admin1: selectedCityObj?.admin1,
+          country: selectedCityObj?.country,
+          countryCode: selectedCityObj?.countryCode,
+          latitude: selectedCityObj?.latitude,
+          longitude: selectedCityObj?.longitude,
+          destinationId: selectedCityObj?.id,
           startDate,
           days: Number(duration),
           persona,
@@ -208,6 +216,7 @@ export default function PlannerPage() {
                     value={destination}
                     onChange={e => {
                       setDestination(e.target.value);
+                      setSelectedCityObj(null);
                       setShowSuggestions(true);
                     }}
                     onFocus={() => {
@@ -229,7 +238,9 @@ export default function PlannerPage() {
                         key={s.id}
                         type="button"
                         onClick={() => {
-                          setDestination(s.city);
+                          const display = [s.city, s.admin1, s.countryCode || s.country].filter(Boolean).join(', ');
+                          setDestination(display);
+                          setSelectedCityObj(s);
                           setShowSuggestions(false);
                         }}
                         className="w-full text-left px-5 py-3.5 hover:bg-slate-50 flex items-center justify-between transition-colors group cursor-pointer"

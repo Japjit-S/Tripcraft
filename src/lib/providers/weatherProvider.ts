@@ -13,6 +13,16 @@ interface WeatherCacheEntry {
   data: DayForecast[];
 }
 
+interface OpenMeteoDailyData {
+  time?: string[];
+  weather_code?: number[];
+  temperature_2m_max?: number[];
+  temperature_2m_min?: number[];
+  wind_speed_10m_max?: number[];
+  precipitation_sum?: number[];
+}
+
+
 /**
  * Shifts an ISO date (YYYY-MM-DD) by a given number of years.
  */
@@ -48,35 +58,84 @@ export class WeatherProvider {
 
   /**
    * Geocodes a destination city query into a normalized Destination object.
+   * Supports disambiguation via optional context (admin1, country, countryCode).
    */
-  async geocodeCity(cityQuery: string): Promise<Destination | null> {
+  async geocodeCity(
+    cityQuery: string,
+    context?: { admin1?: string; country?: string; countryCode?: string }
+  ): Promise<Destination | null> {
     const cleaned = cityQuery.trim();
     if (!cleaned) return null;
 
-    const url = `${GEOCODING_API_URL}?name=${encodeURIComponent(cleaned)}&count=5&language=en&format=json`;
-    const res = await fetch(url, {
-      headers: { 'User-Agent': USER_AGENT },
-      signal: AbortSignal.timeout(8000),
-    });
-
-    if (!res.ok) {
-      throw new Error(`Open-Meteo geocoding failed with HTTP ${res.status}`);
+    // If query has comma (e.g. "Manali, Himachal Pradesh"), try full query first
+    const queriesToTry = [cleaned];
+    if (cleaned.includes(',')) {
+      const parts = cleaned.split(',').map((p) => p.trim()).filter(Boolean);
+      if (parts[0] && parts[0] !== cleaned) {
+        queriesToTry.push(parts[0]);
+      }
+    } else if (context?.admin1) {
+      queriesToTry.unshift(`${cleaned}, ${context.admin1}`);
     }
 
-    const data = await res.json();
-    if (!data.results || data.results.length === 0) {
+    interface RawGeocodingItem {
+      id: number;
+      name: string;
+      country?: string;
+      country_code?: string;
+      admin1?: string;
+      latitude: number;
+      longitude: number;
+    }
+
+    let allResults: RawGeocodingItem[] = [];
+
+    for (const q of queriesToTry) {
+      const url = `${GEOCODING_API_URL}?name=${encodeURIComponent(q)}&count=10&language=en&format=json`;
+      try {
+        const res = await fetch(url, {
+          headers: { 'User-Agent': USER_AGENT },
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!res.ok) continue;
+        const data = (await res.json()) as { results?: RawGeocodingItem[] };
+        if (data.results && data.results.length > 0) {
+          allResults = data.results;
+          break;
+        }
+      } catch {
+        // continue
+      }
+    }
+
+    if (allResults.length === 0) {
       return null;
     }
 
-    const first = data.results[0];
+    let matched = allResults[0];
+
+    if (context?.admin1) {
+      const targetAdmin = context.admin1.toLowerCase().trim();
+      const adminMatch = allResults.find(
+        (r) => r.admin1 && r.admin1.toLowerCase().trim() === targetAdmin
+      );
+      if (adminMatch) matched = adminMatch;
+    } else if (context?.countryCode) {
+      const targetCode = context.countryCode.toUpperCase().trim();
+      const codeMatch = allResults.find(
+        (r) => r.country_code && r.country_code.toUpperCase().trim() === targetCode
+      );
+      if (codeMatch) matched = codeMatch;
+    }
+
     return {
-      id: `openmeteo:${first.id}`,
-      city: first.name,
-      country: first.country || '',
-      countryCode: first.country_code || '',
-      admin1: first.admin1 || '',
-      latitude: first.latitude,
-      longitude: first.longitude,
+      id: `openmeteo:${matched.id}`,
+      city: matched.name,
+      country: matched.country || '',
+      countryCode: matched.country_code || '',
+      admin1: matched.admin1 || '',
+      latitude: matched.latitude,
+      longitude: matched.longitude,
     };
   }
 
@@ -224,7 +283,7 @@ export class WeatherProvider {
    * Parses Open-Meteo daily response array into normalized DayForecast[]
    */
   private parseOpenMeteoDaily(
-    daily: any,
+    daily: OpenMeteoDailyData | null | undefined,
     targetStartDate: string,
     estimated: boolean
   ): DayForecast[] {

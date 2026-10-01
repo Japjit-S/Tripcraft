@@ -292,9 +292,9 @@ async function queryWikipediaSummaryImage(
   fetchImpl: typeof fetch
 ): Promise<ValidatedExternalIllustration | null> {
   const cityTitles = [
-    identity.displayCity,
     identity.admin1 ? `${identity.displayCity}, ${identity.admin1}` : '',
     identity.country ? `${identity.displayCity}, ${identity.country}` : '',
+    identity.displayCity,
   ].filter(Boolean);
 
   for (const title of cityTitles) {
@@ -307,10 +307,28 @@ async function queryWikipediaSummaryImage(
       if (!res.ok) continue;
       const data = (await res.json()) as {
         title?: string;
+        description?: string;
         thumbnail?: { source?: string };
         originalimage?: { source?: string };
         content_urls?: { desktop?: { page?: string } };
       };
+
+      // Disambiguation cross-region guard: prevent returning another state's identically-named city
+      if (identity.admin1) {
+        const fullText = `${data.title || ''} ${data.description || ''}`.toLowerCase();
+        const targetAdmin = identity.admin1.toLowerCase();
+        if (
+          (fullText.includes('tamil nadu') && !targetAdmin.includes('tamil nadu')) ||
+          (fullText.includes('himachal') && !targetAdmin.includes('himachal')) ||
+          (fullText.includes('rajasthan') && !targetAdmin.includes('rajasthan')) ||
+          (fullText.includes('kerala') && !targetAdmin.includes('kerala')) ||
+          (fullText.includes('karnataka') && !targetAdmin.includes('karnataka')) ||
+          (fullText.includes('maharashtra') && !targetAdmin.includes('maharashtra')) ||
+          (fullText.includes('uttar pradesh') && !targetAdmin.includes('uttar pradesh'))
+        ) {
+          continue;
+        }
+      }
 
       const imageUrl = (data.originalimage?.source || data.thumbnail?.source || '').trim();
       if (!imageUrl) continue;
