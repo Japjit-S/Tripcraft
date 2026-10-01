@@ -4,6 +4,7 @@ import { resolveDestinationArtwork } from '@/lib/images/imageResolver';
 import { OsmActivityProvider } from '@/lib/providers/osmProvider';
 import { WeatherProvider } from '@/lib/providers/weatherProvider';
 import { CandidateActivity, Destination, Persona } from '@/lib/types/engine';
+import { isValidCoordinate } from '@/lib/engine/geography';
 
 const osmProvider = new OsmActivityProvider();
 const weatherProvider = new WeatherProvider();
@@ -73,12 +74,16 @@ export async function POST(req: NextRequest) {
 
     // 2. Geocoding & Disambiguation
     let destination: Destination | null = null;
-    if (
-      body.latitude !== undefined &&
-      body.longitude !== undefined &&
-      typeof body.latitude === 'number' &&
-      typeof body.longitude === 'number'
-    ) {
+    if (body.latitude !== undefined || body.longitude !== undefined) {
+      if (!isValidCoordinate(body.latitude, body.longitude)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Invalid coordinates: latitude must be between -90 and 90, longitude between -180 and 180.',
+          },
+          { status: 400 }
+        );
+      }
       destination = {
         id: body.destinationId || `dest:${city.toLowerCase().replace(/\s+/g, '-')}`,
         city: body.cityName || city.split(',')[0].trim(),

@@ -19,6 +19,11 @@ export interface ItineraryItem {
   linkedExpeditionId?: string;
   expeditionPhase?: string;
   continuationOfId?: string;
+  // Geographic transit fields (Stage 2)
+  distanceFromPreviousKm?: number;
+  transitFromPreviousMin?: number;
+  source?: string;
+  isVerified?: boolean;
 }
 
 export interface TripDay {

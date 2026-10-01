@@ -7,6 +7,7 @@ import {
   Slot,
 } from '../types/engine';
 import { normalizeOsmElement, RawOsmElement } from './normalize';
+import { deduplicateCandidates, resolveSearchRadius } from '../engine/geography';
 
 interface CacheEntry {
   timestamp: number;
@@ -248,6 +249,9 @@ out center tags;`;
             ? ['heritage', 'culture', 'monument', 'history']
             : ['landmark', 'sightseeing'],
           sourceUrl: `https://en.wikipedia.org/?curid=${page.pageid}`,
+          source: 'wikipedia',
+          sourceId: `wiki:page/${page.pageid}`,
+          isVerified: true,
         });
       }
 
@@ -260,8 +264,8 @@ out center tags;`;
   /**
    * Queries Overpass API across multiple reliable mirrors with strict timeouts
    */
-  private async queryOverpass(lat: number, lon: number): Promise<RawOsmElement[]> {
-    const query = this.buildOverpassQuery(lat, lon);
+  private async queryOverpass(lat: number, lon: number, radiusM = 18000): Promise<RawOsmElement[]> {
+    const query = this.buildOverpassQuery(lat, lon, radiusM);
 
     for (const endpoint of OVERPASS_ENDPOINTS) {
       try {
@@ -290,89 +294,8 @@ out center tags;`;
   }
 
   /**
-   * Generates safe fallback activities if both Overpass and Wikipedia are unreachable
-   */
-  private generateSafetyFallbacks(dest: Destination): CandidateActivity[] {
-    const city = dest.city;
-    return [
-      {
-        id: `procedural:${dest.id}-heritage-walk`,
-        title: `${city} Historic Heritage & Old Quarter Walk`,
-        category: 'CULTURE',
-        indoor: false,
-        intensity: 'MEDIUM',
-        typicalDurationMin: 120,
-        slotAffinity: ['MORNING', 'AFTERNOON'],
-        prominence: 0.85,
-        coords: { lat: dest.latitude + 0.005, lon: dest.longitude + 0.005 },
-        tags: ['heritage', 'culture', 'walking', 'history'],
-      },
-      {
-        id: `procedural:${dest.id}-central-museum`,
-        title: `${city} City Museum & Cultural Gallery`,
-        category: 'CULTURE',
-        indoor: true,
-        intensity: 'LOW',
-        typicalDurationMin: 90,
-        slotAffinity: ['MORNING', 'AFTERNOON'],
-        prominence: 0.82,
-        coords: { lat: dest.latitude - 0.004, lon: dest.longitude - 0.003 },
-        tags: ['museum', 'culture', 'indoor', 'art'],
-      },
-      {
-        id: `procedural:${dest.id}-scenic-point`,
-        title: `${city} Panoramic Viewpoint & Nature Promenade`,
-        category: 'NATURE',
-        indoor: false,
-        intensity: 'LOW',
-        typicalDurationMin: 75,
-        slotAffinity: ['AFTERNOON', 'EVENING'],
-        prominence: 0.80,
-        coords: { lat: dest.latitude + 0.008, lon: dest.longitude - 0.006 },
-        tags: ['nature', 'scenic', 'sunset', 'viewpoint'],
-      },
-      {
-        id: `procedural:${dest.id}-market`,
-        title: `${city} Local Artisans & Traditional Bazaar`,
-        category: 'MARKET',
-        indoor: false,
-        intensity: 'MEDIUM',
-        typicalDurationMin: 90,
-        slotAffinity: ['AFTERNOON', 'EVENING'],
-        prominence: 0.78,
-        coords: { lat: dest.latitude - 0.002, lon: dest.longitude + 0.007 },
-        tags: ['market', 'shopping', 'local', 'food'],
-      },
-      {
-        id: `procedural:${dest.id}-memorial-park`,
-        title: `${city} Botanical Gardens & Botanical Park`,
-        category: 'NATURE',
-        indoor: false,
-        intensity: 'LOW',
-        typicalDurationMin: 60,
-        slotAffinity: ['MORNING', 'EVENING'],
-        prominence: 0.74,
-        coords: { lat: dest.latitude + 0.003, lon: dest.longitude + 0.002 },
-        tags: ['nature', 'park', 'peaceful'],
-      },
-      {
-        id: `procedural:${dest.id}-culinary-quarter`,
-        title: `${city} Evening Street Food & Culinary Walk`,
-        category: 'FOOD',
-        indoor: false,
-        intensity: 'LOW',
-        typicalDurationMin: 75,
-        slotAffinity: ['EVENING'],
-        prominence: 0.81,
-        coords: { lat: dest.latitude, lon: dest.longitude },
-        tags: ['food', 'dining', 'evening', 'nightlife'],
-      },
-    ];
-  }
-
-  /**
    * Main entry point: Procedural multi-tier discovery (Wikipedia GeoSearch + Overpass Mirrors).
-   * 100% resilient. Guarantees non-empty candidate array for every city worldwide.
+   * 100% authentic data with zero synthetic offset coordinates or fabricated venues.
    */
   async getCandidates(dest: Destination): Promise<CandidateActivity[]> {
     const cacheKey = `${dest.latitude.toFixed(3)},${dest.longitude.toFixed(3)}`;
@@ -382,22 +305,20 @@ out center tags;`;
       return cached.candidates;
     }
 
-    const candidates: CandidateActivity[] = [];
-    const seenTitles = new Set<string>();
+    const radius = resolveSearchRadius(dest);
+    const wikiRadius = Math.min(10000, radius);
 
-    // Step 1: Run Wikipedia GeoSearch and Overpass in parallel with bounded timeouts
+    // Step 1: Run Wikipedia GeoSearch and Overpass in parallel with bounded timeouts and adaptive radius
     const [wikiCandidates, rawOsmElements] = await Promise.all([
-      this.queryWikipediaGeo(dest.latitude, dest.longitude),
-      this.queryOverpass(dest.latitude, dest.longitude),
+      this.queryWikipediaGeo(dest.latitude, dest.longitude, wikiRadius),
+      this.queryOverpass(dest.latitude, dest.longitude, radius),
     ]);
+
+    const candidates: CandidateActivity[] = [];
 
     // Step 2: Ingest Wikipedia landmarks (high prominence, clean landmark names)
     for (const item of wikiCandidates) {
-      const key = item.title.toLowerCase().trim();
-      if (!seenTitles.has(key)) {
-        seenTitles.add(key);
-        candidates.push(item);
-      }
+      candidates.push(item);
     }
 
     // Step 3: Ingest and normalize OpenStreetMap elements
@@ -417,36 +338,24 @@ out center tags;`;
         const normalized = normalizeOsmElement(elem, sitelinks);
 
         if (normalized) {
-          const titleKey = normalized.title.toLowerCase().trim();
-          if (!seenTitles.has(titleKey)) {
-            seenTitles.add(titleKey);
-            candidates.push(normalized);
-          }
+          candidates.push(normalized);
         }
       }
     }
 
-    // Step 4: If live sources returned fewer than 6 candidates, pad with procedural city activities
-    if (candidates.length < 6) {
-      const safetyFallbacks = this.generateSafetyFallbacks(dest);
-      for (const fb of safetyFallbacks) {
-        const key = fb.title.toLowerCase().trim();
-        if (!seenTitles.has(key)) {
-          seenTitles.add(key);
-          candidates.push(fb);
-        }
-      }
-    }
+    // Step 4: Spatial proximity deduplication and identity merging
+    // Merges overlapping venues (< 80m or matching titles) to eliminate duplicate stops
+    const deduplicated = deduplicateCandidates(candidates, 80);
 
     // Sort by prominence descending
-    candidates.sort((a, b) => b.prominence - a.prominence || a.id.localeCompare(b.id));
+    deduplicated.sort((a, b) => b.prominence - a.prominence || a.id.localeCompare(b.id));
 
     this.cache.set(cacheKey, {
       timestamp: Date.now(),
-      candidates,
+      candidates: deduplicated,
     });
 
-    return candidates;
+    return deduplicated;
   }
 }
 

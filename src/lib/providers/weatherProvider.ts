@@ -126,6 +126,12 @@ export class WeatherProvider {
         (r) => r.country_code && r.country_code.toUpperCase().trim() === targetCode
       );
       if (codeMatch) matched = codeMatch;
+    } else if (context?.country) {
+      const targetCountry = context.country.toLowerCase().trim();
+      const countryMatch = allResults.find(
+        (r) => r.country && r.country.toLowerCase().trim() === targetCountry
+      );
+      if (countryMatch) matched = countryMatch;
     }
 
     return {

@@ -61,6 +61,9 @@ export interface CandidateActivity {
   openingHours?: OpeningHours; // parsed, optional
   tags: string[]; // free-form, used by persona scoring
   sourceUrl?: string;
+  source?: 'osm' | 'wikipedia' | 'curated_pack' | 'procedural';
+  sourceId?: string;
+  isVerified?: boolean;
 }
 
 export interface ScoreBreakdown {
@@ -249,6 +252,12 @@ export interface EngineItineraryItem {
   continuationOfId?: string;
   isOpenKnown?: boolean;
   hoursEvaluated?: boolean;
+
+  // Geographic transit fields (Stage 2)
+  distanceFromPreviousKm?: number;
+  transitFromPreviousMin?: number;
+  source?: 'osm' | 'wikipedia' | 'curated_pack' | 'procedural';
+  isVerified?: boolean;
 }
 
 export interface EngineTripDay {

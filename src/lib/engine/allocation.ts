@@ -16,6 +16,7 @@ import {
   minutesToTimeStr,
   timeStrToMinutes,
 } from './timeline';
+import { sequenceDayStops } from './geography';
 
 export interface DayAllocationInput {
   dayNumber: number;
@@ -874,6 +875,20 @@ export function allocateItinerarySlots(
     // Cumulative fatigue tracking
     cumulativeFatigue = Math.max(0, cumulativeFatigue + dayIntensityLoad - 2);
 
+    const { sequencedItems, totalDistanceKm, totalTransitMin } = sequenceDayStops(dayTimeline);
+
+    if (totalDistanceKm > 0) {
+      auditEntries.push({
+        dayNumber: day.dayNumber,
+        stage: 'ALLOCATION',
+        candidateId: `route-day-${day.dayNumber}`,
+        candidateTitle: `Geographic Route Sequencing`,
+        verdict: 'SELECTED',
+        ruleId: 'GEOGRAPHIC_ROUTE_SEQUENCING',
+        reason: `Sequenced daily stops along non-backtracking trajectory (${totalDistanceKm}km transit, ~${totalTransitMin}m travel buffer).`,
+      });
+    }
+
     itineraryDays.push({
       id: `day-${day.dayNumber}`,
       dayNumber: day.dayNumber,
@@ -882,7 +897,7 @@ export function allocateItinerarySlots(
       weatherSummary: day.weatherSummary,
       isEstimatedWeather: day.isEstimatedWeather,
       cumulativeFatigueLoad: cumulativeFatigue,
-      timeline: dayTimeline,
+      timeline: sequencedItems,
       morning: slotItems.MORNING,
       afternoon: slotItems.AFTERNOON,
       evening: slotItems.EVENING,

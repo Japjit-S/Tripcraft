@@ -386,5 +386,8 @@ export function normalizeOsmElement(
       : tags.wikidata
       ? `https://www.wikidata.org/wiki/${tags.wikidata}`
       : undefined,
+    source: 'osm',
+    sourceId: `osm:${elem.type}/${elem.id}`,
+    isVerified: true,
   };
 }
