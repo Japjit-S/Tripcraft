@@ -32,6 +32,10 @@ export interface TripDay {
   date: string;
   weatherSummary: string;
   weatherState?: string;
+  isEstimatedWeather?: boolean;
+  weatherSource?: 'forecast' | 'historical_estimate' | 'fallback_estimate';
+  weatherConfidence?: 'high' | 'medium' | 'low';
+  weatherResolution?: 'daily' | 'hourly';
   timeline?: ItineraryItem[];
   morning: ItineraryItem[];
   afternoon: ItineraryItem[];
@@ -46,6 +50,7 @@ export interface Trip {
   destinationCountry?: string;
   destinationCountryCode?: string;
   destinationAdmin1?: string;
+  destinationTimezone?: string;
   destinationCoords?: { lat: number; lon: number };
   bannerUrl?: string;
   artwork?: DestinationArtworkDescriptor;

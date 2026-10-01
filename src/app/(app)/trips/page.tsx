@@ -18,6 +18,7 @@ import {
   GeneratedTrip,
 } from '@/lib/tripStore';
 import { DestinationBanner } from '@/components/artwork/DestinationBanner';
+import { formatDestinationDate } from '@/lib/engine/timezone';
 
 const PERSONA_PILL_STYLES: Record<string, string> = {
   Backpacker: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -189,11 +190,11 @@ export default function TripsPage() {
                       <div className="flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
                         <span>
-                          {new Date(trip.startDate).toLocaleDateString('en-US', {
+                          {formatDestinationDate(trip.startDate, {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric',
-                          })}
+                          }, trip.destinationTimezone)}
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5">

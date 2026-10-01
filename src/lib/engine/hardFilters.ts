@@ -220,11 +220,41 @@ export function applyHardFiltersForDay(params: {
         });
         continue;
       }
+    } else if (weatherState === 'COLD_WIND') {
+      const isUnsafeInColdWind =
+        isWaterOrRooftopOrTour || (!candidate.indoor && candidate.intensity === 'HIGH');
+      if (isUnsafeInColdWind) {
+        auditEntries.push({
+          dayNumber,
+          stage: 'WEATHER_FILTER',
+          candidateId: candidate.id,
+          candidateTitle: candidate.title,
+          verdict: 'REMOVED',
+          ruleId: WEATHER_RULE_IDS.WX_COLD_WIND_INDOOR,
+          reason: 'High-exposure outdoor activity removed due to extreme cold and high wind conditions.',
+        });
+        continue;
+      }
     }
 
     let effectiveCandidate = candidate;
     if (weatherState === 'EXTREME_HEAT' && !candidate.indoor) {
       if (candidate.intensity === 'HIGH') {
+        // Multi-slot 4+ hr outdoor high-intensity excursions cannot safely run on extreme heat days
+        if (candidate.typicalDurationMin >= 240) {
+          auditEntries.push({
+            dayNumber,
+            stage: 'WEATHER_FILTER',
+            candidateId: candidate.id,
+            candidateTitle: candidate.title,
+            verdict: 'REMOVED',
+            ruleId: WEATHER_RULE_IDS.MULTI_SLOT_HEAT_SAFETY_BLOCK,
+            reason:
+              'Multi-slot outdoor high-intensity excursion cancelled due to extreme midday heat risk.',
+          });
+          continue;
+        }
+
         // High intensity outdoor items cannot run in midday heat
         const filteredSlots = candidate.slotAffinity.filter(
           (s) => s !== 'AFTERNOON'

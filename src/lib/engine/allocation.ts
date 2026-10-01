@@ -24,6 +24,9 @@ export interface DayAllocationInput {
   weatherState: DayWeatherState;
   weatherSummary: string;
   isEstimatedWeather?: boolean;
+  weatherSource?: 'forecast' | 'historical_estimate' | 'fallback_estimate';
+  weatherConfidence?: 'high' | 'medium' | 'low';
+  weatherResolution?: 'daily' | 'hourly';
   blockedSlots: Slot[];
   survivors: CandidateActivity[];
   arrivalAt?: string;
@@ -109,54 +112,92 @@ export function allocateItinerarySlots(
       .sort((a, b) => b.prominence - a.prominence || a.id.localeCompare(b.id));
 
     if (landmarkCandidates.length > 0) {
-      const topCandidate = landmarkCandidates[0];
+      for (const candidate of landmarkCandidates) {
+        const hasNextDay = i + 1 < daysInput.length;
+        const wantsMultiDay =
+          hasNextDay &&
+          isExpeditionCandidate(candidate) &&
+          candidate.typicalDurationMin >= 360;
 
-      // Check for multi-day expedition fit (e.g. 400+ min trek with >= 2 consecutive days remaining)
-      const hasNextDay = i + 1 < daysInput.length;
-      const isMultiDayTrek =
-        hasNextDay &&
-        isExpeditionCandidate(topCandidate) &&
-        topCandidate.typicalDurationMin >= 360 &&
-        !daysInput[i + 1].blockedSlots.includes('MORNING');
+        if (wantsMultiDay) {
+          const nextDay = daysInput[i + 1];
+          const nextDayMorningBlocked = nextDay.blockedSlots.includes('MORNING');
+          const isNextDayWeatherHazard =
+            !candidate.indoor &&
+            (nextDay.weatherState === 'STORM' ||
+              (nextDay.weatherState === 'RAIN' && candidate.intensity === 'HIGH') ||
+              nextDay.weatherState === 'COLD_WIND' ||
+              nextDay.weatherState === 'EXTREME_HEAT' ||
+              !nextDay.survivors.some((s) => s.id === candidate.id));
 
-      if (isMultiDayTrek) {
-        const linkedId = `exp-${topCandidate.id}-d${day.dayNumber}`;
-        dayAnchors.set(day.dayNumber, topCandidate);
-        multiDayExpeditions.set(day.dayNumber, {
-          candidate: topCandidate,
-          phase: 'ascent',
-          linkedId,
-        });
-        multiDayExpeditions.set(day.dayNumber + 1, {
-          candidate: topCandidate,
-          phase: 'descent',
-          linkedId,
-        });
-        usedCandidateIds.add(topCandidate.id);
+          if (nextDayMorningBlocked) {
+            continue;
+          }
 
-        auditEntries.push({
-          dayNumber: day.dayNumber,
-          stage: 'ALLOCATION',
-          candidateId: topCandidate.id,
-          candidateTitle: topCandidate.title,
-          verdict: 'SELECTED',
-          ruleId: 'MULTI_DAY_EXPEDITION_LINKING',
-          reason: `Allocated linked multi-day expedition (${topCandidate.title}) spanning Day ${day.dayNumber} ascent and Day ${day.dayNumber + 1} descent.`,
-        });
-      } else {
-        dayAnchors.set(day.dayNumber, topCandidate);
-        usedCandidateIds.add(topCandidate.id);
+          if (isNextDayWeatherHazard) {
+            auditEntries.push({
+              dayNumber: day.dayNumber,
+              stage: 'WEATHER_FILTER',
+              candidateId: candidate.id,
+              candidateTitle: candidate.title,
+              verdict: 'REMOVED',
+              ruleId: 'MULTI_DAY_WEATHER_HAZARD',
+              reason: `Multi-day expedition "${candidate.title}" cancelled: Day ${nextDay.dayNumber} weather (${nextDay.weatherState}) creates hazardous conditions for outdoor continuation.`,
+            });
+            continue;
+          }
 
-        auditEntries.push({
-          dayNumber: day.dayNumber,
-          stage: 'ALLOCATION',
-          candidateId: topCandidate.id,
-          candidateTitle: topCandidate.title,
-          verdict: 'SELECTED',
-          ruleId: 'ANCHOR_LANDMARK_DISTRIBUTION',
-          reason: `Selected as primary high-prominence anchor landmark for Day ${day.dayNumber}.`,
-        });
+          // Weather safe across both days: allocate linked expedition
+          const linkedId = `exp-${candidate.id}-d${day.dayNumber}`;
+          dayAnchors.set(day.dayNumber, candidate);
+          multiDayExpeditions.set(day.dayNumber, {
+            candidate,
+            phase: 'ascent',
+            linkedId,
+          });
+          multiDayExpeditions.set(day.dayNumber + 1, {
+            candidate,
+            phase: 'descent',
+            linkedId,
+          });
+          usedCandidateIds.add(candidate.id);
+
+          auditEntries.push({
+            dayNumber: day.dayNumber,
+            stage: 'ALLOCATION',
+            candidateId: candidate.id,
+            candidateTitle: candidate.title,
+            verdict: 'SELECTED',
+            ruleId: 'MULTI_DAY_EXPEDITION_LINKING',
+            reason: `Allocated linked multi-day expedition (${candidate.title}) spanning Day ${day.dayNumber} ascent and Day ${day.dayNumber + 1} descent.`,
+          });
+          break;
+        } else {
+          dayAnchors.set(day.dayNumber, candidate);
+          usedCandidateIds.add(candidate.id);
+
+          auditEntries.push({
+            dayNumber: day.dayNumber,
+            stage: 'ALLOCATION',
+            candidateId: candidate.id,
+            candidateTitle: candidate.title,
+            verdict: 'SELECTED',
+            ruleId: 'ANCHOR_LANDMARK_DISTRIBUTION',
+            reason: `Selected as primary high-prominence anchor landmark for Day ${day.dayNumber}.`,
+          });
+          break;
+        }
       }
+    } else if (day.weatherState === 'STORM' || day.weatherState === 'RAIN') {
+      auditEntries.push({
+        dayNumber: day.dayNumber,
+        stage: 'WEATHER_FILTER',
+        candidateId: `anchor-day-${day.dayNumber}`,
+        candidateTitle: `Day ${day.dayNumber} Anchors`,
+        verdict: 'DEFERRED',
+        ruleId: 'ANCHOR_WEATHER_SAFETY_REMOVAL',
+        reason: `No weather-safe landmark anchors available for Day ${day.dayNumber} due to ${day.weatherState}; falling back to indoor cultural and leisure activities.`,
+      });
     }
   }
 
@@ -896,6 +937,9 @@ export function allocateItinerarySlots(
       weatherState: day.weatherState,
       weatherSummary: day.weatherSummary,
       isEstimatedWeather: day.isEstimatedWeather,
+      weatherSource: day.weatherSource,
+      weatherConfidence: day.weatherConfidence,
+      weatherResolution: day.weatherResolution,
       cumulativeFatigueLoad: cumulativeFatigue,
       timeline: sequencedItems,
       morning: slotItems.MORNING,

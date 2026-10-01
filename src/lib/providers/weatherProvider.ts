@@ -1,4 +1,9 @@
 import { DayForecast, Destination } from '../types/engine';
+import {
+  addDaysToDate,
+  getDaysDifference,
+  shiftYear,
+} from '../engine/timezone';
 
 const GEOCODING_API_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 const FORECAST_API_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -22,43 +27,12 @@ interface OpenMeteoDailyData {
   precipitation_sum?: number[];
 }
 
-
-/**
- * Shifts an ISO date (YYYY-MM-DD) by a given number of years.
- */
-function shiftYear(dateStr: string, yearDelta: number): string {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  const shiftedYear = year + yearDelta;
-  return `${shiftedYear}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-}
-
-/**
- * Calculates end date string from start date and number of days.
- */
-function calculateEndDate(startDateStr: string, days: number): string {
-  const [year, month, day] = startDateStr.split('-').map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  date.setUTCDate(date.getUTCDate() + (days - 1));
-  return date.toISOString().slice(0, 10);
-}
-
-/**
- * Calculates day difference between target date and current UTC date.
- */
-function getDaysFromToday(targetDateStr: string): number {
-  const [year, month, day] = targetDateStr.split('-').map(Number);
-  const target = Date.UTC(year, month - 1, day);
-  const now = new Date();
-  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-  return Math.round((target - today) / (1000 * 60 * 60 * 24));
-}
-
 export class WeatherProvider {
   private cache = new Map<string, WeatherCacheEntry>();
 
   /**
    * Geocodes a destination city query into a normalized Destination object.
-   * Supports disambiguation via optional context (admin1, country, countryCode).
+   * Preserves destination IANA timezone and administrative disambiguation context.
    */
   async geocodeCity(
     cityQuery: string,
@@ -86,6 +60,7 @@ export class WeatherProvider {
       admin1?: string;
       latitude: number;
       longitude: number;
+      timezone?: string;
     }
 
     let allResults: RawGeocodingItem[] = [];
@@ -104,7 +79,7 @@ export class WeatherProvider {
           break;
         }
       } catch {
-        // continue
+        // continue to next query candidate
       }
     }
 
@@ -142,11 +117,13 @@ export class WeatherProvider {
       admin1: matched.admin1 || '',
       latitude: matched.latitude,
       longitude: matched.longitude,
+      timezone: matched.timezone || 'UTC',
     };
   }
 
   /**
    * Searches for matching cities matching the query with debouncing/capping.
+   * Includes destination IANA timezone.
    */
   async searchCities(query: string, count = 6): Promise<Destination[]> {
     const cleaned = query.trim();
@@ -170,6 +147,7 @@ export class WeatherProvider {
       admin1?: string;
       latitude: number;
       longitude: number;
+      timezone?: string;
     }
 
     const data = (await res.json()) as { results?: RawGeocodingItem[] };
@@ -185,158 +163,270 @@ export class WeatherProvider {
       admin1: r.admin1 || '',
       latitude: r.latitude,
       longitude: r.longitude,
+      timezone: r.timezone || 'UTC',
     }));
   }
 
   /**
    * Fetches weather forecast data for a destination and trip duration.
-   * Gracefully handles the 16-day forecast horizon hole by falling back
-   * to Open-Meteo's historical climate archive with estimated: true.
+   * Stage 3 Implementation:
+   * - Evaluates the 16-day forecast horizon PER DAY rather than failing the trip or treating as uniform.
+   * - Days <= 16 days from destination-local today receive real forecast (high/medium confidence).
+   * - Days > 16 days receive destination historical climate estimates (low confidence).
+   * - If archive is unreachable, applies conservative, qualified low-confidence fallback (no fake clear sky).
    */
   async fetchForecast(params: {
     latitude: number;
     longitude: number;
     startDate: string;
     days: number;
+    timezone?: string;
   }): Promise<DayForecast[]> {
-    const { latitude, longitude, startDate, days } = params;
-    const cacheKey = `${latitude.toFixed(3)},${longitude.toFixed(3)}:${startDate}:${days}`;
+    const { latitude, longitude, startDate, days, timezone } = params;
+    const tzKey = timezone || 'auto';
+    const cacheKey = `${latitude.toFixed(3)},${longitude.toFixed(3)}:${tzKey}:${startDate}:${days}`;
     const cached = this.cache.get(cacheKey);
 
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
       return cached.data;
     }
 
-    const daysFromNow = getDaysFromToday(startDate);
-    const endDate = calculateEndDate(startDate, days);
-    let forecasts: DayForecast[] = [];
+    // 1. Identify per-day horizon status
+    const dayDates: string[] = [];
+    const dayIsForecast: boolean[] = [];
 
-    // Check if start date exceeds Open-Meteo 16-day forecast horizon
-    const isBeyondHorizon = daysFromNow > MAX_FORECAST_HORIZON_DAYS || daysFromNow < 0;
+    for (let i = 0; i < days; i++) {
+      const dateStr = addDaysToDate(startDate, i);
+      dayDates.push(dateStr);
+      const diff = getDaysDifference(dateStr, timezone);
+      dayIsForecast.push(diff >= 0 && diff <= MAX_FORECAST_HORIZON_DAYS);
+    }
 
-    if (isBeyondHorizon) {
-      // Historical climate archive fallback
-      forecasts = await this.fetchArchiveEstimate({
-        latitude,
-        longitude,
-        startDate,
-        endDate,
-        days,
-      });
-    } else {
-      try {
-        const url = `${FORECAST_API_URL}?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum&timezone=auto&start_date=${startDate}&end_date=${endDate}`;
-        const res = await fetch(url, {
-          headers: { 'User-Agent': USER_AGENT },
-          signal: AbortSignal.timeout(10000),
-        });
+    // 2. Partition into contiguous execution segments
+    interface DaySegment {
+      isForecast: boolean;
+      startIndex: number;
+      count: number;
+      startDate: string;
+      endDate: string;
+    }
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        forecasts = this.parseOpenMeteoDaily(data.daily, startDate, false);
-      } catch {
-        // Fallback to archive estimate on error
-        forecasts = await this.fetchArchiveEstimate({
-          latitude,
-          longitude,
-          startDate,
-          endDate,
-          days,
-        });
+    const segments: DaySegment[] = [];
+    let currentSegment: DaySegment | null = null;
+
+    for (let i = 0; i < days; i++) {
+      const isFc = dayIsForecast[i];
+      if (!currentSegment || currentSegment.isForecast !== isFc) {
+        currentSegment = {
+          isForecast: isFc,
+          startIndex: i,
+          count: 1,
+          startDate: dayDates[i],
+          endDate: dayDates[i],
+        };
+        segments.push(currentSegment);
+      } else {
+        currentSegment.count++;
+        currentSegment.endDate = dayDates[i];
+      }
+    }
+
+    // 3. Resolve each segment independently
+    const finalForecasts: DayForecast[] = new Array(days);
+
+    for (const seg of segments) {
+      if (seg.isForecast) {
+        let segData: DayForecast[] | null = null;
+        try {
+          segData = await this.fetchLiveForecastSegment({
+            latitude,
+            longitude,
+            startDate: seg.startDate,
+            endDate: seg.endDate,
+            count: seg.count,
+            timezone,
+          });
+        } catch {
+          // If live forecast fails, fall back to historical archive for this segment
+          try {
+            segData = await this.fetchArchiveSegment({
+              latitude,
+              longitude,
+              startDate: seg.startDate,
+              endDate: seg.endDate,
+              count: seg.count,
+              timezone,
+            });
+          } catch {
+            segData = this.generateQualifiedFallbackForecast(
+              dayDates.slice(seg.startIndex, seg.startIndex + seg.count)
+            );
+          }
+        }
+
+        for (let j = 0; j < seg.count; j++) {
+          finalForecasts[seg.startIndex + j] = segData[j];
+        }
+      } else {
+        // Beyond forecast horizon -> historical climate archive
+        let segData: DayForecast[] | null = null;
+        try {
+          segData = await this.fetchArchiveSegment({
+            latitude,
+            longitude,
+            startDate: seg.startDate,
+            endDate: seg.endDate,
+            count: seg.count,
+            timezone,
+          });
+        } catch {
+          segData = this.generateQualifiedFallbackForecast(
+            dayDates.slice(seg.startIndex, seg.startIndex + seg.count)
+          );
+        }
+
+        for (let j = 0; j < seg.count; j++) {
+          finalForecasts[seg.startIndex + j] = segData[j];
+        }
       }
     }
 
     this.cache.set(cacheKey, {
       timestamp: Date.now(),
-      data: forecasts,
+      data: finalForecasts,
     });
 
-    return forecasts;
+    return finalForecasts;
+  }
+
+  /**
+   * Fetches live daily forecast for a slice within the 16-day horizon.
+   */
+  private async fetchLiveForecastSegment(params: {
+    latitude: number;
+    longitude: number;
+    startDate: string;
+    endDate: string;
+    count: number;
+    timezone?: string;
+  }): Promise<DayForecast[]> {
+    const { latitude, longitude, startDate, endDate, count, timezone } = params;
+    const tzParam = timezone ? encodeURIComponent(timezone) : 'auto';
+    const url = `${FORECAST_API_URL}?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum&timezone=${tzParam}&start_date=${startDate}&end_date=${endDate}`;
+
+    const res = await fetch(url, {
+      headers: { 'User-Agent': USER_AGENT },
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!res.ok) throw new Error(`Live forecast request failed with HTTP ${res.status}`);
+    const data = await res.json();
+    return this.parseOpenMeteoDaily(data.daily, startDate, count, {
+      estimated: false,
+      source: 'forecast',
+      timezone,
+    });
   }
 
   /**
    * Queries historical archive for exact calendar dates 1 year prior.
    */
-  private async fetchArchiveEstimate(params: {
+  private async fetchArchiveSegment(params: {
     latitude: number;
     longitude: number;
     startDate: string;
     endDate: string;
-    days: number;
+    count: number;
+    timezone?: string;
   }): Promise<DayForecast[]> {
-    const { latitude, longitude, startDate, endDate } = params;
+    const { latitude, longitude, startDate, endDate, count, timezone } = params;
     const prevYearStart = shiftYear(startDate, -1);
     const prevYearEnd = shiftYear(endDate, -1);
+    const tzParam = timezone ? encodeURIComponent(timezone) : 'auto';
 
-    const url = `${ARCHIVE_API_URL}?latitude=${latitude}&longitude=${longitude}&start_date=${prevYearStart}&end_date=${prevYearEnd}&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum&timezone=auto`;
+    const url = `${ARCHIVE_API_URL}?latitude=${latitude}&longitude=${longitude}&start_date=${prevYearStart}&end_date=${prevYearEnd}&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,precipitation_sum&timezone=${tzParam}`;
 
-    try {
-      const res = await fetch(url, {
-        headers: { 'User-Agent': USER_AGENT },
-        signal: AbortSignal.timeout(10000),
-      });
+    const res = await fetch(url, {
+      headers: { 'User-Agent': USER_AGENT },
+      signal: AbortSignal.timeout(10000),
+    });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      return this.parseOpenMeteoDaily(data.daily, startDate, true);
-    } catch {
-      // Safe fallback seasonal estimate if network archive fails
-      return this.generateDefaultSeasonalForecast(startDate, params.days);
-    }
-  }
-
-  /**
-   * Parses Open-Meteo daily response array into normalized DayForecast[]
-   */
-  private parseOpenMeteoDaily(
-    daily: OpenMeteoDailyData | null | undefined,
-    targetStartDate: string,
-    estimated: boolean
-  ): DayForecast[] {
-    if (!daily || !Array.isArray(daily.time)) {
-      return [];
-    }
-
-    const [year, month, day] = targetStartDate.split('-').map(Number);
-    const baseDate = new Date(Date.UTC(year, month - 1, day));
-
-    return daily.time.map((_: string, idx: number) => {
-      const targetDate = new Date(baseDate.getTime() + idx * 86400000);
-      const dateStr = targetDate.toISOString().slice(0, 10);
-
-      return {
-        date: dateStr,
-        weatherCode: daily.weather_code?.[idx] ?? 0,
-        maxTemp: Number((daily.temperature_2m_max?.[idx] ?? 28).toFixed(1)),
-        minTemp: Number((daily.temperature_2m_min?.[idx] ?? 18).toFixed(1)),
-        windSpeed: Number((daily.wind_speed_10m_max?.[idx] ?? 12).toFixed(1)),
-        precipitationMm: Number((daily.precipitation_sum?.[idx] ?? 0).toFixed(1)),
-        estimated,
-      };
+    if (!res.ok) throw new Error(`Archive request failed with HTTP ${res.status}`);
+    const data = await res.json();
+    return this.parseOpenMeteoDaily(data.daily, startDate, count, {
+      estimated: true,
+      source: 'historical_estimate',
+      timezone,
     });
   }
 
   /**
-   * Safe fallback seasonal baseline
+   * Parses Open-Meteo daily response array into normalized DayForecast[].
+   * Maps indices directly to target dates to guarantee exact alignment.
    */
-  private generateDefaultSeasonalForecast(startDate: string, days: number): DayForecast[] {
-    const [year, month, day] = startDate.split('-').map(Number);
-    const baseDate = new Date(Date.UTC(year, month - 1, day));
+  private parseOpenMeteoDaily(
+    daily: OpenMeteoDailyData | null | undefined,
+    targetStartDate: string,
+    count: number,
+    options: {
+      estimated: boolean;
+      source: 'forecast' | 'historical_estimate';
+      timezone?: string;
+    }
+  ): DayForecast[] {
+    if (!daily || !Array.isArray(daily.time)) {
+      return this.generateQualifiedFallbackForecast(
+        Array.from({ length: count }, (_, i) => addDaysToDate(targetStartDate, i))
+      );
+    }
+
     const results: DayForecast[] = [];
 
-    for (let i = 0; i < days; i++) {
-      const d = new Date(baseDate.getTime() + i * 86400000);
+    for (let idx = 0; idx < count; idx++) {
+      const dateStr = addDaysToDate(targetStartDate, idx);
+      const diff = getDaysDifference(dateStr, options.timezone);
+
+      // Distinguish near-term vs medium-term forecast confidence
+      const confidence: 'high' | 'medium' | 'low' = options.estimated
+        ? 'low'
+        : diff <= 7
+        ? 'high'
+        : 'medium';
+
       results.push({
-        date: d.toISOString().slice(0, 10),
-        weatherCode: 0,
-        maxTemp: 28,
-        minTemp: 18,
-        windSpeed: 10,
-        precipitationMm: 0,
-        estimated: true,
+        date: dateStr,
+        weatherCode: daily.weather_code?.[idx] ?? 3,
+        maxTemp: Number((daily.temperature_2m_max?.[idx] ?? 22).toFixed(1)),
+        minTemp: Number((daily.temperature_2m_min?.[idx] ?? 14).toFixed(1)),
+        windSpeed: Number((daily.wind_speed_10m_max?.[idx] ?? 12).toFixed(1)),
+        precipitationMm: Number((daily.precipitation_sum?.[idx] ?? 0).toFixed(1)),
+        estimated: options.estimated,
+        temporalResolution: 'daily',
+        source: options.source,
+        confidence,
       });
     }
 
     return results;
+  }
+
+  /**
+   * Safe, qualified low-confidence fallback baseline when both forecast
+   * and historical archive feeds are unavailable.
+   * Strictly avoids false certainty (does NOT classify unknown weather as confirmed clear/sunny).
+   */
+  private generateQualifiedFallbackForecast(dates: string[]): DayForecast[] {
+    return dates.map((dateStr) => ({
+      date: dateStr,
+      weatherCode: 3, // Overcast / unconfirmed
+      maxTemp: 22,
+      minTemp: 14,
+      windSpeed: 15,
+      precipitationMm: 1.0,
+      estimated: true,
+      temporalResolution: 'daily',
+      source: 'fallback_estimate',
+      confidence: 'low',
+    }));
   }
 }

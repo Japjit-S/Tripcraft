@@ -56,7 +56,18 @@ export function upgradeLegacyTrip(trip: GeneratedTrip): GeneratedTrip {
   const withArtwork = ensureTripArtwork(trip);
 
   const upgradedDays = (withArtwork.itineraryDays || []).map((day) => {
-    if (day.timeline && day.timeline.length > 0) return day;
+    const weatherSource = day.weatherSource || (day.isEstimatedWeather ? 'historical_estimate' : 'forecast');
+    const weatherConfidence = day.weatherConfidence || (day.isEstimatedWeather ? 'low' : 'high');
+    const weatherResolution = day.weatherResolution || 'daily';
+
+    if (day.timeline && day.timeline.length > 0) {
+      return {
+        ...day,
+        weatherSource,
+        weatherConfidence,
+        weatherResolution,
+      };
+    }
 
     const morningItems = (day.morning || []).map((item, idx) => {
       const startTime = item.startTime || `${(9 + idx).toString().padStart(2, '0')}:00`;
@@ -103,6 +114,9 @@ export function upgradeLegacyTrip(trip: GeneratedTrip): GeneratedTrip {
 
     return {
       ...day,
+      weatherSource,
+      weatherConfidence,
+      weatherResolution,
       timeline: [...morningItems, ...afternoonItems, ...eveningItems],
     };
   });
@@ -110,6 +124,7 @@ export function upgradeLegacyTrip(trip: GeneratedTrip): GeneratedTrip {
   return {
     ...withArtwork,
     version: 2,
+    destinationTimezone: withArtwork.destinationTimezone || 'UTC',
     itineraryDays: upgradedDays,
   };
 }

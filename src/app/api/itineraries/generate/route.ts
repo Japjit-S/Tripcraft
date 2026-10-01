@@ -92,6 +92,7 @@ export async function POST(req: NextRequest) {
         admin1: body.admin1 || '',
         latitude: body.latitude,
         longitude: body.longitude,
+        timezone: body.timezone || 'UTC',
       };
     } else {
       destination = await weatherProvider.geocodeCity(city, {
@@ -111,12 +112,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Weather Forecast (with 16-day horizon fallback)
+    // 3. Weather Forecast (with destination timezone and per-day 16-day horizon fallback)
     const weatherForecast = await weatherProvider.fetchForecast({
       latitude: destination.latitude,
       longitude: destination.longitude,
       startDate,
       days: daysNum,
+      timezone: destination.timezone,
     });
 
     if (!weatherForecast || weatherForecast.length === 0) {
@@ -192,6 +194,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       destination: enrichedDestination,
+      destinationTimezone: destination.timezone || 'UTC',
       artwork,
       persona,
       startDate,

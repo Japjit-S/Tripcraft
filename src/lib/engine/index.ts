@@ -9,6 +9,7 @@ import {
   applyHardFiltersForDay,
   evaluateFeasibility,
 } from './hardFilters';
+import { addDaysToDate } from './timezone';
 
 /**
  * Pure, deterministic itinerary generation engine.
@@ -121,14 +122,9 @@ export function generateItinerary(input: EngineInput): EngineOutput {
   // ==========================================
   const daysAllocationInput: DayAllocationInput[] = [];
 
-  // Parse start date parts deterministically (avoiding timezone shifts)
-  const [year, month, day] = input.startDate.split('-').map(Number);
-  const baseUtcDate = new Date(Date.UTC(year, month - 1, day));
-
   for (let i = 0; i < input.days; i++) {
     const dayNumber = i + 1;
-    const currentDayDate = new Date(baseUtcDate.getTime() + i * 86400000);
-    const dateStr = currentDayDate.toISOString().slice(0, 10);
+    const dateStr = addDaysToDate(input.startDate, i);
     const dayForecast = input.weatherForecast[i];
 
     // Stage 1: Classify Day Weather
@@ -152,6 +148,9 @@ export function generateItinerary(input: EngineInput): EngineOutput {
       weatherState: classification.state,
       weatherSummary: classification.summary,
       isEstimatedWeather: classification.isEstimated,
+      weatherSource: classification.source,
+      weatherConfidence: classification.confidence,
+      weatherResolution: classification.temporalResolution,
       blockedSlots: filterResult.blockedSlots,
       survivors: filterResult.survivors,
       arrivalAt: dayNumber === 1 ? input.arrivalAt : undefined,

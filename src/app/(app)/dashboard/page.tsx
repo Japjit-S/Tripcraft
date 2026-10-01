@@ -6,6 +6,7 @@ import { ensureTripArtwork, getAllStoredTrips, GeneratedTrip } from '@/lib/tripS
 import { DestinationBanner } from '@/components/artwork/DestinationBanner';
 import { ArrowRight, MapPin, Calendar, Compass, Sun, Wind, Droplets, Plus } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { formatDestinationDate } from '@/lib/engine/timezone';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -150,7 +151,7 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
                     <Calendar className="w-4 h-4 text-orange-400" />
                     <span>
-                      {new Date(featuredTrip!.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {featuredTrip!.days} days
+                      {formatDestinationDate(featuredTrip!.startDate, { month: 'short', day: 'numeric', year: 'numeric' }, featuredTrip!.destinationTimezone)} · {featuredTrip!.days} days
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">

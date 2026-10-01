@@ -181,6 +181,7 @@ export interface Destination {
   admin1?: string;
   latitude: number;
   longitude: number;
+  timezone?: string; // IANA timezone e.g. "Asia/Kolkata", "Europe/Paris"
   imageUrl?: string;
   artwork?: DestinationArtworkDescriptor;
 }
@@ -203,6 +204,9 @@ export interface DayForecast {
   windSpeed: number; // km/h
   precipitationMm?: number;
   estimated?: boolean; // true when fallback archive/seasonal data is used
+  temporalResolution?: 'daily' | 'hourly';
+  source?: 'forecast' | 'historical_estimate' | 'fallback_estimate';
+  confidence?: 'high' | 'medium' | 'low';
 }
 
 export interface EngineInput {
@@ -267,6 +271,9 @@ export interface EngineTripDay {
   weatherState: DayWeatherState;
   weatherSummary: string;
   isEstimatedWeather?: boolean;
+  weatherSource?: 'forecast' | 'historical_estimate' | 'fallback_estimate';
+  weatherConfidence?: 'high' | 'medium' | 'low';
+  weatherResolution?: 'daily' | 'hourly';
   cumulativeFatigueLoad?: number;
   timeline?: EngineItineraryItem[]; // Chronological sequence of all events across the day
   morning: EngineItineraryItem[];

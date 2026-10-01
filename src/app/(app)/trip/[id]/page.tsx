@@ -21,6 +21,7 @@ import MapPlaceholder from '@/components/workspace/MapPlaceholder';
 import DayNotes from '@/components/workspace/DayNotes';
 import WeatherSummary from '@/components/workspace/WeatherSummary';
 import DecisionLogDrawer from '@/components/workspace/DecisionLogDrawer';
+import { formatDestinationDate, parseDateParts } from '@/lib/engine/timezone';
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; border: string }> = {
   LANDMARK: { bg: 'bg-amber-50', text: 'text-amber-800', border: 'border-amber-200' },
@@ -193,7 +194,14 @@ export default function TripWorkspacePage({
 
           {/* Weather Card */}
           <div className="w-full xl:w-80 shrink-0 flex flex-col justify-center">
-            <WeatherSummary summary={selectedDay.weatherSummary} />
+            <WeatherSummary
+              summary={selectedDay.weatherSummary}
+              weatherState={selectedDay.weatherState}
+              isEstimatedWeather={selectedDay.isEstimatedWeather}
+              weatherSource={selectedDay.weatherSource}
+              weatherConfidence={selectedDay.weatherConfidence}
+              weatherResolution={selectedDay.weatherResolution}
+            />
           </div>
         </div>
 
@@ -206,10 +214,12 @@ export default function TripWorkspacePage({
               {trip.days} {trip.days === 1 ? 'Day Excursion' : 'Days Total'}
             </h3>
             <p className="text-xs font-semibold text-slate-500">
-              {new Date(trip.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
-              {new Date(
-                trip.itineraryDays[trip.itineraryDays.length - 1]?.date || trip.startDate
-              ).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              {formatDestinationDate(trip.startDate, { month: 'short', day: 'numeric' }, trip.destinationTimezone)} –{' '}
+              {formatDestinationDate(
+                trip.itineraryDays[trip.itineraryDays.length - 1]?.date || trip.startDate,
+                { month: 'short', day: 'numeric', year: 'numeric' },
+                trip.destinationTimezone
+              )}
             </p>
           </div>
 
@@ -273,11 +283,15 @@ export default function TripWorkspacePage({
                   Day {selectedDay.dayNumber} Timeline
                 </h2>
                 <p className="text-xs font-medium text-slate-400 mt-0.5">
-                  {new Date(selectedDay.date).toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
+                  {formatDestinationDate(
+                    selectedDay.date,
+                    {
+                      weekday: 'long',
+                      month: 'short',
+                      day: 'numeric',
+                    },
+                    trip.destinationTimezone
+                  )}
                 </p>
               </div>
 
@@ -415,12 +429,10 @@ export default function TripWorkspacePage({
 
           <div className="grid grid-cols-7 gap-y-2 gap-x-1 text-center">
             {(() => {
-              const start = new Date(trip.startDate);
-              const year = start.getUTCFullYear();
-              const month = start.getUTCMonth();
-              const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+              const { year, month } = parseDateParts(trip.startDate);
+              const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
               
-              const firstDayOfWeek = new Date(Date.UTC(year, month, 1)).getUTCDay();
+              const firstDayOfWeek = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
               const offset = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
               
               const grid = [];
@@ -429,7 +441,7 @@ export default function TripWorkspacePage({
               }
               
               const tripDates = trip.itineraryDays.map(d => ({
-                dayNum: new Date(d.date).getUTCDate(),
+                dayNum: parseDateParts(d.date).day,
                 tripDayIndex: trip.itineraryDays.indexOf(d),
                 id: d.id
               }));
