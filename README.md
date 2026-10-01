@@ -1,97 +1,149 @@
-# Tripcraft
+# Tripcraft (Roamwise)
 
-Tripcraft is a full-stack travel planner that creates weather-aware daily itineraries for a selected city, trip date, duration, and traveler persona. Users can save, revisit, and manage their own itineraries.
+Tripcraft is a full-stack, weather-aware deterministic itinerary planner built for the GDG Dev Recruitment Task. It procedurally synthesizes realistic, feasible daily travel plans (1–7 days) for any destination worldwide based on live meteorological forecasts, open geospatial data, and traveler persona constraints—with zero opaque LLM hallucination and zero reliance on paid Places APIs.
 
-**Status:** Frontend Foundation Complete. Currently in Phase 2 (Backend Integration pending).
+**Status:** Full-Stack Complete & Production-Ready. Verified with 32 unit tests passing and live Supabase PostgreSQL integration.
 
 ---
 
-## 1. The Problem and Product Decision
+## 1. Product Architecture & Philosophy
 
-Planning a trip often involves juggling multiple tabs for weather, activities, maps, and notes. Existing travel planners are often either too rigid or overly reliant on slow, unpredictable AI generation.
+Planning travel typically forces users to juggle disconnected tabs for weather, attraction hours, distance calculation, and itinerary assembly. Many AI travel planners produce generic or physically infeasible schedules (e.g., scheduling outdoor beach visits during monsoons or mountain hikes at night).
 
-**The Solution**: Tripcraft takes a deterministic, rule-based approach. By combining live weather forecasts with carefully curated city data and traveler personas (Backpacker, Culture Seeker, Comfort Traveler, Family), the application rapidly generates predictable, feasible itineraries. It strictly limits trips to a 7-day maximum to ensure accurate weather forecasting and a clean UI, without relying on expensive paid Places APIs or opaque LLM wrappers for core logic.
+**The Tripcraft Approach:**
+- **Deterministic Rules Engine:** Every itinerary item is chosen through a verifiable pipeline of feasibility rules, hard weather gates, arrival cutoffs, persona scoring, and spatial proximity clustering.
+- **Universal Procedural Discovery:** Rather than hardcoding a shortlist of cities, Tripcraft procedurally discovers landmarks, cultural monuments, mountain treks, nature reserves, and markets worldwide using OpenStreetMap (Overpass) and Wikipedia GeoSearch.
+- **Dynamic Photographic Banner Resolution:** Real, high-resolution photographs for any destination are resolved on-the-fly via the Wikipedia Page Summary API with regional disambiguation guards.
+- **Full-Stack Persistence:** User authentication, trip management, and collaborative day notes are backed by Supabase PostgreSQL with Row Level Security (RLS). Gracefully falls back to browser storage if offline.
 
-## 2. Setup and Environment Variables
+---
+
+## 2. Tech Stack
+
+- **Framework:** Next.js 16 (App Router, Turbopack)
+- **Language:** TypeScript 5 (Strict mode)
+- **Styling:** Tailwind CSS 4, Lucide React
+- **Persistence & Auth:** Supabase (`@supabase/ssr` with cookie-based session management, PostgreSQL with RLS)
+- **Geocoding & Weather:** Open-Meteo (Search API, 16-day forecast API, historical climate archive for dates >16 days)
+- **Procedural Discovery:** OpenStreetMap Overpass API (multi-mirror failover) + Wikipedia GeoSearch API + Wikidata Sitelinks Batch API
+- **Photography:** Wikimedia REST API with contextual title matching and anti-collision validation
+- **Maps:** Google Maps Embed API
+
+---
+
+## 3. Getting Started
 
 ### Prerequisites
-- Node.js 18+
-- npm, yarn, or pnpm
-- Supabase account (for database and auth)
-- Google Cloud account (for Maps Embed API)
+- Node.js 18+ (tested on Node 20 & 24)
+- npm, pnpm, or yarn
 
 ### Installation
 ```bash
-git clone <repository-url>
-cd tripcraft
+git clone https://github.com/Japjit-S/Tripcraft.git
+cd Tripcraft
 npm install
 ```
 
-### Environment Variables
+### Environment Configuration
 Create a `.env.local` file in the root directory:
 ```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+# Google Maps Embed API
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 
-# Google Maps
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_restricted_browser_key
+# Supabase (PostgreSQL & Auth)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_publishable_anon_key
+
+# Server-Side Supabase Keys
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_anon_key
+SUPABASE_SECRET_KEY=your_supabase_secret_key
+SUPABASE_JWKS_URL=https://your-project.supabase.co/auth/v1/.well-known/jwks.json
 ```
 
-### Running the App
+### Database Initialization
+Open the **SQL Editor** in your Supabase Dashboard, paste the contents of `supabase/schema.sql`, and execute. This creates all 8 tables, indexes, triggers, and RLS policies.
+
+### Running Development Server
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 3. Architecture and Schema
+### Running Verification Tests & Build
+```bash
+# Run unit & engine test suite (32 tests)
+npm test
 
-**Frontend:** Next.js 15 (App Router), React, Tailwind CSS, Plus Jakarta Sans.
-**Backend/Database (Planned):** Supabase (PostgreSQL)
-**External APIs:** Open-Meteo (Weather), Google Maps Embed API
+# Run strict TypeScript check
+npx tsc --noEmit
 
-### Core Schema (Planned)
-- `profiles`: Extends the authenticated user.
-- `destinations`: Normalised location returned from geocoding.
-- `weather_cache`: Avoids duplicate Open-Meteo provider calls.
-- `itineraries`: The saved trip, its owner, and arrival details.
-- `itinerary_days`: One record for each trip day.
-- `itinerary_items`: Ordered itinerary activities and their rationale.
-- `itinerary_day_notes`: User-written notes attached to a specific day.
-- `feasibility_rules`: Auditable set of destination/advisory constraints.
+# Run Next.js production build
+npm run build
+```
 
-## 4. API Endpoints (Planned)
+---
 
-| Route | Access | Responsibility |
-|---|---|---|
-| `POST /api/itineraries/generate` | Public/Signed-in | Validates inputs, runs feasibility & rules engine, returns unsaved plan. |
-| `POST /api/itineraries` | Signed-in | Saves a generated itinerary for the current user. |
-| `GET /api/itineraries` | Signed-in | Returns only the current user’s saved trips. |
-| `GET /api/itineraries/:id` | Owner only | Returns one saved itinerary. |
-| `DELETE /api/itineraries/:id` | Owner only | Deletes one saved itinerary. |
-| `GET /api/destinations/search?q=`| Public | Geocodes a city search with debouncing. |
+## 4. Deterministic Engine Pipeline
 
-## 5. Deterministic Rules-Engine Flow
+Each itinerary request passes through 8 deterministic stages:
 
-The core of Tripcraft is the itinerary generator:
-1. Validate inputs (city, dates, persona, arrival mode).
-2. Geocode the city safely.
-3. Run feasibility checks (block/caution constraints).
-4. Check `weather_cache` via a collision-free key (`destination_id` + `forecast_date`).
-5. Categorize days (clear, rain, storm, hot, cold).
-6. Filter candidate activities using hard weather filters (e.g., no outdoor walks in storms).
-7. Apply Persona Scoring (e.g., Backpacker favors walkable/local food, Family favors kid-friendly).
-8. Slot into Morning/Afternoon/Evening and generate explanation logs.
+```
+[User Input] 
+     │ (City, Dates 1–7, Persona, Arrival Time & Mode)
+     ▼
+1. Validation & Geocoding
+     │ Open-Meteo Geocoding + Contextual Admin1 Disambiguation
+     ▼
+2. Weather Ingestion & 16-Day Horizon Fallback
+     │ Open-Meteo Live Forecast (<16d) OR Climate Archive (>16d)
+     ▼
+3. Day Weather Classification
+     │ Evaluates temperature, precipitation, wind -> CLEAR, RAIN, STORM, EXTREME_HEAT, COLD_WIND
+     ▼
+4. Feasibility Constraints
+     │ Checks internal geopolitical/advisory rules -> PASSED, CAUTION, or BLOCKED
+     ▼
+5. Procedural Candidate Discovery
+     │ Queries Wikipedia GeoSearch + Overpass OSM (18km radius) + Wikidata prominence sitelinks
+     ▼
+6. Hard Filters & Arrival Cutoffs
+     │ Arrival time drops unusable morning/afternoon slots; Storm drops hazardous outdoor activities
+     ▼
+7. Persona-Aware Anchor & Slot Allocation
+     │ Pass A: High-prominence anchors assigned per day (respects Backpacker Nature preference)
+     │ Pass B: Greedy multi-factor scoring (persona affinity + weather fit + spatial proximity)
+     ▼
+8. Audit Trail & Explanation Generation
+     │ Every inclusion and rejection logged with human-readable rationale
+```
 
-## 6. Feasibility Disclaimer
+---
 
-**Important:** This application contains *demo feasibility information, not authoritative travel advice*. 
-Feasibility is implemented as a small, auditable, and source-linked internal rules dataset. It demonstrates the technical capability to block or warn users about geopolitical or weather-related constraints without making unsafe or unverified safety claims.
+## 5. API Reference
 
-## 7. Caching and Weather
+| Endpoint | Method | Auth | Description |
+|---|---|---|---|
+| `/api/destinations/search?q=` | GET | Public | Debounced city search returning geocoded coordinates & administrative region |
+| `/api/destinations/artwork?destinationId=&city=&admin1=&country=` | GET | Public | Resolves high-resolution destination photography via Wikimedia |
+| `/api/itineraries/generate` | POST | Public | Validates input, fetches weather, executes engine, and returns complete plan with audit log |
+| `/api/itineraries` | GET | Authenticated | Lists saved itineraries for the authenticated user |
+| `/api/itineraries` | POST | Authenticated | Saves a generated itinerary and all nested days/items to Supabase |
+| `/api/itineraries/[id]` | GET | Owner | Retrieves a specific saved itinerary by UUID |
+| `/api/itineraries/[id]` | DELETE | Owner | Deletes a saved itinerary (cascades to days, items, and notes) |
+| `/api/itineraries/days/[dayId]/notes` | GET/POST | Owner | Retrieves or persists collaborative notes for a specific day |
 
-To prevent hammering the Open-Meteo API and to ensure fast generation times, weather responses are routed through a server-side cache (`weather_cache` table). Successive requests for the same city on the same dates will serve the cached payload until it expires, massively reducing duplicate provider calls.
+---
 
-## 8. Deployment
+## 6. Supported Traveler Personas
 
-[Deployment URL will be added here once deployed to Vercel]
+- **Backpacker:** High preference for outdoor nature, hiking trails, viewpoints, budget-friendly street food, and authentic local bazaars. High stamina tolerance.
+- **Culture Seeker:** High preference for historic monuments, palaces, museums, architectural heritage, and archaeological sites. Moderate stamina load.
+- **Comfort Traveller:** Balanced pacing, preference for accessible landmarks, scenic panoramas, and high-comfort dining. Low physical fatigue tolerance.
+- **Family:** Strict preference for kid-friendly attractions, parks, science galleries, and safety-screened outdoor environments. Zero high-intensity activities.
+
+---
+
+## 7. License
+
+MIT
