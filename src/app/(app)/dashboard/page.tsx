@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ensureTripArtwork, getAllStoredTrips, GeneratedTrip } from '@/lib/tripStore';
-import { mockTripsList } from '@/lib/mockData';
 import { DestinationBanner } from '@/components/artwork/DestinationBanner';
 import { ArrowRight, MapPin, Calendar, Compass, Sun, Wind, Droplets, Plus } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -21,10 +20,7 @@ export default function DashboardPage() {
     let isMounted = true;
 
     async function loadDashboardTrips() {
-      let stored = getAllStoredTrips();
-      if (stored.length === 0) {
-        stored = (mockTripsList as GeneratedTrip[]).map((t) => ensureTripArtwork(t));
-      }
+      const stored = getAllStoredTrips().map((t) => ensureTripArtwork(t));
 
       try {
         const res = await fetch('/api/itineraries');

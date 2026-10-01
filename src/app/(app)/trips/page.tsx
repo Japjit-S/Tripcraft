@@ -15,10 +15,8 @@ import {
 import {
   getAllStoredTrips,
   deleteTripFromStorage,
-  saveTripToStorage,
   GeneratedTrip,
 } from '@/lib/tripStore';
-import { mockTripsList, mockJaipurTrip } from '@/lib/mockData';
 import { DestinationBanner } from '@/components/artwork/DestinationBanner';
 
 const PERSONA_PILL_STYLES: Record<string, string> = {
@@ -36,16 +34,7 @@ export default function TripsPage() {
   useEffect(() => {
     let isMounted = true;
     async function loadAllTrips() {
-      let stored = getAllStoredTrips();
-      // If no trips in storage yet, seed initial mock trip so the user has immediate data
-      if (stored.length === 0) {
-        const seeded: GeneratedTrip[] = mockTripsList.map((m) => ({
-          ...m,
-          itineraryDays: m.id === mockJaipurTrip.id ? mockJaipurTrip.itineraryDays : [],
-        }));
-        seeded.forEach((t) => saveTripToStorage(t));
-        stored = getAllStoredTrips();
-      }
+      const stored = getAllStoredTrips();
 
       try {
         const res = await fetch('/api/itineraries');

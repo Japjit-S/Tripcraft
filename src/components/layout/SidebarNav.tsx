@@ -64,7 +64,7 @@ export default function SidebarNav() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-bold text-slate-900 truncate">{user.name}</p>
-                <p className="text-[10px] text-slate-400 truncate">{user.isDemo ? 'Demo User' : 'Authenticated'}</p>
+                <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
               </div>
             </div>
             <button

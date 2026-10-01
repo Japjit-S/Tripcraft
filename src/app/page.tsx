@@ -103,7 +103,7 @@ export default function HomePage() {
               href="/login"
               className="text-sm font-semibold text-slate-700 hover:text-slate-900 px-3.5 py-2 rounded-lg hover:bg-slate-100 transition-colors"
             >
-              Sign In / Demo
+              Sign In
             </Link>
             <Link
               href="/planner"
@@ -151,7 +151,7 @@ export default function HomePage() {
                 href="/login"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-base font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200/90 px-7 py-3.5 rounded-xl shadow-xs transition-all hover:border-slate-300"
               >
-                1-Click Demo Login
+                Sign In to Account
               </Link>
             </div>
 
@@ -390,7 +390,7 @@ export default function HomePage() {
               Dashboard
             </Link>
             <Link href="/login" className="hover:text-slate-900 transition-colors">
-              Auth Demo
+              Account Login
             </Link>
           </div>
         </div>

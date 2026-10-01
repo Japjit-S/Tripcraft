@@ -11,7 +11,6 @@ import {
   ShieldCheck,
   AlertTriangle,
 } from 'lucide-react';
-import { getMockTrip } from '@/lib/mockData';
 import { ensureTripArtwork, getTripFromStorage, GeneratedTrip } from '@/lib/tripStore';
 import { ItineraryItem } from '@/lib/types';
 import { DestinationBanner } from '@/components/artwork/DestinationBanner';
@@ -56,17 +55,7 @@ export default function TripWorkspacePage({
         return;
       }
 
-      // 2. Fall back to mock trip if matching
-      const mock = getMockTrip(resolvedParams.id);
-      if (mock) {
-        if (isMounted) {
-          setTrip(ensureTripArtwork(mock as GeneratedTrip));
-          setIsLoaded(true);
-        }
-        return;
-      }
-
-      // 3. Try fetching from Supabase database API
+      // 2. Try fetching from Supabase database API
       try {
         const res = await fetch(`/api/itineraries/${encodeURIComponent(resolvedParams.id)}`);
         if (res.ok) {

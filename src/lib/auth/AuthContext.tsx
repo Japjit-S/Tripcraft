@@ -10,7 +10,7 @@ export interface UserProfile {
   email: string;
   name: string;
   initials: string;
-  isDemo: boolean;
+  avatarUrl?: string;
 }
 
 export interface AuthContextType {
@@ -18,7 +18,7 @@ export interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  loginWithDemo: (email?: string, name?: string) => void;
+  signInWithGoogle: () => Promise<{ error: Error | null }>;
   refreshSession: () => Promise<void>;
 }
 
@@ -39,37 +39,36 @@ function extractInitials(name?: string, email?: string): string {
   return 'TR';
 }
 
+function buildUserProfile(session: Session | null): UserProfile | null {
+  if (!session) return null;
+  const user = session.user;
+  const name =
+    user.user_metadata?.display_name ||
+    user.user_metadata?.full_name ||
+    user.user_metadata?.name ||
+    user.email?.split('@')[0] ||
+    'Traveller';
+  const email = user.email || '';
+  const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+
+  return {
+    id: user.id,
+    email,
+    name,
+    initials: extractInitials(name, email),
+    avatarUrl,
+  };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const syncDemoUser = useCallback((): boolean => {
-    if (typeof window === 'undefined') return false;
-    try {
-      const raw = localStorage.getItem('tripcraft_demo_user');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        const email = parsed.email || 'japjit31@gmail.com';
-        const name = parsed.name || 'Japjit Singh';
-        setUser({
-          id: 'demo-user',
-          email,
-          name,
-          initials: extractInitials(name, email),
-          isDemo: true,
-        });
-        return true;
-      }
-    } catch {
-      // ignore
-    }
-    return false;
-  }, []);
-
   const refreshSession = useCallback(async () => {
     if (!isSupabaseConfigured()) {
-      syncDemoUser();
+      setUser(null);
+      setSession(null);
       setLoading(false);
       return;
     }
@@ -77,120 +76,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const supabase = createClient();
       if (!supabase) {
-        syncDemoUser();
+        setUser(null);
+        setSession(null);
         setLoading(false);
         return;
       }
 
       const { data, error } = await supabase.auth.getSession();
       if (error || !data.session) {
-        // Fall back to demo session if active in localStorage
-        const hasDemo = syncDemoUser();
-        if (!hasDemo) {
-          setUser(null);
-          setSession(null);
-        }
+        setUser(null);
+        setSession(null);
       } else {
-        const s = data.session;
-        setSession(s);
-        const name =
-          s.user.user_metadata?.display_name ||
-          s.user.user_metadata?.full_name ||
-          s.user.email?.split('@')[0] ||
-          'Traveller';
-        const email = s.user.email || '';
-        setUser({
-          id: s.user.id,
-          email,
-          name,
-          initials: extractInitials(name, email),
-          isDemo: false,
-        });
+        setSession(data.session);
+        setUser(buildUserProfile(data.session));
       }
     } catch {
-      syncDemoUser();
+      setUser(null);
+      setSession(null);
     } finally {
       setLoading(false);
     }
-  }, [syncDemoUser]);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
 
     async function initAuth() {
       if (!isSupabaseConfigured()) {
-        if (mounted) {
-          syncDemoUser();
-          setLoading(false);
-        }
+        if (mounted) setLoading(false);
         return;
       }
 
       try {
         const supabase = createClient();
         if (!supabase) {
-          if (mounted) {
-            syncDemoUser();
-            setLoading(false);
-          }
+          if (mounted) setLoading(false);
           return;
         }
 
         const { data } = await supabase.auth.getSession();
         if (mounted) {
           if (data.session) {
-            const s = data.session;
-            setSession(s);
-            const name =
-              s.user.user_metadata?.display_name ||
-              s.user.user_metadata?.full_name ||
-              s.user.email?.split('@')[0] ||
-              'Traveller';
-            const email = s.user.email || '';
-            setUser({
-              id: s.user.id,
-              email,
-              name,
-              initials: extractInitials(name, email),
-              isDemo: false,
-            });
-            setLoading(false);
+            setSession(data.session);
+            setUser(buildUserProfile(data.session));
           } else {
-            const hasDemo = syncDemoUser();
-            if (!hasDemo) {
-              setUser(null);
-              setSession(null);
-            }
-            setLoading(false);
+            setUser(null);
+            setSession(null);
           }
+          setLoading(false);
         }
 
         const {
           data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, newSession) => {
           if (!mounted) return;
-          if (newSession) {
-            setSession(newSession);
-            const name =
-              newSession.user.user_metadata?.display_name ||
-              newSession.user.user_metadata?.full_name ||
-              newSession.user.email?.split('@')[0] ||
-              'Traveller';
-            const email = newSession.user.email || '';
-            setUser({
-              id: newSession.user.id,
-              email,
-              name,
-              initials: extractInitials(name, email),
-              isDemo: false,
-            });
-          } else {
-            setSession(null);
-            const hasDemo = syncDemoUser();
-            if (!hasDemo) {
-              setUser(null);
-            }
-          }
+          setSession(newSession);
+          setUser(buildUserProfile(newSession));
           setLoading(false);
         });
 
@@ -198,10 +139,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           subscription.unsubscribe();
         };
       } catch {
-        if (mounted) {
-          syncDemoUser();
-          setLoading(false);
-        }
+        if (mounted) setLoading(false);
       }
     }
 
@@ -210,7 +148,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       mounted = false;
     };
-  }, [syncDemoUser]);
+  }, []);
+
+  const signInWithGoogle = useCallback(async () => {
+    try {
+      const supabase = createClient();
+      if (!supabase) throw new Error('Supabase is not configured');
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
+      return { error: error ? new Error(error.message) : null };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Google sign-in initiation failed';
+      return { error: new Error(msg) };
+    }
+  }, []);
 
   const signOut = useCallback(async () => {
     try {
@@ -231,30 +191,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const loginWithDemo = useCallback((email = 'japjit31@gmail.com', name = 'Japjit Singh') => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('tripcraft_demo_user', JSON.stringify({ email, name }));
-    }
-    setUser({
-      id: 'demo-user',
-      email,
-      name,
-      initials: extractInitials(name, email),
-      isDemo: true,
-    });
-    setSession(null);
-  }, []);
-
   const contextValue = useMemo(
     () => ({
       user,
       session,
       loading,
       signOut,
-      loginWithDemo,
+      signInWithGoogle,
       refreshSession,
     }),
-    [user, session, loading, signOut, loginWithDemo, refreshSession]
+    [user, session, loading, signOut, signInWithGoogle, refreshSession]
   );
 
   return (

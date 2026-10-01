@@ -139,7 +139,7 @@ export default function TopNav() {
               <div className="text-left hidden sm:block">
                 <p className="text-xs font-bold text-slate-900 leading-none">{user.name}</p>
                 <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">
-                  {user.isDemo ? 'Demo Mode' : 'Verified'}
+                  Active
                 </p>
               </div>
               <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-xs">
@@ -155,15 +155,9 @@ export default function TopNav() {
                   <p className="text-xs font-black text-slate-900">{user.name}</p>
                   <p className="text-[11px] text-slate-500 truncate mt-0.5 font-mono">{user.email}</p>
                   <div className="mt-2">
-                    {user.isDemo ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
-                        <Sparkles className="w-3 h-3" /> Guest / Demo Session
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        <ShieldCheck className="w-3 h-3" /> Supabase Session
-                      </span>
-                    )}
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <ShieldCheck className="w-3 h-3" /> Authenticated
+                    </span>
                   </div>
                 </div>
 

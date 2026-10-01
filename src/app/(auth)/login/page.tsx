@@ -3,88 +3,91 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Compass, Sparkles, Loader2, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Compass, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { useAuth } from '@/lib/auth/AuthContext';
 
+function GoogleIcon() {
+  return (
+    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+      <path
+        fill="#4285F4"
+        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"
+      />
+    </svg>
+  );
+}
+
 export default function LoginPage() {
   const router = useRouter();
-  const { loginWithDemo, refreshSession } = useAuth();
+  const { signInWithGoogle, refreshSession } = useAuth();
 
-  const [email, setEmail] = useState('japjit31@gmail.com');
-  const [password, setPassword] = useState('Japjit12');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isUnconfirmed, setIsUnconfirmed] = useState(false);
 
-  const handleSignIn = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError('');
-    setIsUnconfirmed(false);
     setLoading(true);
 
-    if (isSupabaseConfigured()) {
-      try {
-        const supabase = createClient();
-        if (supabase) {
-          const { data, error: authErr } = await supabase.auth.signInWithPassword({
-            email: email.trim(),
-            password,
-          });
-
-          if (authErr) {
-            // Check for unconfirmed email edge case
-            if (
-              authErr.message.toLowerCase().includes('email not confirmed') ||
-              authErr.message.toLowerCase().includes('not confirmed')
-            ) {
-              setIsUnconfirmed(true);
-              setError(
-                'Supabase requires email confirmation for this address. You can verify your email or launch an instant guest/demo session below.'
-              );
-              setLoading(false);
-              return;
-            }
-
-            // Demo credentials fallback if matching
-            if (email.trim() === 'japjit31@gmail.com' && password === 'Japjit12') {
-              loginWithDemo(email.trim(), 'Japjit Singh');
-              router.push('/dashboard');
-              return;
-            }
-
-            setError(authErr.message);
-            setLoading(false);
-            return;
-          }
-
-          if (data?.session) {
-            await refreshSession();
-            router.push('/dashboard');
-            return;
-          }
-        }
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Network error during sign in';
-        setError(message);
-      }
+    if (!isSupabaseConfigured()) {
+      setError('Database connection is not configured.');
+      setLoading(false);
+      return;
     }
 
-    // Local / Demo mode fallback
-    if (email.trim() === 'japjit31@gmail.com' && password === 'Japjit12') {
-      loginWithDemo(email.trim(), 'Japjit Singh');
-      router.push('/dashboard');
-    } else {
-      setError('Invalid email or password. You can also use the 1-click demo button below.');
+    try {
+      const supabase = createClient();
+      if (!supabase) throw new Error('Supabase client failed to initialize');
+
+      const { data, error: authErr } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (authErr) {
+        setError(authErr.message);
+        setLoading(false);
+        return;
+      }
+
+      if (data?.session) {
+        await refreshSession();
+        router.push('/dashboard');
+        return;
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error occurred during sign in';
+      setError(message);
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleDemoLogin = () => {
-    setLoading(true);
-    loginWithDemo('japjit31@gmail.com', 'Japjit Singh');
-    router.push('/dashboard');
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setGoogleLoading(true);
+    const { error: gErr } = await signInWithGoogle();
+    if (gErr) {
+      setError(gErr.message);
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -108,45 +111,36 @@ export default function LoginPage() {
         </Link>
       </p>
 
-      {/* 1-Click Demo Access Banner for Reviewers */}
-      <div className="mt-6 p-4 rounded-2xl bg-gradient-to-br from-amber-50/90 to-orange-50/50 border border-amber-200/80 text-center shadow-xs">
-        <div className="flex items-center justify-center gap-1.5 text-xs font-black text-amber-900 uppercase tracking-wider">
-          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-          <span>Evaluator / Demo Access</span>
-        </div>
-        <p className="text-[11px] text-amber-800/80 mt-1 font-mono">
-          japjit31@gmail.com / Japjit12
-        </p>
+      <div className="mt-6 bg-white py-7 px-5 shadow-xs border border-slate-200 sm:rounded-3xl sm:px-8">
+        {/* Google OAuth Button */}
         <button
           type="button"
-          onClick={handleDemoLogin}
-          disabled={loading}
-          className="mt-3 inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 transition-all shadow-md shadow-orange-500/20 hover:-translate-y-0.5 cursor-pointer"
+          onClick={handleGoogleSignIn}
+          disabled={googleLoading || loading}
+          className="w-full py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold shadow-xs flex items-center justify-center gap-2.5 transition-all cursor-pointer disabled:opacity-50"
         >
-          <Sparkles className="w-4 h-4" />
-          <span>1-Click Instant Demo Login</span>
-          <ArrowRight className="w-3.5 h-3.5" />
+          {googleLoading ? (
+            <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
+          ) : (
+            <GoogleIcon />
+          )}
+          <span>Continue with Google</span>
         </button>
-      </div>
 
-      <div className="mt-5 bg-white py-7 px-5 shadow-xs border border-slate-200 sm:rounded-3xl sm:px-8">
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-200" />
+          </div>
+          <div className="relative flex justify-center text-[11px] uppercase tracking-wider font-semibold">
+            <span className="bg-white px-3 text-slate-400">or sign in with email</span>
+          </div>
+        </div>
+
         <form className="space-y-4" onSubmit={handleSignIn}>
           {error && (
-            <div className="p-3.5 text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl space-y-2">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600" />
-                <div className="flex-1">{error}</div>
-              </div>
-              {isUnconfirmed && (
-                <button
-                  type="button"
-                  onClick={handleDemoLogin}
-                  className="w-full py-1.5 px-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Bypass Confirmation & Enter as Guest</span>
-                </button>
-              )}
+            <div className="p-3.5 text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600" />
+              <div className="flex-1">{error}</div>
             </div>
           )}
 
@@ -157,9 +151,10 @@ export default function LoginPage() {
             <input
               type="email"
               required
+              placeholder="you@domain.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-xs border border-slate-300 rounded-xl shadow-2xs focus:ring-2 focus:ring-[#1d6b8f]/20 focus:border-[#1d6b8f] text-slate-900 transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1d6b8f] focus:border-transparent transition-all placeholder:text-slate-400"
             />
           </div>
 
@@ -170,25 +165,27 @@ export default function LoginPage() {
             <input
               type="password"
               required
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-xs border border-slate-300 rounded-xl shadow-2xs focus:ring-2 focus:ring-[#1d6b8f]/20 focus:border-[#1d6b8f] text-slate-900 transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1d6b8f] focus:border-transparent transition-all placeholder:text-slate-400"
             />
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-transparent rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 focus:outline-hidden transition-all shadow-md shadow-slate-900/10 hover:-translate-y-0.5 cursor-pointer"
-            >
-              {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <span>Sign in with Password</span>
-              )}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading || googleLoading}
+            className="w-full py-3.5 px-4 bg-[#1d6b8f] hover:bg-[#155370] text-white rounded-xl text-xs font-bold shadow-md shadow-[#1d6b8f]/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                <span>Sign in</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
         </form>
       </div>
     </div>

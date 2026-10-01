@@ -328,7 +328,7 @@ export default function PlannerPage() {
                       if (suggestions.length > 0) setShowSuggestions(true);
                     }}
                     type="text" 
-                    placeholder="Where are you heading? (e.g. Manali, Paris, Tokyo, Jaipur)" 
+                    placeholder="Where are you heading? (e.g. Manali, Tokyo, Paris, Cape Town)" 
                     className="w-full pl-12 pr-12 py-3.5 bg-[#f8f9fc] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1d6b8f]/30 border border-transparent focus:border-[#1d6b8f] transition-all text-slate-900 font-bold placeholder:font-normal placeholder:text-slate-400 text-base"
                   />
                   {isSearchingCities && (
