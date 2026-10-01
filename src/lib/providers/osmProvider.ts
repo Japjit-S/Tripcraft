@@ -34,7 +34,7 @@ export class OsmActivityProvider implements ActivityProvider {
   /**
    * Builds an Overpass QL query including nature, treks, viewpoints, stadiums, and cultural landmarks.
    */
-  private buildOverpassQuery(lat: number, lon: number, radiusM = 10000): string {
+  private buildOverpassQuery(lat: number, lon: number, radiusM = 18000): string {
     return `[out:json][timeout:15];
 (
   nwr["tourism"~"museum|attraction|viewpoint|gallery|theme_park|camp_site|alpine_hut|picnic_site"](around:${radiusM},${lat},${lon});
@@ -50,41 +50,60 @@ out center tags;`;
   }
 
   /**
-   * Fetches Wikipedia sitelink counts in batch from the Wikidata API
+   * Fetches Wikipedia sitelink counts in batch from the Wikidata API.
+   * Chunks up to 150 unique IDs in batches of 50 to prevent truncating landmarks past index 50.
    */
   private async fetchWikidataSitelinks(
     wikidataIds: string[]
   ): Promise<Record<string, number>> {
     if (wikidataIds.length === 0) return {};
 
-    const uniqueIds = Array.from(new Set(wikidataIds)).slice(0, 50);
-    const params = new URLSearchParams({
-      action: 'wbgetentities',
-      ids: uniqueIds.join('|'),
-      props: 'sitelinks',
-      format: 'json',
-      origin: '*',
-    });
+    const uniqueIds = Array.from(new Set(wikidataIds));
+    const batchSize = 50;
+    const maxBatches = 3; // Up to 150 entities
+    const batches: string[][] = [];
 
-    try {
-      const res = await fetch(`${WIKIDATA_API_ENDPOINT}?${params.toString()}`, {
-        headers: { 'User-Agent': 'Tripcraft/1.0 (travel-planner-app)' },
-        signal: AbortSignal.timeout(6000),
-      });
-      if (!res.ok) return {};
-      const data = await res.json();
-      const entities = data.entities || {};
-      const counts: Record<string, number> = {};
-
-      for (const [id, entity] of Object.entries<any>(entities)) {
-        if (entity && entity.sitelinks) {
-          counts[id] = Object.keys(entity.sitelinks).length;
-        }
-      }
-      return counts;
-    } catch {
-      return {};
+    for (let i = 0; i < Math.min(uniqueIds.length, maxBatches * batchSize); i += batchSize) {
+      batches.push(uniqueIds.slice(i, i + batchSize));
     }
+
+    const counts: Record<string, number> = {};
+
+    interface WikidataResponse {
+      entities?: Record<string, { sitelinks?: Record<string, unknown> }>;
+    }
+
+    await Promise.allSettled(
+      batches.map(async (batch) => {
+        const params = new URLSearchParams({
+          action: 'wbgetentities',
+          ids: batch.join('|'),
+          props: 'sitelinks',
+          format: 'json',
+          origin: '*',
+        });
+
+        try {
+          const res = await fetch(`${WIKIDATA_API_ENDPOINT}?${params.toString()}`, {
+            headers: { 'User-Agent': 'Tripcraft/1.0 (travel-planner-app)' },
+            signal: AbortSignal.timeout(6000),
+          });
+          if (!res.ok) return;
+          const data = (await res.json()) as WikidataResponse;
+          const entities = data.entities || {};
+
+          for (const [id, entity] of Object.entries(entities)) {
+            if (entity?.sitelinks) {
+              counts[id] = Object.keys(entity.sitelinks).length;
+            }
+          }
+        } catch {
+          // Continue gracefully if a batch fails or times out
+        }
+      })
+    );
+
+    return counts;
   }
 
   /**

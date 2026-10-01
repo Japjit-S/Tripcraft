@@ -38,12 +38,14 @@ export function allocateItinerarySlots(
   const dayAnchors = new Map<number, CandidateActivity>();
 
   for (const day of daysInput) {
-    // Find highest prominence candidate in day's survivor pool not yet used
     const landmarkCandidates = day.survivors
       .filter(
         (c) =>
           !usedCandidateIds.has(c.id) &&
-          (c.category === 'LANDMARK' || c.category === 'CULTURE' || c.prominence >= 0.7)
+          (c.category === 'LANDMARK' ||
+            c.category === 'CULTURE' ||
+            (c.category === 'NATURE' && (persona === 'Backpacker' || c.prominence >= 0.65)) ||
+            c.prominence >= 0.7)
       )
       .sort((a, b) => b.prominence - a.prominence || a.id.localeCompare(b.id));
 
