@@ -46,12 +46,7 @@ export async function resolveDestinationArtwork(
 
   const identity = normalizeDestinationIdentity(input);
 
-  // Step 2: Bundled curated local illustration for flagship cities
-  if (identity.curatedKey) {
-    return resolveLocalDestinationArtwork(input, resolvedIso);
-  }
-
-  // Step 6: Incomplete metadata -> immediate local vector scene without external lookup
+  // Step 2: Incomplete metadata -> immediate local vector scene without external lookup
   if (!identity.hasCompleteMetadata || !identity.country) {
     return resolveLocalDestinationArtwork(input, resolvedIso);
   }

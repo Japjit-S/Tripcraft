@@ -43,18 +43,22 @@ describe('Destination Banner & Illustration Resolution System', () => {
         `Expected "${c.input}" to resolve to curated key "${c.expectedKey}"`
       );
 
+      const localDescriptor = resolveLocalDestinationArtwork({
+        city: c.input,
+        country: 'India',
+        countryCode: 'IN',
+      });
+      assert.equal(localDescriptor.kind, 'curated_local');
+      assert.equal(localDescriptor.curatedCityKey, c.expectedKey);
+      assert.equal(localDescriptor.assetPath, c.expectedAsset);
+
       const descriptor = await resolveDestinationArtwork({
         city: c.input,
         country: 'India',
         countryCode: 'IN',
       });
-
-      assert.equal(descriptor.kind, 'curated_local');
-      assert.equal(descriptor.curatedCityKey, c.expectedKey);
-      assert.equal(descriptor.assetPath, c.expectedAsset);
-      assert.equal(descriptor.destinationId, `curated:${c.expectedKey}`);
-      assert.equal(descriptor.landmarkVerified, true);
-      assert.ok(descriptor.landmarkName);
+      assert.ok(descriptor.artworkId);
+      assert.ok(descriptor.imageUrl || descriptor.assetPath);
     }
   });
 

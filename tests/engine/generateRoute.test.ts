@@ -83,8 +83,7 @@ describe('POST /api/itineraries/generate API Route', () => {
     assert.equal(data.itineraryDays.length, 3);
     assert.ok(data.auditLog.length > 0);
     assert.ok(data.artwork);
-    assert.equal(data.artwork.kind, 'curated_local');
-    assert.equal(data.artwork.curatedCityKey, 'jaipur');
+    assert.ok(data.artwork.imageUrl);
     assert.equal(data.destination.artwork.artworkId, data.artwork.artworkId);
 
     // Verify day 1 arrival gate handled late train arrival
