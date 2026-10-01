@@ -10,6 +10,133 @@ export interface DbDayNote {
   updatedAt: string;
 }
 
+interface DbDestinationRow {
+  id?: string;
+  city?: string;
+  country?: string;
+  country_code?: string;
+  admin1?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+interface DbItineraryItemRow {
+  id: string;
+  candidate_id?: string;
+  slot: 'MORNING' | 'AFTERNOON' | 'EVENING';
+  sort_order: number;
+  title: string;
+  category: string;
+  reason: string;
+  indoor: boolean;
+  latitude?: number;
+  longitude?: number;
+  is_flex?: boolean;
+  flex_reason?: string;
+}
+
+interface DbItineraryDayRow {
+  id: string;
+  day_number: number;
+  date: string;
+  weather_summary: string;
+  itinerary_items?: DbItineraryItemRow[];
+}
+
+interface DbItineraryRow {
+  id: string;
+  persona: GeneratedTrip['persona'];
+  start_date: string;
+  days: number;
+  origin_city?: string;
+  arrival_mode: GeneratedTrip['arrivalMode'];
+  arrival_at: string;
+  feasibility_status?: GeneratedTrip['feasibilityStatus'];
+  warnings?: string[];
+  audit_log?: GeneratedTrip['auditLog'];
+  destinations?: DbDestinationRow | null;
+  itinerary_days?: DbItineraryDayRow[];
+}
+
+interface DbDayNoteRow {
+  id: string;
+  itinerary_day_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+
+function mapDbRowToGeneratedTrip(row: DbItineraryRow): GeneratedTrip {
+  const dest = row.destinations || {};
+  const daysRaw = (row.itinerary_days || []).slice().sort(
+    (a, b) => a.day_number - b.day_number
+  );
+
+  const itineraryDays: TripDay[] = daysRaw.map((d) => {
+    const itemsRaw = (d.itinerary_items || []).slice().sort(
+      (a, b) => a.sort_order - b.sort_order
+    );
+
+    const morning: ItineraryItem[] = [];
+    const afternoon: ItineraryItem[] = [];
+    const evening: ItineraryItem[] = [];
+
+    for (const item of itemsRaw) {
+      const mapped: ItineraryItem = {
+        id: item.candidate_id || item.id,
+        title: item.title,
+        category: item.category,
+        reason: item.reason,
+        indoor: Boolean(item.indoor),
+        coords:
+          item.latitude !== undefined && item.longitude !== undefined
+            ? { lat: item.latitude, lon: item.longitude }
+            : undefined,
+        isFlex: item.is_flex,
+        flexReason: item.flex_reason,
+      };
+
+      if (item.slot === 'MORNING') morning.push(mapped);
+      else if (item.slot === 'AFTERNOON') afternoon.push(mapped);
+      else evening.push(mapped);
+    }
+
+    return {
+      id: d.id,
+      dayNumber: d.day_number,
+      date: d.date,
+      weatherSummary: d.weather_summary,
+      morning,
+      afternoon,
+      evening,
+    };
+  });
+
+  return {
+    id: row.id,
+    destination: dest.city || 'Destination',
+    destinationId: dest.id,
+    destinationCountry: dest.country,
+    destinationCountryCode: dest.country_code,
+    destinationAdmin1: dest.admin1,
+    destinationCoords:
+      dest.latitude !== undefined && dest.longitude !== undefined
+        ? { lat: dest.latitude, lon: dest.longitude }
+        : undefined,
+    persona: row.persona,
+    startDate: row.start_date,
+    days: row.days,
+    originCity: row.origin_city || '',
+    arrivalMode: row.arrival_mode,
+    arrivalAt: row.arrival_at,
+    arrivalTime: row.arrival_at,
+    itineraryDays,
+    warnings: row.warnings || [],
+    auditLog: row.audit_log || [],
+    feasibilityStatus: row.feasibility_status,
+  };
+}
+
 /**
  * Saves a GeneratedTrip to PostgreSQL via Supabase with complete relational hierarchy.
  */
@@ -194,76 +321,7 @@ export async function getUserItinerariesFromDb(
     return [];
   }
 
-  return itineraries.map((row: any): GeneratedTrip => {
-    const dest = row.destinations || {};
-    const daysRaw = (row.itinerary_days || []).sort(
-      (a: any, b: any) => a.day_number - b.day_number
-    );
-
-    const itineraryDays: TripDay[] = daysRaw.map((d: any) => {
-      const itemsRaw = (d.itinerary_items || []).sort(
-        (a: any, b: any) => a.sort_order - b.sort_order
-      );
-
-      const morning: ItineraryItem[] = [];
-      const afternoon: ItineraryItem[] = [];
-      const evening: ItineraryItem[] = [];
-
-      for (const item of itemsRaw) {
-        const mapped: ItineraryItem = {
-          id: item.candidate_id || item.id,
-          title: item.title,
-          category: item.category,
-          reason: item.reason,
-          indoor: Boolean(item.indoor),
-          coords:
-            item.latitude && item.longitude
-              ? { lat: item.latitude, lon: item.longitude }
-              : undefined,
-          isFlex: item.is_flex,
-          flexReason: item.flex_reason,
-        };
-
-        if (item.slot === 'MORNING') morning.push(mapped);
-        else if (item.slot === 'AFTERNOON') afternoon.push(mapped);
-        else evening.push(mapped);
-      }
-
-      return {
-        id: d.id,
-        dayNumber: d.day_number,
-        date: d.date,
-        weatherSummary: d.weather_summary,
-        morning,
-        afternoon,
-        evening,
-      };
-    });
-
-    return {
-      id: row.id,
-      destination: dest.city || 'Destination',
-      destinationId: dest.id,
-      destinationCountry: dest.country,
-      destinationCountryCode: dest.country_code,
-      destinationAdmin1: dest.admin1,
-      destinationCoords:
-        dest.latitude && dest.longitude
-          ? { lat: dest.latitude, lon: dest.longitude }
-          : undefined,
-      persona: row.persona,
-      startDate: row.start_date,
-      days: row.days,
-      originCity: row.origin_city,
-      arrivalMode: row.arrival_mode,
-      arrivalAt: row.arrival_at,
-      arrivalTime: row.arrival_at,
-      itineraryDays,
-      warnings: row.warnings || [],
-      auditLog: row.audit_log || [],
-      feasibilityStatus: row.feasibility_status,
-    };
-  });
+  return (itineraries as unknown as DbItineraryRow[]).map(mapDbRowToGeneratedTrip);
 }
 
 /**
@@ -323,74 +381,7 @@ export async function getItineraryByIdFromDb(
     return null;
   }
 
-  const dest = (row as any).destinations || {};
-  const daysRaw = ((row as any).itinerary_days || []).sort(
-    (a: any, b: any) => a.day_number - b.day_number
-  );
-
-  const itineraryDays: TripDay[] = daysRaw.map((d: any) => {
-    const itemsRaw = (d.itinerary_items || []).sort(
-      (a: any, b: any) => a.sort_order - b.sort_order
-    );
-
-    const morning: ItineraryItem[] = [];
-    const afternoon: ItineraryItem[] = [];
-    const evening: ItineraryItem[] = [];
-
-    for (const item of itemsRaw) {
-      const mapped: ItineraryItem = {
-        id: item.candidate_id || item.id,
-        title: item.title,
-        category: item.category,
-        reason: item.reason,
-        indoor: Boolean(item.indoor),
-        coords:
-          item.latitude && item.longitude
-            ? { lat: item.latitude, lon: item.longitude }
-            : undefined,
-        isFlex: item.is_flex,
-        flexReason: item.flex_reason,
-      };
-
-      if (item.slot === 'MORNING') morning.push(mapped);
-      else if (item.slot === 'AFTERNOON') afternoon.push(mapped);
-      else evening.push(mapped);
-    }
-
-    return {
-      id: d.id,
-      dayNumber: d.day_number,
-      date: d.date,
-      weatherSummary: d.weather_summary,
-      morning,
-      afternoon,
-      evening,
-    };
-  });
-
-  return {
-    id: (row as any).id,
-    destination: dest.city || 'Destination',
-    destinationId: dest.id,
-    destinationCountry: dest.country,
-    destinationCountryCode: dest.country_code,
-    destinationAdmin1: dest.admin1,
-    destinationCoords:
-      dest.latitude && dest.longitude
-        ? { lat: dest.latitude, lon: dest.longitude }
-        : undefined,
-    persona: (row as any).persona,
-    startDate: (row as any).start_date,
-    days: (row as any).days,
-    originCity: (row as any).origin_city,
-    arrivalMode: (row as any).arrival_mode,
-    arrivalAt: (row as any).arrival_at,
-    arrivalTime: (row as any).arrival_at,
-    itineraryDays,
-    warnings: (row as any).warnings || [],
-    auditLog: (row as any).audit_log || [],
-    feasibilityStatus: (row as any).feasibility_status,
-  };
+  return mapDbRowToGeneratedTrip(row as unknown as DbItineraryRow);
 }
 
 /**
@@ -425,12 +416,13 @@ export async function saveDayNoteToDb(
     throw new Error(`Failed to save day note: ${error?.message}`);
   }
 
+  const noteRow = data as unknown as DbDayNoteRow;
   return {
-    id: data.id,
-    dayId: data.itinerary_day_id,
-    content: data.content,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
+    id: noteRow.id,
+    dayId: noteRow.itinerary_day_id,
+    content: noteRow.content,
+    createdAt: noteRow.created_at,
+    updatedAt: noteRow.updated_at,
   };
 }
 
@@ -448,7 +440,8 @@ export async function getDayNotesFromDb(
     .order('created_at', { ascending: true });
 
   if (error || !data) return [];
-  return data.map((d: any) => ({
+  const noteRows = data as unknown as DbDayNoteRow[];
+  return noteRows.map((d) => ({
     id: d.id,
     dayId: d.itinerary_day_id,
     content: d.content,
