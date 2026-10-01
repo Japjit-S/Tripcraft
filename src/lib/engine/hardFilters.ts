@@ -134,7 +134,7 @@ export function applyHardFiltersForDay(params: {
           reason: `Arrival scheduled at ${arrivalAt}; morning slot collapsed for transit and check-in.`,
         });
       }
-      if (arrivalMinutes >= 17 * 60) {
+      if (arrivalMinutes >= 15 * 60) {
         blockedSlots.push('AFTERNOON');
         auditEntries.push({
           dayNumber: 1,
@@ -144,6 +144,18 @@ export function applyHardFiltersForDay(params: {
           verdict: 'REMOVED',
           ruleId: 'ARRIVAL_LATE_AFTERNOON',
           reason: `Arrival scheduled at ${arrivalAt}; afternoon slot collapsed for transit and check-in.`,
+        });
+      }
+      if (arrivalMinutes >= 19 * 60 + 30) {
+        blockedSlots.push('EVENING');
+        auditEntries.push({
+          dayNumber: 1,
+          stage: 'ARRIVAL_GATE',
+          candidateId: 'slot-evening',
+          candidateTitle: 'Evening Slot',
+          verdict: 'REMOVED',
+          ruleId: 'ARRIVAL_LATE_EVENING',
+          reason: `Arrival scheduled at ${arrivalAt}; evening slot collapsed for late arrival.`,
         });
       }
     }
@@ -171,38 +183,53 @@ export function applyHardFiltersForDay(params: {
     }
 
     // 3. Weather Gates
-    if (weatherState === 'RAIN' || weatherState === 'STORM') {
-      const isWaterOrRooftop = candidate.tags.some(
-        (t) =>
-          t.includes('water') ||
-          t.includes('boat') ||
-          t.includes('rooftop') ||
-          t.includes('walking_tour')
-      );
-      if (!candidate.indoor || isWaterOrRooftop) {
+    const isWaterOrRooftopOrTour = candidate.tags.some(
+      (t) =>
+        t.includes('water') ||
+        t.includes('boat') ||
+        t.includes('rooftop') ||
+        t.includes('walking_tour')
+    );
+
+    if (weatherState === 'STORM') {
+      if (!candidate.indoor || isWaterOrRooftopOrTour) {
         auditEntries.push({
           dayNumber,
           stage: 'WEATHER_FILTER',
           candidateId: candidate.id,
           candidateTitle: candidate.title,
           verdict: 'REMOVED',
-          ruleId:
-            weatherState === 'STORM'
-              ? WEATHER_RULE_IDS.WX_STORM_OUTDOOR
-              : WEATHER_RULE_IDS.WX_RAIN_OUTDOOR,
-          reason: `Outdoor activity removed due to forecast ${weatherState.toLowerCase()} conditions.`,
+          ruleId: WEATHER_RULE_IDS.WX_STORM_OUTDOOR,
+          reason: 'Outdoor activity removed due to severe storm conditions.',
+        });
+        continue;
+      }
+    } else if (weatherState === 'RAIN') {
+      // In rain showers, eliminate water/boat/rooftop/walking tours and high-intensity outdoor activities
+      const isUnsafeInRain =
+        isWaterOrRooftopOrTour || (!candidate.indoor && candidate.intensity === 'HIGH');
+      if (isUnsafeInRain) {
+        auditEntries.push({
+          dayNumber,
+          stage: 'WEATHER_FILTER',
+          candidateId: candidate.id,
+          candidateTitle: candidate.title,
+          verdict: 'REMOVED',
+          ruleId: WEATHER_RULE_IDS.WX_RAIN_OUTDOOR,
+          reason: 'High-exposure outdoor activity removed due to rain showers.',
         });
         continue;
       }
     }
 
+    let effectiveCandidate = candidate;
     if (weatherState === 'EXTREME_HEAT' && !candidate.indoor) {
       if (candidate.intensity === 'HIGH') {
         // High intensity outdoor items cannot run in midday heat
-        candidate.slotAffinity = candidate.slotAffinity.filter(
+        const filteredSlots = candidate.slotAffinity.filter(
           (s) => s !== 'AFTERNOON'
         );
-        if (candidate.slotAffinity.length === 0) {
+        if (filteredSlots.length === 0) {
           auditEntries.push({
             dayNumber,
             stage: 'WEATHER_FILTER',
@@ -215,10 +242,15 @@ export function applyHardFiltersForDay(params: {
           });
           continue;
         }
+        // Clone candidate immutably for this day to eliminate in-memory cache corruption
+        effectiveCandidate = {
+          ...candidate,
+          slotAffinity: filteredSlots,
+        };
       }
     }
 
-    survivors.push(candidate);
+    survivors.push(effectiveCandidate);
   }
 
   return { survivors, blockedSlots, auditEntries };

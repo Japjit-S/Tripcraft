@@ -22,15 +22,18 @@ export interface DestinationBannerProps {
   showAttribution?: boolean;
 }
 
-const ALLOWED_EXTERNAL_PREFIX =
-  'https://upload.wikimedia.org/wikipedia/commons/';
+const ALLOWED_EXTERNAL_PREFIXES = [
+  'https://upload.wikimedia.org/wikipedia/commons/',
+  'https://thumb.wikimedia.org/wikipedia/commons/',
+  'https://images.unsplash.com/',
+];
 
 function isAllowedExternalIllustrationUrl(url?: string): url is string {
   if (!url) return false;
-  if (!url.startsWith(ALLOWED_EXTERNAL_PREFIX)) return false;
+  if (!ALLOWED_EXTERNAL_PREFIXES.some((p) => url.startsWith(p))) return false;
   const cleanPath = url.split('?')[0];
   if (/\.svg$/i.test(cleanPath)) return false;
-  return /\.(png|jpe?g|webp)$/i.test(cleanPath);
+  return /\.(png|jpe?g|webp)$/i.test(cleanPath) || url.includes('unsplash.com');
 }
 
 /**

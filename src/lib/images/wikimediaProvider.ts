@@ -287,6 +287,63 @@ export function validateWikimediaCandidate(
   };
 }
 
+async function queryWikipediaSummaryImage(
+  identity: NormalizedDestinationIdentity,
+  fetchImpl: typeof fetch
+): Promise<ValidatedExternalIllustration | null> {
+  const cityTitles = [
+    identity.displayCity,
+    identity.admin1 ? `${identity.displayCity}, ${identity.admin1}` : '',
+    identity.country ? `${identity.displayCity}, ${identity.country}` : '',
+  ].filter(Boolean);
+
+  for (const title of cityTitles) {
+    try {
+      const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title.replace(/\s+/g, '_'))}`;
+      const res = await fetchImpl(url, {
+        headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
+        signal: AbortSignal.timeout(1800),
+      });
+      if (!res.ok) continue;
+      const data = (await res.json()) as {
+        title?: string;
+        thumbnail?: { source?: string };
+        originalimage?: { source?: string };
+        content_urls?: { desktop?: { page?: string } };
+      };
+
+      const imageUrl = (data.originalimage?.source || data.thumbnail?.source || '').trim();
+      if (!imageUrl) continue;
+
+      const cleanPath = imageUrl.split('?')[0];
+      if (/\.svg$/i.test(cleanPath)) continue;
+      if (!/\.(png|jpe?g|webp)$/i.test(cleanPath)) continue;
+
+      const sourceTitle = data.title || identity.displayCity;
+      const sourcePageUrl =
+        data.content_urls?.desktop?.page ||
+        `https://en.wikipedia.org/wiki/${encodeURIComponent(sourceTitle.replace(/\s+/g, '_'))}`;
+      const suffix = identity.country ? `, ${identity.country}` : '';
+
+      return {
+        imageUrl,
+        alt: `${sourceTitle}${suffix} destination panorama`,
+        attribution: {
+          sourceTitle,
+          sourcePageUrl,
+          author: 'Wikimedia Commons contributors',
+          license: 'CC BY-SA / Public Domain',
+          licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
+          attributionText: `${sourceTitle} — Wikimedia Commons (CC BY-SA)`,
+        },
+      };
+    } catch {
+      // Continue to next title candidate or fallback
+    }
+  }
+  return null;
+}
+
 /**
  * Performs a single bounded, server-side Wikimedia Commons search for a
  * destination-matched illustration. Never throws; returns structured outcome.
@@ -297,6 +354,17 @@ export async function lookupWikimediaIllustration(
 ): Promise<WikimediaLookupOutcome> {
   if (!identity.hasCompleteMetadata || !identity.displayCity || !identity.country) {
     return { match: null, providerError: false };
+  }
+
+  // When runtime fetch is used, fetch real high-res city photography from Wikipedia Page Summary
+  if (fetchImpl === fetch) {
+    const summaryMatch = await queryWikipediaSummaryImage(identity, fetchImpl);
+    if (summaryMatch) {
+      return {
+        match: summaryMatch,
+        providerError: false,
+      };
+    }
   }
 
   const searchQuery = `"${identity.displayCity}" "${identity.country}" (illustration OR "travel poster" OR vector) -photo -map -flag -logo`;

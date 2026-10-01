@@ -57,8 +57,10 @@ export function scoreCandidate(params: ScoreCandidateParams): ScoredCandidate {
 
   // 3. Weather Fit (0 to 1)
   let normWeatherFit = 0.8;
-  if (weatherState === 'RAIN' || weatherState === 'STORM') {
+  if (weatherState === 'STORM') {
     normWeatherFit = candidate.indoor ? 1.0 : 0.0;
+  } else if (weatherState === 'RAIN') {
+    normWeatherFit = candidate.indoor ? 1.0 : 0.4;
   } else if (weatherState === 'CLEAR') {
     normWeatherFit = candidate.indoor ? 0.8 : 1.0;
   } else if (weatherState === 'EXTREME_HEAT') {

@@ -181,9 +181,8 @@ function TemplateArchitectureLayer({
       <g transform={`translate(${shiftX}, 0)`}>
         <rect x="540" y="235" width="75" height="187" fill={palette.midSilhouette} />
         <rect x="630" y="175" width="92" height="247" fill={palette.secondaryArchitecture} />
-        <rect x="740" y="125" width="105" height="297" fill={palette.primaryArchitecture} />
-        <rect x="765" y="95" width="55" height="30" fill={palette.secondaryArchitecture} />
-        <line x1="792" y1="55" x2="792" y2="95" stroke={palette.windowArch} strokeWidth="4" />
+        <path d="M740 125 Q792 75 845 125 Z" fill={palette.highlightTrim} />
+        <rect x="785" y="60" width="14" height="20" rx="3" fill={palette.windowArch} />
         <rect x="862" y="190" width="88" height="232" fill={palette.secondaryArchitecture} />
         <rect x="968" y="150" width="95" height="272" fill={palette.primaryArchitecture} />
         <path d="M968 150 Q1015 110 1063 150 Z" fill={palette.highlightTrim} />

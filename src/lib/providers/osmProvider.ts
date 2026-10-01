@@ -34,7 +34,7 @@ export class OsmActivityProvider implements ActivityProvider {
   /**
    * Builds an Overpass QL query including nature, treks, viewpoints, stadiums, and cultural landmarks.
    */
-  private buildOverpassQuery(lat: number, lon: number, radiusM = 20000): string {
+  private buildOverpassQuery(lat: number, lon: number, radiusM = 10000): string {
     return `[out:json][timeout:15];
 (
   nwr["tourism"~"museum|attraction|viewpoint|gallery|theme_park|camp_site|alpine_hut|picnic_site"](around:${radiusM},${lat},${lon});
@@ -91,12 +91,13 @@ out center tags;`;
    * Queries Wikipedia GeoSearch API for verified, unmissable landmarks and treks
    * around the destination coordinates. Returns high-quality candidate items in ~200ms.
    */
-  private async queryWikipediaGeo(lat: number, lon: number, radiusM = 15000): Promise<CandidateActivity[]> {
+  private async queryWikipediaGeo(lat: number, lon: number, radiusM = 10000): Promise<CandidateActivity[]> {
+    const boundedRadius = Math.min(10000, Math.max(10, radiusM));
     const params = new URLSearchParams({
       action: 'query',
       list: 'geosearch',
       gscoord: `${lat}|${lon}`,
-      gsradius: String(radiusM),
+      gsradius: String(boundedRadius),
       gslimit: '35',
       format: 'json',
       origin: '*',
@@ -118,13 +119,21 @@ out center tags;`;
         const rawTitle = page.title;
         const lower = rawTitle.toLowerCase();
 
-        // Skip non-tourist administrative or electoral pages
+        // Skip non-tourist administrative, medical, educational, or security facilities
         if (
           lower.includes('constituency') ||
           lower.includes('district') ||
           lower.includes('elections') ||
           lower.includes('ward') ||
-          lower.includes('subdivision')
+          lower.includes('subdivision') ||
+          lower.includes('hospital') ||
+          lower.includes('clinic') ||
+          lower.includes('school') ||
+          lower.includes('college') ||
+          lower.includes('university') ||
+          lower.includes('police') ||
+          lower.includes('prison') ||
+          lower.includes('court')
         ) {
           continue;
         }
@@ -137,7 +146,13 @@ out center tags;`;
           lower.includes('lake') ||
           lower.includes('fall') ||
           lower.includes('valley') ||
-          lower.includes('glacier');
+          lower.includes('glacier') ||
+          lower.includes('triund') ||
+          lower.includes('ridge') ||
+          lower.includes('sanctuary') ||
+          lower.includes('wildlife') ||
+          lower.includes('viewpoint') ||
+          lower.includes('garden');
 
         const isTempleOrHeritage =
           lower.includes('temple') ||
@@ -151,7 +166,15 @@ out center tags;`;
           lower.includes('fort') ||
           lower.includes('palace') ||
           lower.includes('tomb') ||
-          lower.includes('mahal');
+          lower.includes('mahal') ||
+          lower.includes('nunnery') ||
+          lower.includes('institute') ||
+          lower.includes('library') ||
+          lower.includes('ashram') ||
+          lower.includes('stupa') ||
+          lower.includes('pagoda') ||
+          lower.includes('memorial') ||
+          lower.includes('heritage');
 
         const isStadium = lower.includes('stadium') || lower.includes('arena');
         const isMarket = lower.includes('bazaar') || lower.includes('market');

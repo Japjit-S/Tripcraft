@@ -41,9 +41,12 @@ export function classifyDay(
   let state: DayWeatherState = 'MIXED';
   let conditionText = 'Mixed weather';
 
-  if (WMO_STORM_CODES.has(forecast.weatherCode)) {
+  if (
+    WMO_STORM_CODES.has(forecast.weatherCode) ||
+    (forecast.precipitationMm !== undefined && forecast.precipitationMm >= 25.0)
+  ) {
     state = 'STORM';
-    conditionText = 'Thunderstorms forecast';
+    conditionText = 'Thunderstorms or severe rain forecast';
   } else if (
     forecast.maxTemp >= WEATHER_THRESHOLDS.EXTREME_HEAT_MAX_TEMP_C
   ) {
