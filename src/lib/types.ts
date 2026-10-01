@@ -10,6 +10,15 @@ export interface ItineraryItem {
   coords?: { lat: number; lon: number };
   isFlex?: boolean;
   flexReason?: string;
+  // Temporal model fields (Stage 1)
+  eventKind?: string;
+  startTime?: string;
+  endTime?: string;
+  durationMin?: number;
+  typicalDurationMin?: number;
+  linkedExpeditionId?: string;
+  expeditionPhase?: string;
+  continuationOfId?: string;
 }
 
 export interface TripDay {
@@ -17,6 +26,8 @@ export interface TripDay {
   dayNumber: number;
   date: string;
   weatherSummary: string;
+  weatherState?: string;
+  timeline?: ItineraryItem[];
   morning: ItineraryItem[];
   afternoon: ItineraryItem[];
   evening: ItineraryItem[];
@@ -24,6 +35,7 @@ export interface TripDay {
 
 export interface Trip {
   id: string;
+  version?: number;
   destination: string;
   destinationId?: string;
   destinationCountry?: string;

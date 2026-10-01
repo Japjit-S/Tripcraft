@@ -215,6 +215,15 @@ export interface EngineInput {
   feasibilityRules?: FeasibilityRule[];
 }
 
+export type EventKind =
+  | 'activity'
+  | 'transfer'
+  | 'arrival_checkin'
+  | 'meal'
+  | 'rest'
+  | 'recovery'
+  | 'expedition_phase';
+
 export interface EngineItineraryItem {
   id: string;
   candidateId: string;
@@ -229,6 +238,17 @@ export interface EngineItineraryItem {
   scoreBreakdown?: ScoreBreakdown;
   isFlex?: boolean;
   flexReason?: string;
+
+  // Temporal extension fields (Stage 1)
+  eventKind?: EventKind;
+  startTime?: string; // e.g. "09:00" (24h destination-local)
+  endTime?: string; // e.g. "11:30" (24h destination-local)
+  durationMin?: number;
+  linkedExpeditionId?: string;
+  expeditionPhase?: 'ascent' | 'camp' | 'descent' | 'full_day';
+  continuationOfId?: string;
+  isOpenKnown?: boolean;
+  hoursEvaluated?: boolean;
 }
 
 export interface EngineTripDay {
@@ -238,12 +258,15 @@ export interface EngineTripDay {
   weatherState: DayWeatherState;
   weatherSummary: string;
   isEstimatedWeather?: boolean;
+  cumulativeFatigueLoad?: number;
+  timeline?: EngineItineraryItem[]; // Chronological sequence of all events across the day
   morning: EngineItineraryItem[];
   afternoon: EngineItineraryItem[];
   evening: EngineItineraryItem[];
 }
 
 export interface EngineOutput {
+  version?: number; // 2 for temporal model
   success: boolean;
   itineraryDays: EngineTripDay[];
   auditLog: AuditEntry[];

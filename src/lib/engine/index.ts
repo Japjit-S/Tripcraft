@@ -154,6 +154,7 @@ export function generateItinerary(input: EngineInput): EngineOutput {
       isEstimatedWeather: classification.isEstimated,
       blockedSlots: filterResult.blockedSlots,
       survivors: filterResult.survivors,
+      arrivalAt: dayNumber === 1 ? input.arrivalAt : undefined,
     });
   }
 
@@ -168,6 +169,7 @@ export function generateItinerary(input: EngineInput): EngineOutput {
   allAuditLog.push(...allocationResult.auditEntries);
 
   return {
+    version: 2,
     success: true,
     itineraryDays: allocationResult.itineraryDays,
     auditLog: allAuditLog,

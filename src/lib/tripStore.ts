@@ -3,6 +3,7 @@ import {
   ART_SCHEMA_VERSION,
   resolveLocalDestinationArtwork,
 } from './images/sceneCatalog';
+import { minutesToTimeStr, timeStrToMinutes } from './engine/timeline';
 
 export interface GeneratedTrip extends Trip {
   auditLog?: AuditEntry[];
@@ -27,9 +28,14 @@ export function ensureTripArtwork(trip: GeneratedTrip): GeneratedTrip {
     return trip;
   }
 
+  const destinationCity =
+    typeof trip.destination === 'string'
+      ? trip.destination
+      : (trip.destination as { city?: string } | undefined)?.city || '';
+
   const resolvedArtwork = resolveLocalDestinationArtwork({
     id: trip.destinationId,
-    city: trip.destination,
+    city: destinationCity,
     country: trip.destinationCountry,
     countryCode: trip.destinationCountryCode,
     admin1: trip.destinationAdmin1,
@@ -46,6 +52,68 @@ export function ensureTripArtwork(trip: GeneratedTrip): GeneratedTrip {
   };
 }
 
+export function upgradeLegacyTrip(trip: GeneratedTrip): GeneratedTrip {
+  const withArtwork = ensureTripArtwork(trip);
+
+  const upgradedDays = (withArtwork.itineraryDays || []).map((day) => {
+    if (day.timeline && day.timeline.length > 0) return day;
+
+    const morningItems = (day.morning || []).map((item, idx) => {
+      const startTime = item.startTime || `${(9 + idx).toString().padStart(2, '0')}:00`;
+      const durationMin = item.durationMin || item.typicalDurationMin || 90;
+      const startMin = timeStrToMinutes(startTime) ?? (9 + idx) * 60;
+      const endTime = item.endTime || minutesToTimeStr(startMin + durationMin);
+      return {
+        ...item,
+        slot: 'MORNING' as const,
+        startTime,
+        endTime,
+        durationMin,
+        eventKind: item.eventKind || 'activity',
+      };
+    });
+    const afternoonItems = (day.afternoon || []).map((item, idx) => {
+      const startTime = item.startTime || `${(13 + idx).toString().padStart(2, '0')}:30`;
+      const durationMin = item.durationMin || item.typicalDurationMin || 90;
+      const startMin = timeStrToMinutes(startTime) ?? ((13 + idx) * 60 + 30);
+      const endTime = item.endTime || minutesToTimeStr(startMin + durationMin);
+      return {
+        ...item,
+        slot: 'AFTERNOON' as const,
+        startTime,
+        endTime,
+        durationMin,
+        eventKind: item.eventKind || 'activity',
+      };
+    });
+    const eveningItems = (day.evening || []).map((item, idx) => {
+      const startTime = item.startTime || `${(18 + idx).toString().padStart(2, '0')}:30`;
+      const durationMin = item.durationMin || item.typicalDurationMin || 90;
+      const startMin = timeStrToMinutes(startTime) ?? ((18 + idx) * 60 + 30);
+      const endTime = item.endTime || minutesToTimeStr(startMin + durationMin);
+      return {
+        ...item,
+        slot: 'EVENING' as const,
+        startTime,
+        endTime,
+        durationMin,
+        eventKind: item.eventKind || (item.category === 'FOOD' ? 'meal' : 'activity'),
+      };
+    });
+
+    return {
+      ...day,
+      timeline: [...morningItems, ...afternoonItems, ...eveningItems],
+    };
+  });
+
+  return {
+    ...withArtwork,
+    version: 2,
+    itineraryDays: upgradedDays,
+  };
+}
+
 /**
  * Saves a generated trip and its audit log to client storage
  */
@@ -53,7 +121,7 @@ export function saveTripToStorage(trip: GeneratedTrip): void {
   if (typeof window === 'undefined') return;
 
   try {
-    const normalizedTrip = ensureTripArtwork(trip);
+    const normalizedTrip = upgradeLegacyTrip(trip);
     localStorage.setItem(
       `${STORAGE_PREFIX}${normalizedTrip.id}`,
       JSON.stringify(normalizedTrip)
@@ -79,8 +147,8 @@ export function getTripFromStorage(id: string): GeneratedTrip | null {
     const raw = localStorage.getItem(`${STORAGE_PREFIX}${id}`);
     if (raw) {
       const parsed = JSON.parse(raw) as GeneratedTrip;
-      const upgraded = ensureTripArtwork(parsed);
-      if (!parsed.artwork) {
+      const upgraded = upgradeLegacyTrip(parsed);
+      if (!parsed.artwork || !parsed.version) {
         localStorage.setItem(
           `${STORAGE_PREFIX}${id}`,
           JSON.stringify(upgraded)
@@ -106,8 +174,8 @@ export function getAllStoredTrips(): GeneratedTrip[] {
       const parsed = JSON.parse(raw) as GeneratedTrip[];
       let didUpgrade = false;
       const upgraded = parsed.map((t) => {
-        if (!t.artwork) didUpgrade = true;
-        return ensureTripArtwork(t);
+        if (!t.artwork || !t.version) didUpgrade = true;
+        return upgradeLegacyTrip(t);
       });
       if (didUpgrade) {
         localStorage.setItem(LIST_KEY, JSON.stringify(upgraded));

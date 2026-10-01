@@ -586,17 +586,35 @@ function ItinerarySection({
 
               {/* Main Content */}
               <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
-                  <h4
-                    className={`font-black text-sm tracking-tight ${
-                      isSelected || isHovered ? 'text-slate-900' : 'text-slate-800'
-                    }`}
-                  >
-                    {item.title}
-                  </h4>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h4
+                      className={`font-black text-sm tracking-tight ${
+                        isSelected || isHovered ? 'text-slate-900' : 'text-slate-800'
+                      }`}
+                    >
+                      {item.title}
+                    </h4>
+                    {item.startTime && item.endTime && (
+                      <span className="text-[11px] font-mono font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md flex items-center gap-1 border border-slate-200/60">
+                        <Clock className="w-3 h-3 text-[#1d6b8f]" />
+                        {item.startTime} – {item.endTime}
+                      </span>
+                    )}
+                  </div>
 
                   {/* Badges */}
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {item.continuationOfId && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">
+                        Trail Continuation
+                      </span>
+                    )}
+                    {item.linkedExpeditionId && !item.continuationOfId && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        Expedition Phase
+                      </span>
+                    )}
                     <span
                       className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${catStyle.bg} ${catStyle.text} ${catStyle.border}`}
                     >
@@ -626,7 +644,7 @@ function ItinerarySection({
                 )}
 
                 {/* Details Footer */}
-                <div className="mt-2 pt-2 border-t border-slate-100/80 flex items-center gap-4 text-[11px] text-slate-400 font-medium">
+                <div className="mt-2.5 pt-2 border-t border-slate-100/80 flex flex-wrap items-center gap-4 text-[11px] text-slate-400 font-medium">
                   {item.coords && (
                     <span className="flex items-center gap-1 hover:text-[#1d6b8f] transition-colors">
                       <MapPin className="w-3 h-3 text-[#1d6b8f]" />
@@ -637,8 +655,13 @@ function ItinerarySection({
                   )}
                   <span className="flex items-center gap-1">
                     <Clock className="w-3 h-3 text-slate-400" />
-                    <span>Focus Activity</span>
+                    <span>{item.durationMin || 90} min scheduled</span>
                   </span>
+                  {item.eventKind && item.eventKind !== 'activity' && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                      {item.eventKind.replace('_', ' ')}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
