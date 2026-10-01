@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { generateItinerary } from '../../src/lib/engine/index';
-import { CuratedPackProvider } from '../../src/lib/providers/curatedPackProvider';
+import { OsmActivityProvider } from '../../src/lib/providers/osmProvider';
 import { WeatherProvider } from '../../src/lib/providers/weatherProvider';
 
 describe('WeatherProvider (Open-Meteo Integration)', () => {
   const weatherProvider = new WeatherProvider();
-  const curatedProvider = new CuratedPackProvider();
+  const osmProvider = new OsmActivityProvider();
 
   it('geocodes Jaipur into a valid normalized Destination', async () => {
     const dest = await weatherProvider.geocodeCity('Jaipur');
@@ -87,7 +87,7 @@ describe('WeatherProvider (Open-Meteo Integration)', () => {
       days: 3,
     });
 
-    const candidates = await curatedProvider.getCandidates(dest);
+    const candidates = await osmProvider.getCandidates(dest);
 
     const output = generateItinerary({
       destination: dest,
