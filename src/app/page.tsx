@@ -7,6 +7,7 @@ import {
   Clock,
   Layers,
 } from 'lucide-react';
+import LandingHeader from '@/components/layout/LandingHeader';
 
 export const metadata = {
   title: 'Tripcraft | A better journey begins with a plan that fits',
@@ -69,47 +70,7 @@ export default function HomePage() {
       <div className="pointer-events-none fixed inset-0 opacity-[0.03] z-50 mix-blend-multiply" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
 
       {/* Navigation */}
-      <header className="sticky top-0 z-40 bg-[var(--color-tc-parchment)]/90 backdrop-blur-md border-b border-[var(--color-tc-sage)]/30">
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-9 h-9 sm:w-10 sm:h-10 shrink-0">
-              <Image
-                src="/artwork/tripcraft-mark.png"
-                alt=""
-                width={40}
-                height={40}
-                className="w-full h-full object-contain"
-                priority
-              />
-            </div>
-            <span className="font-serif text-2xl font-bold tracking-tight text-[var(--color-tc-ink)]">
-              Tripcraft
-            </span>
-          </Link>
-
-          <nav className="hidden md:flex items-center gap-8 text-sm font-bold text-[var(--color-tc-ink)]/70 uppercase tracking-widest">
-            <a href="#personas" className="hover:text-[var(--color-tc-tangerine)] transition-colors">Personas</a>
-              <a href="#how-it-works" className="hover:text-[var(--color-tc-tangerine)] transition-colors">Method</a>
-            <a href="#destinations" className="hover:text-[var(--color-tc-tangerine)] transition-colors">Atlas</a>
-          </nav>
-
-          <div className="flex items-center gap-4">
-            <Link
-              href="/login"
-              className="text-sm font-bold uppercase tracking-wider text-[var(--color-tc-ink)] hover:text-[var(--color-tc-tangerine)] px-2 transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/planner"
-              className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-[var(--color-tc-cream)] bg-[var(--color-tc-ink)] hover:bg-[var(--color-tc-teal)] px-6 py-3 rounded-full transition-all"
-            >
-              Plan Trip
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </header>
+      <LandingHeader />
 
       {/* Hero Section */}
       <section className="relative pt-12 pb-24 lg:pt-20 lg:pb-32 overflow-hidden border-b border-[var(--color-tc-sage)]/30">
@@ -285,7 +246,7 @@ export default function HomePage() {
           <div className="flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-[var(--color-tc-parchment)]/60">
             <Link href="/planner" className="hover:text-[var(--color-tc-saffron)] transition-colors">Planner</Link>
             <Link href="/dashboard" className="hover:text-[var(--color-tc-saffron)] transition-colors">Dashboard</Link>
-            <Link href="/login" className="hover:text-[var(--color-tc-saffron)] transition-colors">Account</Link>
+            <Link href="/trips" className="hover:text-[var(--color-tc-saffron)] transition-colors">Saved Trips</Link>
           </div>
         </div>
       </footer>
