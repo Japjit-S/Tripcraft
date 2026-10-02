@@ -14,6 +14,7 @@ import {
   Calendar,
   Compass,
   CheckCircle2,
+  ArrowLeft,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
 
@@ -72,8 +73,12 @@ export default function TopNav() {
         
         {isTrip ? (
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/trips" className="text-xs font-bold uppercase tracking-widest text-[var(--color-tc-ink)]/50 hover:text-[var(--color-tc-tangerine)] transition-colors">
-              +? Back to Atlas
+            <Link
+              href="/trips"
+              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[var(--color-tc-ink)]/60 hover:text-[var(--color-tc-tangerine)] transition-colors group"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
+              <span>Back to Atlas</span>
             </Link>
           </div>
         ) : (

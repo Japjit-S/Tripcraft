@@ -1,4 +1,4 @@
-﻿import Image from 'next/image';
+import Image from 'next/image';
 import { Cloud } from 'lucide-react';
 
 interface WeatherSummaryProps {
@@ -66,9 +66,9 @@ export default function WeatherSummary({
 
   return (
     <div
-      className={"flex flex-row items-center justify-between px-6 py-4 rounded-3xl bg-gradient-to-br " + bgGradient + " border-2 border-[var(--color-tc-sage)] shadow-[4px_4px_0px_rgba(23,60,57,0.05)] h-full transition-all gap-4"}
+      className={"flex flex-row items-center justify-between px-4 sm:px-5 py-3.5 rounded-3xl bg-gradient-to-br " + bgGradient + " border-2 border-[var(--color-tc-sage)] shadow-[4px_4px_0px_rgba(23,60,57,0.05)] h-full transition-all gap-2 sm:gap-3"}
     >
-      <div className="flex flex-col items-start gap-0.5">
+      <div className="flex flex-col items-start gap-0.5 min-w-0 flex-1">
         <div className="flex items-baseline gap-1.5">
           <p className="text-3xl font-bold font-serif text-[var(--color-tc-ink)] tracking-tight">
             {maxTemp}°<span className="text-xl text-[var(--color-tc-ink)]/70 font-bold">C</span>
@@ -79,7 +79,7 @@ export default function WeatherSummary({
             </span>
           )}
         </div>
-        <p className="text-sm font-bold text-[var(--color-tc-ink)]/80 capitalize line-clamp-1">
+        <p className="text-xs sm:text-sm font-bold text-[var(--color-tc-ink)]/80 capitalize leading-snug break-words">
           {mainCondition || 'Forecast'}
         </p>
       </div>

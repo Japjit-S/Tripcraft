@@ -191,10 +191,7 @@ export function DestinationBanner({
 
       {/* Surface-Specific Overlays & Safe-Area Gradients */}
       {surface === 'workspace' && (
-        <>
-          <div className="absolute inset-0 bg-gradient-to-r from-[#FFF5ED] via-[#FFE8D6]/85 via-30% to-transparent pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#FFE8D6]/35 via-transparent to-[#FFF5ED]/20 pointer-events-none" />
-        </>
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-tc-ink)]/15 via-transparent to-transparent pointer-events-none" />
       )}
 
       {surface === 'dashboard' && (

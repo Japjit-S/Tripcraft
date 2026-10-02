@@ -7,8 +7,6 @@ import {
   ChevronRight,
   MapPin,
   Clock,
-  ShieldCheck,
-  AlertTriangle,
 } from 'lucide-react';
 import { ensureTripArtwork, getTripFromStorage, GeneratedTrip } from '@/lib/tripStore';
 import { ItineraryItem } from '@/lib/types';
@@ -29,6 +27,62 @@ const CATEGORY_STYLES: Record<string, { bg: string; text: string; border: string
   ENTERTAINMENT: { bg: 'bg-indigo-50', text: 'text-[var(--color-tc-ink)]', border: 'border-indigo-200' },
   RELAXATION: { bg: 'bg-purple-50', text: 'text-[var(--color-tc-ink)]', border: 'border-purple-200' },
 };
+
+function getDestinationTypography(destination: string) {
+  const len = destination.trim().length;
+  if (len > 15) {
+    // Very long city names like Thiruvananthapuram (18 chars)
+    return {
+      city: 'text-xl sm:text-2xl lg:text-[1.85rem]',
+      admin1: 'text-xs sm:text-sm lg:text-base',
+    };
+  }
+  if (len > 10) {
+    // Long city names like Visakhapatnam (13 chars), Bhubaneswar (11 chars)
+    return {
+      city: 'text-2xl sm:text-3xl lg:text-[2.35rem]',
+      admin1: 'text-sm sm:text-base lg:text-lg',
+    };
+  }
+  if (len > 7) {
+    // Medium city names like Bengaluru (9 chars), Hyderabad (9 chars)
+    return {
+      city: 'text-2xl sm:text-3xl lg:text-4xl',
+      admin1: 'text-sm sm:text-base lg:text-lg',
+    };
+  }
+  // Short city names like Mumbai (6 chars), Jaipur (6 chars), Goa (3 chars)
+  return {
+    city: 'text-3xl sm:text-4xl lg:text-5xl',
+    admin1: 'text-base sm:text-lg lg:text-xl',
+  };
+}
+
+function formatCityWithSoftHyphens(name: string): string {
+  const knownBreaks: Record<string, string> = {
+    'Thiruvananthapuram': 'Thiruvanan\u00ADthapuram',
+    'Visakhapatnam': 'Visakha\u00ADpatnam',
+    'Bhubaneswar': 'Bhuban\u00ADeswar',
+    'Mahabalipuram': 'Mahabali\u00ADpuram',
+    'Ramanathapuram': 'Ramanatha\u00ADpuram',
+    'Secunderabad': 'Secunder\u00ADabad',
+    'Kanchipuram': 'Kanchi\u00ADpuram',
+    'Muzaffarnagar': 'Muzaffar\u00ADnagar',
+    'Muzaffarpur': 'Muzaffar\u00ADpur',
+  };
+
+  if (knownBreaks[name]) {
+    return knownBreaks[name];
+  }
+
+  // If a single long word > 11 chars has no hyphens or spaces, insert soft hyphen in the middle
+  if (name.length > 11 && !name.includes(' ') && !name.includes('-')) {
+    const mid = Math.floor(name.length / 2);
+    return name.slice(0, mid) + '\u00AD' + name.slice(mid);
+  }
+
+  return name;
+}
 
 export default function TripWorkspacePage({
   params,
@@ -109,133 +163,81 @@ export default function TripWorkspacePage({
     ? allCurrentDayItems.find((i) => i.id === activeItemId)
     : undefined;
 
+  const destTypo = getDestinationTypography(trip.destination);
+
   return (
     <div className="h-full flex overflow-hidden bg-transparent">
       {/* Center Main Content */}
       <div className="flex-1 overflow-y-auto px-6 py-6 lg:px-10 lg:py-8 flex flex-col">
                 {/* Banner Row */}
-        <div className="mb-8">
-          {/* Destination Banner */}
-          <div className="w-full relative bg-[var(--color-tc-cream)] border-[var(--color-tc-sage)]/50 rounded-2xl overflow-hidden p-6 sm:p-8 flex items-center shadow-[4px_4px_0px_rgba(23,60,57,0.05)] min-h-[220px] border-2">
-            {/* Subtle Gradient Overlays for High-Contrast Readability */}
-            <div className="absolute inset-0 z-10 pointer-events-none" />
-
-            <div className="relative z-20 max-w-[65%] sm:max-w-[60%] pr-4 text-[var(--color-tc-ink)]">
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <span className="text-[11px] font-bold font-serif uppercase tracking-widest text-[var(--color-tc-tangerine)] bg-[var(--color-tc-tangerine)]/10 px-2.5 py-0.5 rounded-md border border-[var(--color-tc-tangerine)]/20 flex items-center gap-1.5">
-                  <div className="relative w-4 h-4 shrink-0">
-                    <Image
-                      src={getPersonaArtworkPath(trip.persona)}
-                      alt=""
-                      width={16}
-                      height={16}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  {trip.persona} Persona
-                </span>
-                {trip.feasibilityStatus === 'CAUTION' ? (
-                  <span className="text-[11px] font-bold font-serif uppercase tracking-wider text-[var(--color-tc-saffron)] bg-[var(--color-tc-saffron)]/10 px-2 py-0.5 rounded-md flex items-center gap-1 border border-[var(--color-tc-saffron)]/20">
-                    <AlertTriangle className="w-3 h-3" /> Caution Advisory
-                  </span>
-                ) : (
-                  <span className="text-[11px] font-bold font-serif uppercase tracking-wider text-[var(--color-tc-teal)] bg-[var(--color-tc-teal)]/10 px-2 py-0.5 rounded-md flex items-center gap-1 border border-[var(--color-tc-teal)]/20">
-                    <ShieldCheck className="w-3 h-3" /> Feasibility Passed
-                  </span>
-                )}
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-serif text-[var(--color-tc-ink)] mb-2 tracking-tight break-words">
-                {trip.destination}
-              </h1>
-
-              <p className="text-xs sm:text-sm font-medium text-[var(--color-tc-ink)]/70 flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-[var(--color-tc-tangerine)] shrink-0" />
-                <span>
-                  {[trip.destinationAdmin1, trip.destinationCountry].filter(Boolean).join(', ') ||
-                    'Global Destination'}
-                </span>
-                {trip.originCity && (
-                  <span className="text-[var(--color-tc-ink)]/50 text-xs">
-                    • Departed from {trip.originCity}
-                  </span>
-                )}
-              </p>
-            </div>
-
-            {/* Illustration Mask */}
-            <div className="absolute right-0 top-0 bottom-0 w-[55%] sm:w-1/2 md:w-5/12 z-0 opacity-90">
-              <DestinationBanner
-                artwork={trip.artwork}
-                destination={trip.destination}
-                destinationId={trip.destinationId}
-                country={trip.destinationCountry}
-                countryCode={trip.destinationCountryCode}
-                admin1={trip.destinationAdmin1}
-                coords={trip.destinationCoords}
-                surface="workspace"
-                className="w-full h-full"
-              />
-            </div>
+        <div className="mb-6">
+          {/* Full-Bleed Destination Artwork Banner */}
+          <div className="w-full relative h-[200px] sm:h-[240px] md:h-[280px] rounded-2xl overflow-hidden border-2 border-[var(--color-tc-sage)]/60 shadow-[4px_4px_0px_rgba(23,60,57,0.05)] bg-[var(--color-tc-cream)]">
+            <DestinationBanner
+              artwork={trip.artwork}
+              destination={trip.destination}
+              destinationId={trip.destinationId}
+              country={trip.destinationCountry}
+              countryCode={trip.destinationCountryCode}
+              admin1={trip.destinationAdmin1}
+              coords={trip.destinationCoords}
+              surface="workspace"
+              className="w-full h-full"
+            />
           </div>
         </div>
 
-                        {/* Info & Weather Row */}
-        <div className="flex flex-col lg:flex-row gap-6 mb-8">
-          {/* Combined Persona & Duration Card (60%) */}
-          <div className="w-full lg:w-3/5 bg-[var(--color-tc-cream)] px-6 py-4 rounded-[1.5rem] shadow-[4px_4px_0px_rgba(23,60,57,0.05)] border-2 border-[var(--color-tc-sage)] flex flex-col justify-center">
-            <div className="flex flex-col sm:flex-row justify-between gap-6 sm:gap-8 h-full items-center">
-              {/* Duration & Schedule */}
-              <div className="flex-1 flex flex-col justify-center w-full">
-                <p className="text-[10px] font-bold text-[var(--color-tc-ink)]/50 uppercase tracking-wider mb-1">Duration & Schedule</p>
-                <div className="flex items-baseline gap-2">
-                  <h3 className="text-xl sm:text-2xl font-bold font-serif text-[var(--color-tc-ink)] mb-0.5">
-                    {trip.days} {trip.days === 1 ? 'Day Excursion' : 'Days Total'}
-                  </h3>
-                  <span className="text-xs sm:text-sm font-semibold text-[var(--color-tc-ink)]/60 hidden xl:inline">
-                    ({formatDestinationDate(trip.startDate, { month: 'short', day: 'numeric' }, trip.destinationTimezone)} —{' '}
-                    {formatDestinationDate(
-                      trip.itineraryDays[trip.itineraryDays.length - 1]?.date || trip.startDate,
-                      { month: 'short', day: 'numeric' },
-                      trip.destinationTimezone
-                    )})
-                  </span>
+        {/* Info & Weather Row */}
+        <div className="flex flex-col lg:flex-row gap-6 mb-8 items-stretch">
+          {/* Combined Persona & Destination Card */}
+          <div className="w-full lg:flex-1 bg-[var(--color-tc-cream)] pl-2.5 sm:pl-3.5 pr-4 sm:pr-6 py-3 sm:py-3.5 rounded-[1.5rem] shadow-[4px_4px_0px_rgba(23,60,57,0.05)] border-2 border-[var(--color-tc-sage)] flex flex-col justify-center overflow-hidden">
+            <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-3 sm:gap-4 lg:gap-5 h-full">
+              {/* Left: Persona with Pure PNG Logo (Shifted completely left to remove dead space) */}
+              <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+                <div className="relative flex items-center justify-center shrink-0 w-20 h-20 sm:w-24 sm:h-24 -ml-0.5 sm:-ml-1">
+                  <Image
+                    src={getPersonaArtworkPath(trip.persona)}
+                    alt={trip.persona}
+                    width={96}
+                    height={96}
+                    className="w-full h-full object-contain drop-shadow-md"
+                  />
                 </div>
-                <p className="text-xs sm:text-sm font-semibold text-[var(--color-tc-ink)]/60 xl:hidden">
-                  {formatDestinationDate(trip.startDate, { month: 'short', day: 'numeric' }, trip.destinationTimezone)} —{' '}
-                  {formatDestinationDate(
-                    trip.itineraryDays[trip.itineraryDays.length - 1]?.date || trip.startDate,
-                    { month: 'short', day: 'numeric', year: 'numeric' },
-                    trip.destinationTimezone
-                  )}
-                </p>
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold font-serif text-[var(--color-tc-ink)] leading-tight whitespace-nowrap">
+                    {trip.persona}
+                  </h3>
+                  <p className="text-xs sm:text-sm font-bold text-[var(--color-tc-teal)] mt-0.5">
+                    Persona
+                  </p>
+                </div>
               </div>
 
-              {/* Persona */}
-              <div className="flex-1 flex flex-col justify-center sm:border-l-2 sm:border-[var(--color-tc-sage)]/30 sm:pl-8 h-full w-full pt-4 sm:pt-0 border-t-2 border-[var(--color-tc-sage)]/30 sm:border-t-0">
-                <p className="text-[10px] font-bold text-[var(--color-tc-ink)]/50 uppercase tracking-wider mb-1">Pacing Algorithm</p>
-                <div className="flex items-center gap-2">
-                  <div className="relative w-6 h-6 shrink-0">
-                    <Image
-                      src={getPersonaArtworkPath(trip.persona)}
-                      alt=""
-                      width={24}
-                      height={24}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-serif text-[var(--color-tc-ink)] mb-0.5">{trip.persona}</h3>
-                </div>
-                <p className="text-xs sm:text-sm font-semibold text-[var(--color-tc-ink)]/60 flex items-center gap-2 mt-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-tc-ink)] animate-pulse shrink-0"></span>
-                  Weather-tuned slot distribution
+              {/* Middle / Right: Destination & Total Days (Divider moved far left; Dynamic typography for long city names) */}
+              <div className="flex-1 sm:border-l-2 sm:border-[var(--color-tc-sage)]/30 sm:pl-4 md:pl-5 pt-3 sm:pt-0 border-t-2 border-[var(--color-tc-sage)]/30 sm:border-t-0 flex flex-col justify-center min-w-0">
+                <h2
+                  className={`font-bold font-serif text-[var(--color-tc-ink)] leading-[1.1] break-words [hyphens:manual] ${destTypo.city}`}
+                  title={trip.destination}
+                >
+                  {formatCityWithSoftHyphens(trip.destination)}
+                </h2>
+                {trip.destinationAdmin1 && (
+                  <p
+                    className={`font-serif font-semibold text-[var(--color-tc-ink)]/70 leading-snug break-words ${destTypo.admin1}`}
+                    title={trip.destinationAdmin1}
+                  >
+                    {trip.destinationAdmin1}
+                  </p>
+                )}
+                <p className="text-xs sm:text-sm font-bold text-[var(--color-tc-teal)] mt-1">
+                  {trip.days} {trip.days === 1 ? 'Day Excursion' : 'Days Total'}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Weather Card (40%) */}
-          <div className="w-full lg:w-2/5 shrink-0 flex flex-col">
+          {/* Weather Card (Compact & Shrunk) */}
+          <div className="w-full lg:w-[250px] xl:w-[280px] shrink-0 flex flex-col">
             <WeatherSummary
               summary={selectedDay.weatherSummary}
               weatherState={selectedDay.weatherState}
