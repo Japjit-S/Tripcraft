@@ -3,8 +3,6 @@ import Image from 'next/image';
 import {
   MapPin,
   ArrowRight,
-  Clock,
-  Layers,
 } from 'lucide-react';
 import LandingHeader from '@/components/layout/LandingHeader';
 
@@ -229,8 +227,14 @@ export default function HomePage() {
                       02.
                     </span>
                   </div>
-                  <div className="w-14 h-14 rounded-2xl border-2 border-[var(--color-tc-tangerine)]/25 group-hover:border-[var(--color-tc-ink)] bg-[var(--color-tc-tangerine)]/10 shadow-sm flex items-center justify-center p-2.5 group-hover:scale-105 group-hover:shadow-[2px_2px_0px_var(--color-tc-ink)] transition-all shrink-0">
-                    <Clock className="w-7 h-7 text-[var(--color-tc-tangerine)]" />
+                  <div className="w-14 h-14 rounded-2xl border-2 border-[var(--color-tc-tangerine)]/25 group-hover:border-[var(--color-tc-ink)] bg-[var(--color-tc-cream)] shadow-sm flex items-center justify-center p-2 group-hover:scale-105 group-hover:shadow-[2px_2px_0px_var(--color-tc-ink)] transition-all shrink-0 overflow-hidden">
+                    <Image
+                      src="/artwork/gate-interval-time-math.png"
+                      alt="Interval & Time Math Gate"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                 </div>
 
@@ -271,8 +275,14 @@ export default function HomePage() {
                       03.
                     </span>
                   </div>
-                  <div className="w-14 h-14 rounded-2xl border-2 border-[var(--color-tc-sage)] group-hover:border-[var(--color-tc-ink)] bg-[var(--color-tc-sage)]/25 shadow-sm flex items-center justify-center p-2.5 group-hover:scale-105 group-hover:shadow-[2px_2px_0px_var(--color-tc-ink)] transition-all shrink-0">
-                    <Layers className="w-7 h-7 text-[var(--color-tc-teal)]" />
+                  <div className="w-14 h-14 rounded-2xl border-2 border-[var(--color-tc-teal)]/20 group-hover:border-[var(--color-tc-ink)] bg-[var(--color-tc-cream)] shadow-sm flex items-center justify-center p-2 group-hover:scale-105 group-hover:shadow-[2px_2px_0px_var(--color-tc-ink)] transition-all shrink-0 overflow-hidden">
+                    <Image
+                      src="/artwork/gate-spatial-clustering.png"
+                      alt="Spatial Clustering Gate"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                 </div>
 

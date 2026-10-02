@@ -466,5 +466,12 @@ describe('Destination Banner & Illustration Resolution System', () => {
     const v2Path = path.join(process.cwd(), 'public/artwork/landing-india-atlas-hero-v2.png');
     assert.equal(fs.existsSync(v2Path), true, 'Missing landing-india-atlas-hero-v2.png');
     assert.ok(fs.statSync(v2Path).size > 1000, 'landing-india-atlas-hero-v2.png is empty');
+
+    // Verify deterministic engine gate artwork exists and is valid
+    for (const gateFile of ['gate-interval-time-math.png', 'gate-spatial-clustering.png']) {
+      const gatePath = path.join(process.cwd(), 'public/artwork', gateFile);
+      assert.equal(fs.existsSync(gatePath), true, `Missing ${gateFile}`);
+      assert.ok(fs.statSync(gatePath).size > 1000, `${gateFile} is empty`);
+    }
   });
 });
