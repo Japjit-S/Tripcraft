@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Bell,
@@ -53,25 +54,32 @@ export default function TopNav() {
   };
 
   return (
-    <header className="h-16 sm:h-20 bg-white border-b border-slate-100 flex items-center justify-between px-4 sm:px-8 shrink-0 w-full z-30">
+    <header className="h-16 sm:h-20 bg-[var(--color-tc-parchment)] border-b border-[var(--color-tc-sage)] flex items-center justify-between px-4 sm:px-8 shrink-0 w-full z-30">
       <div className="flex items-center gap-4 sm:gap-6 md:gap-10">
-        <Link href="/" className="flex items-center gap-2.5 font-black text-xl sm:text-2xl text-slate-900 tracking-tight group shrink-0">
-          <div className="w-8 h-8 bg-gradient-to-tr from-orange-600 to-amber-500 rounded-xl flex items-center justify-center text-white shadow-sm shadow-orange-200 group-hover:scale-105 transition-transform">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <Link href="/" className="flex items-center gap-3 group shrink-0">
+          <div className="relative w-9 h-9 sm:w-10 sm:h-10 shrink-0">
+            <Image
+              src="/artwork/tripcraft-mark.png"
+              alt=""
+              width={40}
+              height={40}
+              className="w-full h-full object-contain"
+              priority
+            />
           </div>
-          <span>Tripcraft</span>
+          <span className="font-serif text-xl font-bold tracking-tight text-[var(--color-tc-ink)] hidden sm:inline-block">Tripcraft</span>
         </Link>
         
         {isTrip ? (
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/trips" className="text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-[#1d6b8f] transition-colors">
-              ← All Travels
+            <Link href="/trips" className="text-xs font-bold uppercase tracking-widest text-[var(--color-tc-ink)]/50 hover:text-[var(--color-tc-tangerine)] transition-colors">
+              +? Back to Atlas
             </Link>
           </div>
         ) : (
           <div className="hidden md:flex items-center gap-6">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              {pathname === '/planner' ? 'Trip Planner' : pathname === '/trips' ? 'Saved Journeys' : 'Travel Dashboard'}
+            <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-tc-ink)]/60">
+              {pathname === '/planner' ? 'Trip Planner' : pathname === '/trips' ? 'Saved Journeys' : 'My Home'}
             </span>
           </div>
         )}
@@ -86,33 +94,29 @@ export default function TopNav() {
               setNotificationsOpen((prev) => !prev);
               setMenuOpen(false);
             }}
-            className="relative p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer"
+            className="relative p-2 text-[var(--color-tc-ink)]/60 hover:text-[var(--color-tc-tangerine)] rounded-full transition-colors cursor-pointer"
             aria-label="Notifications"
           >
             <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full ring-2 ring-white"></span>
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[var(--color-tc-saffron)] rounded-full ring-2 ring-[var(--color-tc-parchment)] border border-[var(--color-tc-ink)]"></span>
           </button>
 
           {notificationsOpen && (
-            <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">System Signals</span>
-                <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+            <div className="absolute right-0 mt-3 w-80 bg-[var(--color-tc-cream)] rounded-2xl shadow-[4px_4px_0px_rgba(23,60,57,0.15)] border-2 border-[var(--color-tc-sage)] p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="flex items-center justify-between pb-3 border-b border-[var(--color-tc-sage)]">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-tc-ink)]/60">System Signals</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-tc-teal)] bg-[var(--color-tc-teal)]/10 px-2 py-0.5 rounded-full flex items-center gap-1">
                   <CheckCircle2 className="w-3 h-3" /> Live
                 </span>
               </div>
               <div className="mt-3 space-y-2.5">
-                <div className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/70 transition-colors">
-                  <p className="text-xs font-bold text-slate-900">Overpass Spatial Engine</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">18 km search radius active with Wikidata sitelink prominence scoring.</p>
+                <div className="p-3 rounded-xl bg-[var(--color-tc-parchment)] border border-[var(--color-tc-sage)]/50">
+                  <p className="text-xs font-bold text-[var(--color-tc-ink)]">OpenStreetMap engine ready</p>
+                  <p className="text-[10px] font-medium text-[var(--color-tc-ink)]/70 mt-1">18 km search radius active with prominence scoring.</p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/70 transition-colors">
-                  <p className="text-xs font-bold text-slate-900">Open-Meteo Meteorology</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Hourly forecast & 16-day historical climate interpolation ready.</p>
-                </div>
-                <div className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/70 transition-colors">
-                  <p className="text-xs font-bold text-slate-900">Supabase Cloud Sync</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">8 relational tables with RLS and live notes synchronization online.</p>
+                <div className="p-3 rounded-xl bg-[var(--color-tc-parchment)] border border-[var(--color-tc-sage)]/50">
+                  <p className="text-xs font-bold text-[var(--color-tc-ink)]">Open-Meteo online</p>
+                  <p className="text-[10px] font-medium text-[var(--color-tc-ink)]/70 mt-1">Hourly forecast & 16-day historical interpolation ready.</p>
                 </div>
               </div>
             </div>
@@ -122,8 +126,8 @@ export default function TopNav() {
         {/* Auth Section */}
         {loading ? (
           <div className="flex items-center gap-3 animate-pulse">
-            <div className="h-4 w-24 bg-slate-200 rounded-md hidden sm:block"></div>
-            <div className="w-9 h-9 rounded-full bg-slate-200"></div>
+            <div className="h-4 w-24 bg-[var(--color-tc-sage)]/30 rounded-md hidden sm:block"></div>
+            <div className="w-10 h-10 rounded-full bg-[var(--color-tc-sage)]/30"></div>
           </div>
         ) : user ? (
           /* Authenticated User Menu */
@@ -134,67 +138,67 @@ export default function TopNav() {
                 setMenuOpen((prev) => !prev);
                 setNotificationsOpen(false);
               }}
-              className="flex items-center gap-3 p-1.5 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer"
+              className="flex items-center gap-3 p-1.5 rounded-full hover:bg-[var(--color-tc-cream)] transition-colors cursor-pointer border border-transparent hover:border-[var(--color-tc-sage)]"
             >
-              <div className="text-left hidden sm:block">
-                <p className="text-xs font-bold text-slate-900 leading-none">{user.name}</p>
-                <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">
-                  Active
+              <div className="text-right hidden sm:block pr-1">
+                <p className="text-xs font-bold text-[var(--color-tc-ink)] leading-none">{user.name}</p>
+                <p className="text-[10px] text-[var(--color-tc-teal)] font-bold uppercase tracking-widest leading-none mt-1.5">
+                  Explorer
                 </p>
               </div>
-              <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+              <div className="w-10 h-10 rounded-full bg-[var(--color-tc-ink)] text-[var(--color-tc-cream)] flex items-center justify-center font-bold text-xs shadow-sm border-2 border-[var(--color-tc-sage)]">
                 {user.initials}
               </div>
-              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-3.5 h-3.5 text-[var(--color-tc-ink)]/40 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute right-0 mt-3 w-64 bg-[var(--color-tc-cream)] rounded-2xl shadow-[4px_4px_0px_rgba(23,60,57,0.15)] border-2 border-[var(--color-tc-sage)] p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                 {/* User Header */}
-                <div className="p-3 border-b border-slate-100">
-                  <p className="text-xs font-black text-slate-900">{user.name}</p>
-                  <p className="text-[11px] text-slate-500 truncate mt-0.5 font-mono">{user.email}</p>
-                  <div className="mt-2">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <div className="p-4 border-b border-[var(--color-tc-sage)]/50">
+                  <p className="text-xs font-bold text-[var(--color-tc-ink)]">{user.name}</p>
+                  <p className="text-[10px] text-[var(--color-tc-ink)]/60 font-medium truncate mt-1">{user.email}</p>
+                  <div className="mt-3">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest bg-[var(--color-tc-teal)]/10 text-[var(--color-tc-teal)] border border-[var(--color-tc-teal)]/20">
                       <ShieldCheck className="w-3 h-3" /> Authenticated
                     </span>
                   </div>
                 </div>
 
                 {/* Nav Links */}
-                <div className="py-1">
+                <div className="py-2 space-y-1">
                   <Link
                     href="/dashboard"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                    className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest text-[var(--color-tc-ink)]/70 hover:text-[var(--color-tc-ink)] hover:bg-[var(--color-tc-parchment)] transition-colors"
                   >
-                    <Compass className="w-4 h-4 text-slate-400" />
-                    Dashboard
+                    <Compass className="w-4 h-4 text-[var(--color-tc-ink)]/40" />
+                    My Home
                   </Link>
                   <Link
                     href="/trips"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                    className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest text-[var(--color-tc-ink)]/70 hover:text-[var(--color-tc-ink)] hover:bg-[var(--color-tc-parchment)] transition-colors"
                   >
-                    <Calendar className="w-4 h-4 text-slate-400" />
+                    <Calendar className="w-4 h-4 text-[var(--color-tc-ink)]/40" />
                     All Trips
                   </Link>
                   <Link
                     href="/planner"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                    className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest text-[var(--color-tc-tangerine)] hover:bg-[var(--color-tc-parchment)] transition-colors"
                   >
-                    <Sparkles className="w-4 h-4 text-amber-500" />
+                    <Sparkles className="w-4 h-4" />
                     Plan New Trip
                   </Link>
                 </div>
 
                 {/* Sign Out */}
-                <div className="pt-1 border-t border-slate-100">
+                <div className="pt-2 border-t border-[var(--color-tc-sage)]/50">
                   <button
                     type="button"
                     onClick={handleSignOut}
-                    className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left"
+                    className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest text-[#7F1D1D]/70 hover:text-[#7F1D1D] hover:bg-[#FEF2F2] transition-colors cursor-pointer text-left"
                   >
                     <LogOut className="w-4 h-4" />
                     Sign Out
@@ -208,7 +212,7 @@ export default function TopNav() {
           <div className="flex items-center gap-2">
             <Link
               href="/login"
-              className="px-4 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-all shadow-xs flex items-center gap-1.5"
+              className="px-5 py-2.5 text-[10px] uppercase tracking-widest font-bold text-[var(--color-tc-cream)] bg-[var(--color-tc-ink)] hover:bg-[var(--color-tc-teal)] rounded-full transition-all shadow-[2px_2px_0px_var(--color-tc-sage)] flex items-center gap-2"
             >
               <User className="w-3.5 h-3.5" />
               <span>Sign In</span>

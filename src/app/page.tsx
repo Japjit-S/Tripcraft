@@ -1,113 +1,108 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import {
-  Compass,
   CloudSun,
   MapPin,
-  Sparkles,
   ArrowRight,
   Clock,
-  Backpack,
-  Landmark,
-  Coffee,
-  Users,
-  CheckCircle2,
   Layers,
 } from 'lucide-react';
 
 export const metadata = {
-  title: 'Tripcraft | Weather-Aware Deterministic Travel Planner',
-  description:
-    'Generate physically feasible 1-to-7 day itineraries anywhere worldwide using live meteorological forecasts and open spatial data.',
+  title: 'Tripcraft | A better journey begins with a plan that fits',
+  description: 'Weather-aware daily travel plans grounded in reality. The modern atlas for your field notes.',
 };
 
 const FEATURED_DESTINATIONS = [
-  { name: 'Manali', region: 'Himachal Pradesh, India', desc: 'Himalayan valleys & alpine pine walks' },
-  { name: 'Jaipur', region: 'Rajasthan, India', desc: 'Historic pink sandstone forts & royal palaces' },
-  { name: 'Tokyo', region: 'Japan', desc: 'Metropolitan gardens, shrines & culinary lanes' },
-  { name: 'Paris', region: 'France', desc: 'World-renowned art museums & riverside promenades' },
-  { name: 'Cape Town', region: 'South Africa', desc: 'Coastal peaks, ocean drives & botanical reserves' },
+  { name: 'Delhi', region: 'Delhi' },
+  { name: 'Jaipur', region: 'Rajasthan' },
+  { name: 'Mumbai', region: 'Maharashtra' },
+  { name: 'Bengaluru', region: 'Karnataka' },
+  { name: 'Kochi', region: 'Kerala' },
 ];
 
 const PERSONAS = [
   {
     title: 'Backpacker',
-    icon: Backpack,
+    artworkPath: '/artwork/persona-backpacker.png',
     badge: 'High Stamina',
-    color: 'from-emerald-500 to-teal-600',
-    desc: 'Prioritizes unmissable scenic treks, high-altitude viewpoints, street food hubs, and authentic local bazaars.',
-    traits: ['Nature & Outdoors', 'Scenic Viewpoints', 'Bustling Bazaars', 'High Walking Load'],
+    desc: 'Unmissable scenic treks, viewpoints, and bustling local bazaars.',
   },
   {
     title: 'Culture Seeker',
-    icon: Landmark,
+    artworkPath: '/artwork/persona-culture-seeker.png',
     badge: 'Curated Heritage',
-    color: 'from-amber-500 to-orange-600',
-    desc: 'Focuses on architectural heritage, historic forts, royal palaces, archaeological ruins, and premier museums.',
-    traits: ['Historic Monuments', 'Art Galleries', 'Museums', 'Architectural Walking'],
+    desc: 'Architectural heritage, royal palaces, and premier museums.',
   },
   {
     title: 'Comfort Traveller',
-    icon: Coffee,
+    artworkPath: '/artwork/persona-comfort-traveller.png',
     badge: 'Relaxed Pacing',
-    color: 'from-blue-500 to-indigo-600',
-    desc: 'Balanced day flows with gentle transit buffers, scenic viewpoints, fine dining, and minimal physical fatigue.',
-    traits: ['Accessible Sights', 'Scenic Panoramas', 'Comfortable Transit', 'Zero Rush'],
+    desc: 'Balanced day flows with gentle transit buffers and scenic panoramas.',
   },
   {
     title: 'Family',
-    icon: Users,
-    badge: 'Child-Safe & Inclusive',
-    color: 'from-purple-500 to-pink-600',
-    desc: 'Strictly screens for kid-friendly botanical gardens, science galleries, interactive parks, and safe paved environments.',
-    traits: ['Interactive Science & Parks', 'Paved Walking', 'Safe Indoor Swaps', 'Low Fatigue'],
+    artworkPath: '/artwork/persona-family.png',
+    badge: 'Child-Safe',
+    desc: 'Kid-friendly botanical gardens, interactive parks, and low fatigue.',
   },
 ];
 
+// SVG Mountain / Sun / Fort Illustration for the Hero
+const HeroArtwork = () => (
+  <div className="relative w-full max-w-lg mx-auto aspect-square opacity-90 pointer-events-none select-none">
+    <Image 
+      src="/artwork/landing-india-atlas-hero.png" 
+      alt=""
+      fill 
+      sizes="(max-width: 1024px) 100vw, 512px"
+      className="object-contain" 
+      priority 
+    />
+  </div>
+);
+
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-orange-100 selection:text-orange-900">
+    <div className="min-h-screen bg-[var(--color-tc-parchment)] text-[var(--color-tc-ink)] flex flex-col font-sans selection:bg-[var(--color-tc-tangerine)] selection:text-white">
+      {/* Noise Texture Overlay */}
+      <div className="pointer-events-none fixed inset-0 opacity-[0.03] z-50 mix-blend-multiply" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
+
       {/* Navigation */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center shadow-md shadow-orange-500/20 group-hover:scale-105 transition-transform">
-              <Compass className="w-5 h-5 text-white stroke-[2.2]" />
+      <header className="sticky top-0 z-40 bg-[var(--color-tc-parchment)]/90 backdrop-blur-md border-b border-[var(--color-tc-sage)]/30">
+        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="relative w-9 h-9 sm:w-10 sm:h-10 shrink-0">
+              <Image
+                src="/artwork/tripcraft-mark.png"
+                alt=""
+                width={40}
+                height={40}
+                className="w-full h-full object-contain"
+                priority
+              />
             </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-slate-900 via-slate-800 to-orange-600 bg-clip-text text-transparent">
-                Tripcraft
-              </span>
-              <span className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase -mt-1">
-                Roamwise Engine
-              </span>
-            </div>
+            <span className="font-serif text-2xl font-bold tracking-tight text-[var(--color-tc-ink)]">
+              Tripcraft
+            </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-            <a href="#how-it-works" className="hover:text-orange-600 transition-colors">
-              How It Works
-            </a>
-            <a href="#personas" className="hover:text-orange-600 transition-colors">
-              Personas
-            </a>
-            <a href="#destinations" className="hover:text-orange-600 transition-colors">
-              Worldwide Sourcing
-            </a>
-            <a href="#architecture" className="hover:text-orange-600 transition-colors">
-              Engine Philosophy
-            </a>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-bold text-[var(--color-tc-ink)]/70 uppercase tracking-widest">
+            <a href="#personas" className="hover:text-[var(--color-tc-tangerine)] transition-colors">Personas</a>
+              <a href="#how-it-works" className="hover:text-[var(--color-tc-tangerine)] transition-colors">Method</a>
+            <a href="#destinations" className="hover:text-[var(--color-tc-tangerine)] transition-colors">Atlas</a>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <Link
               href="/login"
-              className="text-sm font-semibold text-slate-700 hover:text-slate-900 px-3.5 py-2 rounded-lg hover:bg-slate-100 transition-colors"
+              className="text-sm font-bold uppercase tracking-wider text-[var(--color-tc-ink)] hover:text-[var(--color-tc-tangerine)] px-2 transition-colors"
             >
               Sign In
             </Link>
             <Link
               href="/planner"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 px-4 py-2 rounded-lg shadow-sm shadow-orange-600/20 hover:shadow-orange-600/30 transition-all hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-[var(--color-tc-cream)] bg-[var(--color-tc-ink)] hover:bg-[var(--color-tc-teal)] px-6 py-3 rounded-full transition-all"
             >
               Plan Trip
               <ArrowRight className="w-4 h-4" />
@@ -117,281 +112,180 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-16 pb-24 lg:pt-24 lg:pb-32">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(249,115,22,0.12),rgba(255,255,255,0))]" />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-200/80 text-orange-700 text-xs font-semibold uppercase tracking-wider mb-6 animate-fade-in shadow-xs">
-              <Sparkles className="w-3.5 h-3.5" />
-              Deterministic Travel Intelligence • Zero LLM Hallucinations
-            </div>
+      <section className="relative pt-12 pb-24 lg:pt-20 lg:pb-32 overflow-hidden border-b border-[var(--color-tc-sage)]/30">
+        <div className="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+          <div className="relative z-10 max-w-2xl">
+            
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.1]">
-              Weather-aware daily travel plans{' '}
-              <span className="bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent">
-                grounded in reality.
-              </span>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif font-bold text-[var(--color-tc-ink)] leading-[1.05] tracking-tight">
+              A better journey begins with a plan that fits.
             </h1>
 
-            <p className="mt-6 text-lg sm:text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto">
-              Tripcraft synthesizes physically feasible 1-to-7 day itineraries for any city worldwide. 
-              Governed by real-time meteorological forecasts, physical opening hours, spatial proximity clustering, and traveler stamina.
+            <p className="mt-8 text-lg sm:text-xl text-[var(--color-tc-ink)]/80 leading-relaxed font-medium">
+              Tripcraft synthesizes physically feasible 1-to-7 day itineraries across India. 
+              Governed by live meteorological forecasts, spatial proximity, and traveler stamina.
             </p>
 
-            <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
               <Link
                 href="/planner"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-base font-semibold text-white bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-400 px-7 py-3.5 rounded-xl shadow-lg shadow-orange-500/25 hover:shadow-orange-500/35 transition-all hover:-translate-y-0.5"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider text-[var(--color-tc-cream)] bg-[var(--color-tc-tangerine)] hover:bg-[#e07740] px-8 py-4 rounded-full shadow-[4px_4px_0px_var(--color-tc-ink)] hover:shadow-[2px_2px_0px_var(--color-tc-ink)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all"
               >
-                Start Planning Free
+                Start Planning
                 <ArrowRight className="w-5 h-5" />
               </Link>
-              <Link
-                href="/login"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-base font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200/90 px-7 py-3.5 rounded-xl shadow-xs transition-all hover:border-slate-300"
+            </div>
+          </div>
+
+          <div className="relative hidden lg:block">
+            <HeroArtwork />
+          </div>
+        </div>
+      </section>
+
+      {/* The 4 Personas */}
+      <section id="personas" className="py-24 bg-[var(--color-tc-cream)] border-b border-[var(--color-tc-sage)]/30">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-2xl mb-16">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-[var(--color-tc-tangerine)] mb-4">Tailored Scheduling</h2>
+            <p className="text-4xl font-serif font-bold text-[var(--color-tc-ink)]">
+              Four Personas.<br/>Four Distinct Trips.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {PERSONAS.map((p) => (
+              <div
+                key={p.title}
+                className="bg-[var(--color-tc-parchment)] rounded-2xl p-8 border-2 border-[var(--color-tc-sage)]/40 flex flex-col justify-between group hover:border-[var(--color-tc-ink)] transition-colors"
               >
-                Sign In to Account
-              </Link>
+                  <div>
+                    <div className="w-12 h-12 rounded-xl border-2 border-[var(--color-tc-ink)] bg-[var(--color-tc-cream)] flex items-center justify-center mb-6 group-hover:bg-[var(--color-tc-saffron)]/20 transition-colors p-1 relative overflow-hidden shrink-0">
+                      <Image
+                        src={p.artworkPath}
+                        alt=""
+                        width={44}
+                        height={44}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-tc-teal)] mb-3 block">
+                      {p.badge}
+                    </span>
+                    <h3 className="text-xl font-serif font-bold text-[var(--color-tc-ink)] mb-3">{p.title}</h3>
+                    <p className="text-sm text-[var(--color-tc-ink)]/70 leading-relaxed font-medium">
+                      {p.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works & Architecture */}
+      <section id="how-it-works" className="py-24 border-b border-[var(--color-tc-sage)]/30">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-2xl mb-16">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-[var(--color-tc-teal)] mb-4">Transparent Logic</h2>
+            <p className="text-4xl font-serif font-bold text-[var(--color-tc-ink)]">
+              The Deterministic Engine
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="p-8 rounded-2xl bg-[var(--color-tc-cream)] border-2 border-[var(--color-tc-sage)]/40">
+              <div className="text-3xl font-serif font-bold text-[var(--color-tc-teal)] mb-4">01.</div>
+              <h3 className="text-lg font-bold text-[var(--color-tc-ink)] flex items-center gap-2 mb-3">
+                <CloudSun className="w-5 h-5" />
+                Meteorology
+              </h3>
+              <p className="text-sm text-[var(--color-tc-ink)]/70 leading-relaxed font-medium">
+                Rain triggers outdoor activity culling with indoor museum fallbacks; extreme heat shifts strenuous sightseeing away from afternoon sun.
+              </p>
             </div>
 
-            {/* Quick Metrics */}
-            <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto text-left">
-              <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs">
-                <div className="text-2xl font-bold text-slate-900">100%</div>
-                <div className="text-xs font-medium text-slate-500 mt-0.5">Procedural Worldwide</div>
-              </div>
-              <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs">
-                <div className="text-2xl font-bold text-slate-900">0</div>
-                <div className="text-xs font-medium text-slate-500 mt-0.5">LLM Hallucinations</div>
-              </div>
-              <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs">
-                <div className="text-2xl font-bold text-slate-900">1–7</div>
-                <div className="text-xs font-medium text-slate-500 mt-0.5">Day Weather Horizon</div>
-              </div>
-              <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs">
-                <div className="text-2xl font-bold text-slate-900">Real-Time</div>
-                <div className="text-xs font-medium text-slate-500 mt-0.5">PostgreSQL Persistence</div>
-              </div>
+            <div className="p-8 rounded-2xl bg-[var(--color-tc-cream)] border-2 border-[var(--color-tc-sage)]/40">
+              <div className="text-3xl font-serif font-bold text-[var(--color-tc-tangerine)] mb-4">02.</div>
+              <h3 className="text-lg font-bold text-[var(--color-tc-ink)] flex items-center gap-2 mb-3">
+                <Clock className="w-5 h-5" />
+                Time Math
+              </h3>
+              <p className="text-sm text-[var(--color-tc-ink)]/70 leading-relaxed font-medium">
+                Arrivals after 11:30 AM reserve morning slots for transit; arrivals after 3:00 PM collapse afternoon sightseeing.
+              </p>
+            </div>
+
+            <div className="p-8 rounded-2xl bg-[var(--color-tc-cream)] border-2 border-[var(--color-tc-sage)]/40">
+              <div className="text-3xl font-serif font-bold text-[var(--color-tc-saffron)] mb-4">03.</div>
+              <h3 className="text-lg font-bold text-[var(--color-tc-ink)] flex items-center gap-2 mb-3">
+                <Layers className="w-5 h-5" />
+                Spatial Clustering
+              </h3>
+              <p className="text-sm text-[var(--color-tc-ink)]/70 leading-relaxed font-medium">
+                Pass A anchors each day. Pass B scores remaining candidates by Haversine proximity, preventing chaotic cross-city transit.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Worldwide Destinations */}
-      <section id="destinations" className="py-12 bg-white border-y border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-            <div>
-              <h2 className="text-xs font-bold uppercase tracking-wider text-orange-600">Universal Coverage</h2>
-              <p className="text-2xl font-bold text-slate-900 mt-1">Explore Popular Destinations</p>
+      {/* Featured Destinations (Typographic Treatment) */}
+      <section id="destinations" className="py-24 bg-[var(--color-tc-cream)]">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 border-b-2 border-[var(--color-tc-ink)] pb-8">
+            <div className="max-w-xl">
+              <h2 className="text-sm font-bold uppercase tracking-widest text-[var(--color-tc-tangerine)] mb-4">Subcontinental Coverage</h2>
+              <p className="text-3xl font-serif font-bold text-[var(--color-tc-ink)]">
+                The Indian Atlas is Open
+              </p>
             </div>
-            <p className="text-sm text-slate-500 max-w-md">
-              Powered by OpenStreetMap and Wikipedia GeoSearch. Type any town or metropolis to generate an authentic plan.
+            <p className="text-sm text-[var(--color-tc-ink)]/70 font-medium max-w-sm md:text-right">
+              Powered by OpenStreetMap. Type any Indian city, town, or district to generate an authentic plan.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="mb-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-tc-ink)]/50">Quickstart with these 5 picks:</span>
+            </div>
+            <div className="flex overflow-x-auto gap-4 pb-4 snap-x no-scrollbar">
             {FEATURED_DESTINATIONS.map((dest) => (
               <Link
                 key={dest.name}
                 href={`/planner?city=${encodeURIComponent(dest.name)}`}
-                className="group p-4 rounded-xl border border-slate-200/80 hover:border-orange-500/40 bg-slate-50/50 hover:bg-orange-50/20 transition-all hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between"
+                className="group shrink-0 snap-start flex items-center gap-3 px-6 py-4 rounded-full border-2 border-[var(--color-tc-sage)] hover:border-[var(--color-tc-ink)] bg-[var(--color-tc-parchment)] transition-all hover:bg-[var(--color-tc-saffron)]/10"
               >
-                <div>
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-orange-600">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span>{dest.name}</span>
-                  </div>
-                  <div className="text-xs text-slate-400 mt-0.5 font-medium">{dest.region}</div>
-                  <p className="text-xs text-slate-600 mt-2.5 line-clamp-2 leading-relaxed">
-                    {dest.desc}
-                  </p>
-                </div>
-                <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-slate-700 group-hover:text-orange-600 pt-2 border-t border-slate-200/60">
-                  <span>Plan in {dest.name}</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                </div>
+                <MapPin className="w-4 h-4 text-[var(--color-tc-teal)]" />
+                <span className="font-bold text-[var(--color-tc-ink)] text-sm uppercase tracking-wider">{dest.name}</span>
+                <span className="text-[10px] font-bold text-[var(--color-tc-ink)]/50 uppercase tracking-widest hidden sm:inline-block border-l-2 border-[var(--color-tc-sage)] pl-3 ml-1 group-hover:text-[var(--color-tc-ink)]/70">
+                  {dest.region}
+                </span>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* The 4 Personas */}
-      <section id="personas" className="py-20 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-orange-600">Tailored Scheduling</h2>
-            <p className="text-3xl font-extrabold text-slate-900 mt-2">
-              Four Personas. Four Completely Different Trips.
-            </p>
-            <p className="text-base text-slate-600 mt-3">
-              The same city generates vastly different itineraries based on traveler stamina, interests, and safety tolerances.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {PERSONAS.map((p) => {
-              const Icon = p.icon;
-              return (
-                <div
-                  key={p.title}
-                  className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${p.color} flex items-center justify-center text-white shadow-md shadow-slate-900/5`}>
-                        <Icon className="w-6 h-6 stroke-[2]" />
-                      </div>
-                      <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
-                        {p.badge}
-                      </span>
-                    </div>
-
-                    <h3 className="text-lg font-bold text-slate-900">{p.title}</h3>
-                    <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                      {p.desc}
-                    </p>
-
-                    <div className="mt-5 space-y-2">
-                      {p.traits.map((trait) => (
-                        <div key={trait} className="flex items-center gap-2 text-xs font-medium text-slate-700">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                          <span>{trait}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Link
-                    href={`/planner?persona=${encodeURIComponent(p.title)}`}
-                    className="mt-6 text-center text-xs font-semibold text-slate-700 hover:text-orange-600 py-2.5 rounded-lg bg-slate-50 hover:bg-orange-50 border border-slate-200/60 transition-colors"
-                  >
-                    Select {p.title}
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works & Architecture */}
-      <section id="how-it-works" className="py-20 bg-white border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-orange-600">Transparent Logic</h2>
-            <p className="text-3xl font-extrabold text-slate-900 mt-2">
-              How the Deterministic Engine Works
-            </p>
-            <p className="text-base text-slate-600 mt-3">
-              Every slot is assigned via verifiable mathematical rules rather than random probabilistic output.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-6 rounded-2xl bg-slate-50/70 border border-slate-200/80">
-              <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-sm mb-4">
-                1
-              </div>
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <CloudSun className="w-4 h-4 text-orange-600" />
-                Meteorological Gating
-              </h3>
-              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                Queries Open-Meteo for hourly temperature, precipitation sum, and wind speed. 
-                Rain triggers outdoor activity culling with indoor museum fallbacks; extreme heat shifts strenuous sightseeing away from afternoon sun.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-50/70 border border-slate-200/80">
-              <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-sm mb-4">
-                2
-              </div>
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-orange-600" />
-                Arrival & Slot Math
-              </h3>
-              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                Arrivals after 11:30 AM reserve morning slots for transit & check-in; arrivals after 3:00 PM collapse afternoon sightseeing. 
-                Opening hours and minimum duration ensure travelers are never sent to closed doors.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-50/70 border border-slate-200/80">
-              <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-sm mb-4">
-                3
-              </div>
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Layers className="w-4 h-4 text-orange-600" />
-                Spatial Anchor Clustering
-              </h3>
-              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                Pass A anchors each day with a flagship cultural landmark or mountain excursion. 
-                Pass B scores remaining candidates by Haversine proximity, preventing chaotic cross-city transit.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-tr from-slate-950 via-slate-900 to-orange-950 text-white relative overflow-hidden">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            Ready to plan your next journey?
-          </h2>
-          <p className="mt-4 text-slate-300 text-base max-w-xl mx-auto">
-            Choose any city, pick your dates, select your travel persona, and get a feasible itinerary in under 3 seconds.
-          </p>
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/planner"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-base font-semibold text-slate-950 bg-white hover:bg-slate-100 px-8 py-3.5 rounded-xl shadow-lg transition-all hover:scale-105"
-            >
-              Launch Tripcraft Planner
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/login"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-base font-semibold text-white bg-white/10 hover:bg-white/15 border border-white/20 px-8 py-3.5 rounded-xl transition-all"
-            >
-              Sign In to Save Trips
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-orange-600 flex items-center justify-center text-white">
-              <Compass className="w-4 h-4" />
+      <footer className="bg-[var(--color-tc-ink)] text-[var(--color-tc-parchment)] py-16 border-t border-[var(--color-tc-sage)]">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <div className="relative w-8 h-8 shrink-0">
+              <Image
+                src="/artwork/tripcraft-mark.png"
+                alt=""
+                width={32}
+                height={32}
+                className="w-full h-full object-contain"
+              />
             </div>
-            <span className="text-sm font-bold text-slate-900">Tripcraft (Roamwise)</span>
-            <span className="text-xs text-slate-400">© 2026 GDG Dev Recruitment Task</span>
+            <span className="font-serif text-lg font-bold text-[var(--color-tc-parchment)]">Tripcraft</span>
           </div>
 
-          <div className="flex items-center gap-6 text-xs text-slate-500 font-medium">
-            <a
-              href="https://github.com/Japjit-S/Tripcraft"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-slate-900 transition-colors"
-            >
-              GitHub Repository
-            </a>
-            <Link href="/planner" className="hover:text-slate-900 transition-colors">
-              Planner
-            </Link>
-            <Link href="/dashboard" className="hover:text-slate-900 transition-colors">
-              Dashboard
-            </Link>
-            <Link href="/login" className="hover:text-slate-900 transition-colors">
-              Account Login
-            </Link>
+          <div className="flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-[var(--color-tc-parchment)]/60">
+            <Link href="/planner" className="hover:text-[var(--color-tc-saffron)] transition-colors">Planner</Link>
+            <Link href="/dashboard" className="hover:text-[var(--color-tc-saffron)] transition-colors">Dashboard</Link>
+            <Link href="/login" className="hover:text-[var(--color-tc-saffron)] transition-colors">Account</Link>
           </div>
         </div>
       </footer>

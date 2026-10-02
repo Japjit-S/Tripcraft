@@ -106,7 +106,12 @@ export type CuratedCityKey =
   | 'agra'
   | 'varanasi'
   | 'udaipur'
-  | 'goa';
+  | 'goa'
+  | 'mumbai'
+  | 'kolkata'
+  | 'amritsar'
+  | 'hampi'
+  | 'mysuru';
 
 export type LocalSceneTemplateId =
   | 'coastal-harbor'

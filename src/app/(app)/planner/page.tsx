@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   MapPin,
@@ -13,15 +14,10 @@ import {
   Baby,
   Backpack,
   Navigation,
-  CheckCircle2,
   Sparkles,
   AlertCircle,
   Plus,
   Minus,
-  Layers,
-  Database,
-  CloudSun,
-  ShieldCheck,
 } from 'lucide-react';
 import { saveTripToStorage, GeneratedTrip } from '@/lib/tripStore';
 import { Destination } from '@/lib/types';
@@ -29,17 +25,18 @@ import { DatePicker } from '@/components/ui/DatePicker';
 import { TimePicker } from '@/components/ui/TimePicker';
 
 const POPULAR_DESTINATIONS = [
-  { name: 'Manali', label: 'Manali, HP' },
+  { name: 'Delhi', label: 'Delhi, DL' },
   { name: 'Jaipur', label: 'Jaipur, RJ' },
-  { name: 'Tokyo', label: 'Tokyo, JP' },
-  { name: 'Paris', label: 'Paris, FR' },
-  { name: 'Cape Town', label: 'Cape Town, ZA' },
+  { name: 'Mumbai', label: 'Mumbai, MH' },
+  { name: 'Bengaluru', label: 'Bengaluru, KA' },
+  { name: 'Kochi', label: 'Kochi, KL' },
 ];
 
 const PERSONAS = [
   {
     id: 'Backpacker',
     icon: Backpack,
+    artworkPath: '/artwork/persona-backpacker.png',
     title: 'Backpacker',
     badge: 'High Stamina',
     desc: 'Walkable scenic viewpoints, authentic bazaars, and local street eats.',
@@ -52,6 +49,7 @@ const PERSONAS = [
   {
     id: 'Culture Seeker',
     icon: Compass,
+    artworkPath: '/artwork/persona-culture-seeker.png',
     title: 'Culture Seeker',
     badge: 'Curated Heritage',
     desc: 'Deep architectural heritage, palaces, UNESCO sites, and premier museums.',
@@ -64,6 +62,7 @@ const PERSONAS = [
   {
     id: 'Comfort Traveller',
     icon: Coffee,
+    artworkPath: '/artwork/persona-comfort-traveller.png',
     title: 'Comfort Traveller',
     badge: 'Relaxed Pacing',
     desc: 'Gentle transit buffers, panoramic viewpoints, fine dining, and zero rush.',
@@ -76,6 +75,7 @@ const PERSONAS = [
   {
     id: 'Family',
     icon: Baby,
+    artworkPath: '/artwork/persona-family.png',
     title: 'Family',
     badge: 'Kid-Friendly',
     desc: 'Paved walkways, interactive science parks, gentle pacing, and low fatigue.',
@@ -91,14 +91,6 @@ const ARRIVAL_MODES = [
   { id: 'flight', icon: Plane, label: 'Flight' },
   { id: 'train', icon: Train, label: 'Train' },
   { id: 'bus', icon: Bus, label: 'Bus' },
-];
-
-const DISCOVERY_STAGES = [
-  { label: 'Geocoding destination coordinates & administrative perimeter', icon: MapPin },
-  { label: 'Querying OpenStreetMap Overpass (18 km radius spatial cluster)', icon: Database },
-  { label: 'Wikidata sitelinks & Wikipedia GeoSearch prominence scoring', icon: Layers },
-  { label: 'Evaluating Open-Meteo forecast & meteorological feasibility rules', icon: CloudSun },
-  { label: 'Running constraint satisfaction & multi-slot temporal allocation', icon: ShieldCheck },
 ];
 
 function PlannerForm() {
@@ -128,7 +120,6 @@ function PlannerForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [activeStageIndex, setActiveStageIndex] = useState(0);
 
   // Form State
   const [destination, setDestination] = useState(initialCity);
@@ -191,6 +182,8 @@ function PlannerForm() {
           setSelectedCityObj(match);
           const display = [match.city, match.admin1, match.countryCode || match.country].filter(Boolean).join(', ');
           setDestination(display);
+        } else if (isCurrent) {
+          setErrorMessage('Tripcraft currently plans destinations within India.');
         }
       })
       .catch(() => {});
@@ -199,17 +192,6 @@ function PlannerForm() {
       isCurrent = false;
     };
   }, [initialCity]);
-
-  // Handle stage timer when submitting
-  useEffect(() => {
-    if (!isSubmitting) return;
-
-    const interval = setInterval(() => {
-      setActiveStageIndex((prev) => (prev < DISCOVERY_STAGES.length - 1 ? prev + 1 : prev));
-    }, 2800);
-
-    return () => clearInterval(interval);
-  }, [isSubmitting]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -267,7 +249,6 @@ function PlannerForm() {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorMessage(null);
-    setActiveStageIndex(0);
 
     try {
       const res = await fetch('/api/itineraries/generate', {
@@ -364,7 +345,7 @@ function PlannerForm() {
     <div className="max-w-6xl mx-auto py-12 px-6 lg:px-12 relative">
       {/* Header */}
       <div className="mb-12">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1d6b8f]/10 text-[#1d6b8f] text-xs font-bold uppercase tracking-wider mb-3">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-tc-ink)]/10 text-[var(--color-tc-ink)] text-xs font-bold uppercase tracking-wider mb-3">
           <Sparkles className="w-3.5 h-3.5" />
           <span>Deterministic Procedural Engine</span>
         </div>
@@ -393,7 +374,7 @@ function PlannerForm() {
           {/* Destination & Dates Card */}
           <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-7 lg:p-9">
             <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-[#1d6b8f]/10 flex items-center justify-center text-[#1d6b8f] font-bold text-sm">
+              <span className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)]/10 flex items-center justify-center text-[var(--color-tc-ink)] font-bold text-sm">
                 1
               </span>
               Where & When
@@ -419,11 +400,11 @@ function PlannerForm() {
                       if (suggestions.length > 0) setShowSuggestions(true);
                     }}
                     type="text" 
-                    placeholder="Where are you heading? (e.g. Manali, Tokyo, Paris, Cape Town)" 
-                    className="w-full pl-12 pr-12 py-3.5 bg-[#f8f9fc] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1d6b8f]/30 border border-transparent focus:border-[#1d6b8f] transition-all text-slate-900 font-bold placeholder:font-normal placeholder:text-slate-400 text-base"
+                    placeholder="Where are you heading? (e.g. Delhi, Jaipur, Mumbai, Bengaluru)" 
+                    className="w-full pl-12 pr-12 py-3.5 bg-[#f8f9fc] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[var(--color-tc-ink)]/30 border border-transparent focus:border-[var(--color-tc-ink)] transition-all text-slate-900 font-bold placeholder:font-normal placeholder:text-slate-400 text-base"
                   />
                   {isSearchingCities && (
-                    <div className="absolute right-4 top-4 w-4 h-4 border-2 border-[#1d6b8f]/30 border-t-[#1d6b8f] rounded-full animate-spin"></div>
+                    <div className="absolute right-4 top-4 w-4 h-4 border-2 border-[var(--color-tc-ink)]/30 border-t-[var(--color-tc-ink)] rounded-full animate-spin"></div>
                   )}
                 </div>
 
@@ -442,11 +423,11 @@ function PlannerForm() {
                         className="w-full text-left px-5 py-3 hover:bg-slate-50 flex items-center justify-between transition-colors group cursor-pointer"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-xl bg-[#1d6b8f]/10 text-[#1d6b8f] flex items-center justify-center font-bold text-xs shrink-0">
+                          <div className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)]/10 text-[var(--color-tc-ink)] flex items-center justify-center font-bold text-xs shrink-0">
                             <MapPin className="w-4 h-4" />
                           </div>
                           <div>
-                            <span className="font-bold text-slate-900 group-hover:text-[#1d6b8f] transition-colors text-sm">
+                            <span className="font-bold text-slate-900 group-hover:text-[var(--color-tc-ink)] transition-colors text-sm">
                               {s.city}
                             </span>
                             <span className="text-xs text-slate-400 ml-2 font-medium">
@@ -472,7 +453,7 @@ function PlannerForm() {
                       key={pop.name}
                       type="button"
                       onClick={() => handleSelectPopularCity(pop.name)}
-                      className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-orange-50 text-slate-600 hover:text-orange-700 hover:border-orange-200 border border-transparent transition-all cursor-pointer"
+                      className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[var(--color-tc-cream)] hover:bg-[var(--color-tc-sage)]/20 text-[var(--color-tc-ink)]/70 hover:text-[var(--color-tc-ink)] hover:border-[var(--color-tc-sage)] border border-[var(--color-tc-sage)]/30 transition-all cursor-pointer"
                     >
                       {pop.label}
                     </button>
@@ -498,7 +479,7 @@ function PlannerForm() {
                     <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                       Duration
                     </label>
-                    <span className="text-xs font-black text-[#1d6b8f]">
+                    <span className="text-xs font-black text-[var(--color-tc-ink)]">
                       {duration} {duration === 1 ? 'Day' : 'Days'}
                     </span>
                   </div>
@@ -515,7 +496,7 @@ function PlannerForm() {
                     </button>
 
                     <div className="flex items-center gap-1.5 px-2">
-                      <Clock className="w-4 h-4 text-[#1d6b8f]" />
+                      <Clock className="w-4 h-4 text-[var(--color-tc-ink)]" />
                       <span className="text-sm font-black text-slate-900">
                         {duration} {duration === 1 ? 'day' : 'days'}
                       </span>
@@ -541,7 +522,7 @@ function PlannerForm() {
                         onClick={() => setDuration(d)}
                         className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                           duration === d
-                            ? 'bg-[#1d6b8f] text-white shadow-xs'
+                            ? 'bg-[var(--color-tc-ink)] text-white shadow-xs'
                             : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
                       >
@@ -557,7 +538,7 @@ function PlannerForm() {
           {/* Arrival Logistics Card */}
           <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-7 lg:p-9">
             <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-[#1d6b8f]/10 flex items-center justify-center text-[#1d6b8f] font-bold text-sm">
+              <span className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)]/10 flex items-center justify-center text-[var(--color-tc-ink)] font-bold text-sm">
                 2
               </span>
               Transit & Timing Gate
@@ -575,7 +556,7 @@ function PlannerForm() {
                     onChange={e => setOriginCity(e.target.value)}
                     type="text" 
                     placeholder="Where are you travelling from? (e.g. Delhi, London, Tokyo)" 
-                    className="w-full pl-12 pr-4 py-3.5 bg-[#f8f9fc] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1d6b8f]/30 border border-transparent focus:border-[#1d6b8f] transition-all text-slate-900 font-bold placeholder:font-normal placeholder:text-slate-400 text-base"
+                    className="w-full pl-12 pr-4 py-3.5 bg-[#f8f9fc] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[var(--color-tc-ink)]/30 border border-transparent focus:border-[var(--color-tc-ink)] transition-all text-slate-900 font-bold placeholder:font-normal placeholder:text-slate-400 text-base"
                   />
                 </div>
               </div>
@@ -593,7 +574,7 @@ function PlannerForm() {
                         onClick={() => setArrivalMode(mode.id)} 
                         className={`flex-1 py-3 flex flex-col items-center justify-center gap-1.5 rounded-2xl transition-all border cursor-pointer ${
                           arrivalMode === mode.id 
-                            ? 'bg-[#1d6b8f] border-[#1d6b8f] text-white shadow-md shadow-[#1d6b8f]/20 scale-102 font-bold' 
+                            ? 'bg-[var(--color-tc-ink)] border-[var(--color-tc-ink)] text-white shadow-md shadow-[var(--color-tc-ink)]/20 scale-102 font-bold' 
                             : 'bg-[#f8f9fc] border-slate-100 text-slate-500 hover:bg-slate-100 font-semibold'
                         }`}
                       >
@@ -624,7 +605,7 @@ function PlannerForm() {
           {/* Persona Card */}
           <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-7 lg:p-9">
             <h3 className="text-xl font-black text-slate-900 mb-1 flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-[#1d6b8f]/10 flex items-center justify-center text-[#1d6b8f] font-bold text-sm">
+              <span className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)]/10 flex items-center justify-center text-[var(--color-tc-ink)] font-bold text-sm">
                 3
               </span>
               Travel Persona
@@ -636,7 +617,6 @@ function PlannerForm() {
             <div className="space-y-3">
               {PERSONAS.map((p) => {
                 const isSelected = persona === p.id;
-                const Icon = p.icon;
 
                 return (
                   <div 
@@ -644,15 +624,20 @@ function PlannerForm() {
                     onClick={() => setPersona(p.id)}
                     className={`p-4 rounded-2xl cursor-pointer transition-all border-2 relative overflow-hidden group ${
                       isSelected
-                        ? p.borderClass
-                        : 'border-slate-100 bg-[#f8f9fc] hover:bg-slate-100/80 hover:border-slate-200'
+                        ? 'border-[var(--color-tc-ink)] ring-2 ring-[var(--color-tc-ink)]/10 bg-[var(--color-tc-sage)]/10' : 'border-[var(--color-tc-sage)]/30 bg-[var(--color-tc-cream)] hover:bg-[var(--color-tc-parchment)] hover:border-[var(--color-tc-ink)]/50'
                     }`}
                   >
                     <div className="flex items-start gap-3.5">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 shadow-xs ${
-                        isSelected ? p.iconClass : 'bg-white text-slate-500 border border-slate-200'
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 p-1 relative overflow-hidden ${
+                        isSelected ? 'bg-[var(--color-tc-ink)] border-2 border-[var(--color-tc-ink)] shadow-xs' : 'bg-[var(--color-tc-parchment)] border border-[var(--color-tc-sage)]/50'
                       }`}>
-                        <Icon className="w-5 h-5" />
+                        <Image
+                          src={p.artworkPath}
+                          alt=""
+                          width={44}
+                          height={44}
+                          className="w-full h-full object-contain"
+                        />
                       </div>
 
                       <div className="flex-1 min-w-0">
@@ -661,7 +646,7 @@ function PlannerForm() {
                             {p.title}
                           </h4>
                           <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                            isSelected ? p.badgeClass : 'bg-slate-200 text-slate-600'
+                            isSelected ? 'bg-[var(--color-tc-ink)] text-[var(--color-tc-cream)]' : 'bg-[var(--color-tc-sage)]/30 text-[var(--color-tc-ink)]/70'
                           }`}>
                             {p.badge}
                           </span>
@@ -696,17 +681,17 @@ function PlannerForm() {
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="w-full py-4 px-6 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white font-black text-base rounded-2xl transition-all focus:outline-none focus:ring-4 focus:ring-orange-500/30 disabled:opacity-80 disabled:cursor-not-allowed flex justify-center items-center gap-3 shadow-lg shadow-orange-500/25 hover:-translate-y-0.5 cursor-pointer"
+              className="w-full py-4 px-6 bg-[var(--color-tc-ink)] hover:bg-[var(--color-tc-teal)] text-[var(--color-tc-cream)] font-black text-base rounded-2xl transition-all focus:outline-none focus:ring-4 focus:ring-[var(--color-tc-sage)]/30 disabled:opacity-80 disabled:cursor-not-allowed flex justify-center items-center gap-3 shadow-lg shadow-[var(--color-tc-ink)]/25 hover:-translate-y-0.5 cursor-pointer"
             >
               {isSubmitting ? (
                 <>
                   <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Synthesizing Physical Itinerary...</span>
+                  <span>Charting your journey...</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-5 h-5" />
-                  <span>Synthesize {duration}-Day Itinerary</span>
+                  <span>Chart {duration}-Day Itinerary</span>
                 </>
               )}
             </button>
@@ -718,77 +703,35 @@ function PlannerForm() {
         </div>
       </form>
 
-      {/* Animated Overpass Discovery Modal Overlay */}
+      {/* Restored parchment loading treatment from the earlier planner design. */}
       {isSubmitting && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-orange-500/20">
-                <Compass className="w-6 h-6 animate-spin" />
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-slate-900">
-                  Synthesizing Physical Itinerary
-                </h3>
-                <p className="text-xs font-semibold text-orange-600">
-                  {destination || 'Target Destination'} • {duration} Days • {persona}
-                </p>
-              </div>
-            </div>
-
-            {/* Live progress stages */}
-            <div className="space-y-3.5 mb-8">
-              {DISCOVERY_STAGES.map((st, idx) => {
-                const Icon = st.icon;
-                const isPassed = idx < activeStageIndex;
-                const isCurrent = idx === activeStageIndex;
-
-                return (
-                  <div
-                    key={st.label}
-                    className={`flex items-start gap-3 p-3 rounded-xl transition-all ${
-                      isCurrent
-                        ? 'bg-orange-50/80 border border-orange-200'
-                        : isPassed
-                        ? 'bg-slate-50 opacity-80'
-                        : 'opacity-40'
-                    }`}
-                  >
-                    <div className="shrink-0 mt-0.5">
-                      {isPassed ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      ) : isCurrent ? (
-                        <div className="w-4 h-4 border-2 border-orange-600/30 border-t-orange-600 rounded-full animate-spin"></div>
-                      ) : (
-                        <Icon className="w-4 h-4 text-slate-400" />
-                      )}
-                    </div>
-                    <span
-                      className={`text-xs ${
-                        isCurrent
-                          ? 'font-bold text-slate-900'
-                          : isPassed
-                          ? 'font-medium text-slate-700 line-through'
-                          : 'font-medium text-slate-400'
-                      }`}
-                    >
-                      {st.label}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-              <div 
-                className="bg-gradient-to-r from-orange-600 to-amber-500 h-full transition-all duration-700 ease-out"
-                style={{ width: `${Math.min(95, ((activeStageIndex + 1) / DISCOVERY_STAGES.length) * 100)}%` }}
-              />
-            </div>
-            <p className="text-center text-[11px] font-semibold text-slate-400 mt-3">
-              Zero hallucinated venues. Physically verified spatial coordinates.
+        <div className="fixed inset-0 z-50 flex animate-in items-center justify-center bg-[var(--color-tc-parchment)]/80 p-4 backdrop-blur-sm duration-200">
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="itinerary-loading-title"
+            aria-describedby="itinerary-loading-description"
+            className="flex flex-col items-center gap-4 text-center"
+          >
+            <div
+              aria-hidden="true"
+              className="h-12 w-12 animate-spin rounded-full border-4 border-[var(--color-tc-sage)] border-t-[var(--color-tc-ink)]"
+            />
+            <p
+              id="itinerary-loading-title"
+              role="status"
+              aria-live="polite"
+              className="font-serif text-xl font-bold text-[var(--color-tc-ink)]"
+            >
+              Charting your journey...
             </p>
-          </div>
+            <p
+              id="itinerary-loading-description"
+              className="text-xs font-semibold text-[var(--color-tc-ink)]/60"
+            >
+              {destination || 'Target Destination'} • {duration} Days • {persona}
+            </p>
+          </section>
         </div>
       )}
     </div>
@@ -801,7 +744,7 @@ export default function PlannerPage() {
       fallback={
         <div className="h-full flex items-center justify-center bg-transparent py-20">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-4 border-[#1d6b8f]/30 border-t-[#1d6b8f] rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-[var(--color-tc-ink)]/30 border-t-[var(--color-tc-ink)] rounded-full animate-spin"></div>
             <p className="text-sm font-bold text-slate-500">Loading planner...</p>
           </div>
         </div>

@@ -7,6 +7,11 @@ export const CURATED_CITY_KEYS: readonly CuratedCityKey[] = [
   'varanasi',
   'udaipur',
   'goa',
+  'mumbai',
+  'kolkata',
+  'amritsar',
+  'hampi',
+  'mysuru',
 ] as const;
 
 const EXPLICIT_CURATED_LOOKUP: Readonly<Record<string, CuratedCityKey>> = {
@@ -15,6 +20,7 @@ const EXPLICIT_CURATED_LOOKUP: Readonly<Record<string, CuratedCityKey>> = {
   delhi: 'delhi',
   'new delhi': 'delhi',
   dilli: 'delhi',
+  'nct of delhi': 'delhi',
   agra: 'agra',
   varanasi: 'varanasi',
   banaras: 'varanasi',
@@ -25,6 +31,16 @@ const EXPLICIT_CURATED_LOOKUP: Readonly<Record<string, CuratedCityKey>> = {
   panjim: 'goa',
   'north goa': 'goa',
   'south goa': 'goa',
+  mumbai: 'mumbai',
+  bombay: 'mumbai',
+  kolkata: 'kolkata',
+  calcutta: 'kolkata',
+  amritsar: 'amritsar',
+  hampi: 'hampi',
+  vijayanagara: 'hampi',
+  hosapete: 'hampi',
+  mysuru: 'mysuru',
+  mysore: 'mysuru',
 };
 
 const ALLOWED_INDIAN_QUALIFIERS = new Set([
@@ -42,6 +58,10 @@ const ALLOWED_INDIAN_QUALIFIERS = new Set([
   'goa',
   'north goa',
   'south goa',
+  'maharashtra',
+  'west bengal',
+  'punjab',
+  'karnataka',
 ]);
 
 export interface DestinationIdentityInput {

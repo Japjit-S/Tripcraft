@@ -184,9 +184,9 @@ export const CURATED_CITY_ARTWORK: Record<CuratedCityKey, CuratedCityCatalogEntr
   jaipur: {
     key: 'jaipur',
     displayName: 'Jaipur',
-    assetPath: '/banners/jaipur.svg',
-    landmarkName: 'Hawa Mahal & Amber Fort',
-    alt: 'Illustrated view of Hawa Mahal and Amber Fort hill silhouette in Jaipur',
+    assetPath: '/artwork/landmark-jaipur-hawa-mahal.png',
+    landmarkName: 'Hawa Mahal',
+    alt: 'Illustrated view of Hawa Mahal in Jaipur',
     focalPoint: { x: 0.72, y: 0.48 },
     fallbackScene: {
       templateId: 'historic-old-town',
@@ -201,9 +201,9 @@ export const CURATED_CITY_ARTWORK: Record<CuratedCityKey, CuratedCityCatalogEntr
   delhi: {
     key: 'delhi',
     displayName: 'Delhi',
-    assetPath: '/banners/delhi.svg',
-    landmarkName: 'India Gate & Red Fort',
-    alt: 'Illustrated view of India Gate arch and Red Fort sandstone domes in Delhi',
+    assetPath: '/artwork/landmark-delhi-red-fort.png',
+    landmarkName: 'Red Fort',
+    alt: 'Illustrated view of Red Fort in Delhi',
     focalPoint: { x: 0.72, y: 0.46 },
     fallbackScene: {
       templateId: 'historic-old-town',
@@ -218,9 +218,9 @@ export const CURATED_CITY_ARTWORK: Record<CuratedCityKey, CuratedCityCatalogEntr
   agra: {
     key: 'agra',
     displayName: 'Agra',
-    assetPath: '/banners/agra.svg',
+    assetPath: '/artwork/landmark-agra-taj-mahal.png',
     landmarkName: 'Taj Mahal',
-    alt: 'Illustrated view of the Taj Mahal marble domes and Yamuna riverbank in Agra',
+    alt: 'Illustrated view of the Taj Mahal in Agra',
     focalPoint: { x: 0.70, y: 0.45 },
     fallbackScene: {
       templateId: 'historic-old-town',
@@ -235,9 +235,9 @@ export const CURATED_CITY_ARTWORK: Record<CuratedCityKey, CuratedCityCatalogEntr
   varanasi: {
     key: 'varanasi',
     displayName: 'Varanasi',
-    assetPath: '/banners/varanasi.svg',
-    landmarkName: 'Dashashwamedh Ghat & Riverfront Spires',
-    alt: 'Illustrated view of Varanasi stepped ghats, temple spires, and boats along the Ganges',
+    assetPath: '/artwork/landmark-varanasi-ghats.png',
+    landmarkName: 'Ganges River Ghats',
+    alt: 'Illustrated view of riverfront ghats in Varanasi',
     focalPoint: { x: 0.72, y: 0.50 },
     fallbackScene: {
       templateId: 'coastal-harbor',
@@ -252,9 +252,9 @@ export const CURATED_CITY_ARTWORK: Record<CuratedCityKey, CuratedCityCatalogEntr
   udaipur: {
     key: 'udaipur',
     displayName: 'Udaipur',
-    assetPath: '/banners/udaipur.svg',
-    landmarkName: 'City Palace & Lake Pichola',
-    alt: 'Illustrated view of Udaipur City Palace, Lake Pichola pavilions, and Aravalli hills',
+    assetPath: '/artwork/landmark-udaipur-lake-palace.png',
+    landmarkName: 'Lake Palace',
+    alt: 'Illustrated view of Lake Palace in Udaipur',
     focalPoint: { x: 0.70, y: 0.48 },
     fallbackScene: {
       templateId: 'historic-old-town',
@@ -269,9 +269,9 @@ export const CURATED_CITY_ARTWORK: Record<CuratedCityKey, CuratedCityCatalogEntr
   goa: {
     key: 'goa',
     displayName: 'Goa',
-    assetPath: '/banners/goa.svg',
-    landmarkName: 'Basilica of Bom Jesus, Fontainhas & Aguada Lighthouse',
-    alt: 'Illustrated coastal view of Goa with Fontainhas villas, lighthouse, and palm-lined Arabian Sea',
+    assetPath: '/artwork/landmark-goa-panaji-coast.png',
+    landmarkName: 'Panaji Coast',
+    alt: 'Illustrated coastal view of Panaji in Goa',
     focalPoint: { x: 0.72, y: 0.48 },
     fallbackScene: {
       templateId: 'tropical-island',
@@ -281,6 +281,91 @@ export const CURATED_CITY_ARTWORK: Record<CuratedCityKey, CuratedCityCatalogEntr
       terrainVariant: 0,
       motifVariant: 'sail-route',
       seedHash: 'c01a1006',
+    },
+  },
+  mumbai: {
+    key: 'mumbai',
+    displayName: 'Mumbai',
+    assetPath: '/artwork/landmark-mumbai-gateway.png',
+    landmarkName: 'Gateway of India',
+    alt: 'Illustrated view of Gateway of India in Mumbai',
+    focalPoint: { x: 0.70, y: 0.48 },
+    fallbackScene: {
+      templateId: 'coastal-harbor',
+      paletteId: 'apricot-teal',
+      skyVariant: 0,
+      skylineVariant: 2,
+      terrainVariant: 1,
+      motifVariant: 'sail-route',
+      seedHash: 'c01a1007',
+    },
+  },
+  kolkata: {
+    key: 'kolkata',
+    displayName: 'Kolkata',
+    assetPath: '/artwork/landmark-kolkata-howrah.png',
+    landmarkName: 'Howrah Bridge',
+    alt: 'Illustrated view of Howrah Bridge in Kolkata',
+    focalPoint: { x: 0.70, y: 0.48 },
+    fallbackScene: {
+      templateId: 'coastal-harbor',
+      paletteId: 'ochre-olive',
+      skyVariant: 1,
+      skylineVariant: 1,
+      terrainVariant: 0,
+      motifVariant: 'sail-route',
+      seedHash: 'c01a1008',
+    },
+  },
+  amritsar: {
+    key: 'amritsar',
+    displayName: 'Amritsar',
+    assetPath: '/artwork/landmark-amritsar-golden-temple.png',
+    landmarkName: 'Golden Temple',
+    alt: 'Illustrated view of Harmandir Sahib Golden Temple in Amritsar',
+    focalPoint: { x: 0.70, y: 0.48 },
+    fallbackScene: {
+      templateId: 'historic-old-town',
+      paletteId: 'saffron-amber',
+      skyVariant: 2,
+      skylineVariant: 0,
+      terrainVariant: 1,
+      motifVariant: 'birds-compass',
+      seedHash: 'c01a1009',
+    },
+  },
+  hampi: {
+    key: 'hampi',
+    displayName: 'Hampi',
+    assetPath: '/artwork/landmark-hampi-ruins.png',
+    landmarkName: 'Hampi Ruins',
+    alt: 'Illustrated view of stone temple ruins in Hampi',
+    focalPoint: { x: 0.70, y: 0.48 },
+    fallbackScene: {
+      templateId: 'historic-old-town',
+      paletteId: 'terracotta-sun',
+      skyVariant: 0,
+      skylineVariant: 1,
+      terrainVariant: 2,
+      motifVariant: 'birds-compass',
+      seedHash: 'c01a1010',
+    },
+  },
+  mysuru: {
+    key: 'mysuru',
+    displayName: 'Mysuru',
+    assetPath: '/artwork/landmark-mysuru-palace.png',
+    landmarkName: 'Mysore Palace',
+    alt: 'Illustrated view of Mysore Palace in Mysuru',
+    focalPoint: { x: 0.70, y: 0.48 },
+    fallbackScene: {
+      templateId: 'historic-old-town',
+      paletteId: 'rose-sandstone',
+      skyVariant: 1,
+      skylineVariant: 2,
+      terrainVariant: 1,
+      motifVariant: 'plane-route',
+      seedHash: 'c01a1011',
     },
   },
 };
@@ -422,10 +507,174 @@ export function buildAccessibleAltText(
   return `Illustrated cityscape of ${identity.displayCity}${suffix}`;
 }
 
+export interface RegionalArtworkEntry {
+  assetPath: string;
+  regionName: string;
+  alt: string;
+  focalPoint: ArtworkFocalPoint;
+}
+
+export const REGIONAL_ARTWORK: Record<string, RegionalArtworkEntry> = {
+  'north-himalaya': {
+    assetPath: '/artwork/region-north-himalaya.png',
+    regionName: 'North Himalaya',
+    alt: 'Illustrated landscape of Himalayan peaks and alpine slopes',
+    focalPoint: { x: 0.7, y: 0.5 },
+  },
+  'ne-eastern-hills': {
+    assetPath: '/artwork/region-ne-eastern-hills.png',
+    regionName: 'Northeast Eastern Hills',
+    alt: 'Illustrated landscape of northeastern cloud-wrapped hills and forests',
+    focalPoint: { x: 0.7, y: 0.5 },
+  },
+  'ne-river-tea': {
+    assetPath: '/artwork/region-ne-river-tea.png',
+    regionName: 'Northeast River & Tea',
+    alt: 'Illustrated landscape of Brahmaputra river valley and tea gardens',
+    focalPoint: { x: 0.7, y: 0.5 },
+  },
+  'gangetic-plains': {
+    assetPath: '/artwork/region-gangetic-plains.png',
+    regionName: 'Gangetic Plains',
+    alt: 'Illustrated landscape of the Gangetic plains and historic riverfront',
+    focalPoint: { x: 0.7, y: 0.5 },
+  },
+  'west-arid-desert': {
+    assetPath: '/artwork/region-west-arid-desert.png',
+    regionName: 'West Arid Desert',
+    alt: 'Illustrated desert landscape of western arid hills and forts',
+    focalPoint: { x: 0.7, y: 0.5 },
+  },
+  'central-plateau-forest': {
+    assetPath: '/artwork/region-central-plateau-forest.png',
+    regionName: 'Central Plateau & Forest',
+    alt: 'Illustrated landscape of central plateau highlands and forests',
+    focalPoint: { x: 0.7, y: 0.5 },
+  },
+  'east-delta-coast': {
+    assetPath: '/artwork/region-east-delta-coast.png',
+    regionName: 'East Delta & Coast',
+    alt: 'Illustrated coastal landscape of the eastern delta and temples',
+    focalPoint: { x: 0.7, y: 0.5 },
+  },
+  'konkan-west-coast': {
+    assetPath: '/artwork/region-konkan-west-coast.png',
+    regionName: 'Konkan & West Coast',
+    alt: 'Illustrated coastal view of Konkan cliffs and palms',
+    focalPoint: { x: 0.7, y: 0.5 },
+  },
+  'deccan-temple-plateau': {
+    assetPath: '/artwork/region-deccan-temple-plateau.png',
+    regionName: 'Deccan Temple Plateau',
+    alt: 'Illustrated landscape of Deccan plateau and stone temple architecture',
+    focalPoint: { x: 0.7, y: 0.5 },
+  },
+  'western-ghats-backwaters': {
+    assetPath: '/artwork/region-western-ghats-backwaters.png',
+    regionName: 'Western Ghats & Backwaters',
+    alt: 'Illustrated tropical landscape of Western Ghats and backwaters',
+    focalPoint: { x: 0.7, y: 0.5 },
+  },
+  'indian-islands': {
+    assetPath: '/artwork/region-indian-islands.png',
+    regionName: 'Indian Islands',
+    alt: 'Illustrated tropical island shore and coral waters',
+    focalPoint: { x: 0.7, y: 0.5 },
+  },
+};
+
+export const INDIA_FALLBACK_ARTWORK = {
+  assetPath: '/artwork/destination-india-fallback.png',
+  alt: 'Illustrated editorial travel landscape of India',
+  focalPoint: { x: 0.7, y: 0.5 },
+};
+
+/**
+ * Resolves trusted administrative region (admin1) metadata to one of the 11 regional masters.
+ */
+export function resolveRegionArtworkKey(admin1?: string | null): string | null {
+  if (!admin1) return null;
+  const norm = normalizeToken(admin1);
+  if (!norm) return null;
+
+  // North Himalaya: Jammu & Kashmir, Ladakh, Himachal Pradesh, Uttarakhand
+  if (
+    /^(jammu and kashmir|jammu & kashmir|jammu kashmir|j and k|j & k|jk|ladakh|himachal pradesh|himachal|hp|uttarakhand|uttaranchal|uk)$/.test(norm)
+  ) {
+    return 'north-himalaya';
+  }
+
+  // Northeast Eastern Hills: Arunachal Pradesh, Sikkim, Meghalaya, Nagaland
+  if (/^(arunachal pradesh|arunachal|sikkim|meghalaya|nagaland)$/.test(norm)) {
+    return 'ne-eastern-hills';
+  }
+
+  // Northeast River & Tea: Assam, Manipur, Mizoram, Tripura
+  if (/^(assam|manipur|mizoram|tripura)$/.test(norm)) {
+    return 'ne-river-tea';
+  }
+
+  // Gangetic Plains: Punjab, Haryana, Delhi, Uttar Pradesh, Bihar, Chandigarh
+  if (
+    /^(punjab|haryana|delhi|nct of delhi|national capital territory of delhi|new delhi|uttar pradesh|up|bihar|chandigarh)$/.test(norm)
+  ) {
+    return 'gangetic-plains';
+  }
+
+  // West Arid Desert: Rajasthan, Gujarat, Daman and Diu, Dadra and Nagar Haveli
+  if (
+    /^(rajasthan|gujarat|daman and diu|dadra and nagar haveli|dadra and nagar haveli and daman and diu)$/.test(norm)
+  ) {
+    return 'west-arid-desert';
+  }
+
+  // Central Plateau & Forest: Madhya Pradesh, Chhattisgarh, Jharkhand
+  if (/^(madhya pradesh|mp|chhattisgarh|jharkhand)$/.test(norm)) {
+    return 'central-plateau-forest';
+  }
+
+  // East Delta & Coast: West Bengal, Odisha
+  if (/^(west bengal|wb|odisha|orissa)$/.test(norm)) {
+    return 'east-delta-coast';
+  }
+
+  // Konkan & West Coast: Maharashtra, Goa
+  if (/^(maharashtra|mh|goa)$/.test(norm)) {
+    return 'konkan-west-coast';
+  }
+
+  // Western Ghats & Backwaters: Kerala
+  if (/^(kerala|kl)$/.test(norm)) {
+    return 'western-ghats-backwaters';
+  }
+
+  // Deccan Temple Plateau: Telangana, Andhra Pradesh, Tamil Nadu, Karnataka, Puducherry
+  if (
+    /^(telangana|ts|andhra pradesh|ap|tamil nadu|tn|karnataka|ka|puducherry|pondicherry)$/.test(norm)
+  ) {
+    return 'deccan-temple-plateau';
+  }
+
+  // Indian Islands: Andaman & Nicobar Islands, Lakshadweep
+  if (
+    /^(andaman and nicobar islands|andaman and nicobar|andaman & nicobar|andaman|nicobar|lakshadweep)$/.test(norm)
+  ) {
+    return 'indian-islands';
+  }
+
+  return null;
+}
+
 /**
  * Synchronously resolves a complete local DestinationArtworkDescriptor
- * with zero network calls. Used for curated flagship cities, offline/fallback
- * paths, and legacy stored trips lacking persisted artwork metadata.
+ * with zero network calls.
+ *
+ * 3-tier India-only resolution hierarchy:
+ * 1. Exact, confidently matched landmark image (11 landmark exceptions)
+ * 2. Region image from trusted state/region metadata (11 regional masters)
+ * 3. Neutral India-wide fallback (/artwork/destination-india-fallback.png)
+ *
+ * For foreign destinations in test stubs, falls back to local vector scene.
  */
 export function resolveLocalDestinationArtwork(
   input: DestinationIdentityInput | string | null | undefined,
@@ -433,7 +682,36 @@ export function resolveLocalDestinationArtwork(
 ): DestinationArtworkDescriptor {
   const identity = normalizeDestinationIdentity(input);
 
-  if (identity.curatedKey) {
+  // If destination is explicitly outside India, return deterministic local vector scene
+  const isExplicitlyForeign = Boolean(
+    identity.countryCode &&
+      identity.countryCode !== 'IN' &&
+      normalizeToken(identity.country) !== 'india'
+  );
+
+  if (isExplicitlyForeign) {
+    const fallbackScene = buildLocalSceneParameters(identity);
+    const alt = buildAccessibleAltText(identity);
+    const contentHash = fnv1aHex(
+      `${ART_RESOLVER_VERSION}:${identity.canonicalId}:${fallbackScene.templateId}:${fallbackScene.paletteId}:${fallbackScene.seedHash}`
+    );
+    return {
+      schemaVersion: ART_SCHEMA_VERSION,
+      artVersion: ART_RESOLVER_VERSION,
+      destinationId: identity.canonicalId,
+      artworkId: `art:scene:${identity.seedHash}`,
+      kind: 'generated_local_scene',
+      fallbackScene,
+      alt,
+      landmarkVerified: false,
+      focalPoint: { x: 0.72, y: 0.48 },
+      resolvedAt,
+      contentHash,
+    };
+  }
+
+  // Tier 1: Exact Landmark Exception
+  if (identity.curatedKey && CURATED_CITY_ARTWORK[identity.curatedKey]) {
     const curated = CURATED_CITY_ARTWORK[identity.curatedKey];
     const contentHash = fnv1aHex(
       `${ART_RESOLVER_VERSION}:${identity.canonicalId}:${curated.assetPath}`
@@ -446,6 +724,7 @@ export function resolveLocalDestinationArtwork(
       kind: 'curated_local',
       curatedCityKey: curated.key,
       assetPath: curated.assetPath,
+      imageUrl: curated.assetPath,
       fallbackScene: { ...curated.fallbackScene },
       alt: curated.alt,
       landmarkVerified: true,
@@ -456,22 +735,49 @@ export function resolveLocalDestinationArtwork(
     };
   }
 
-  const fallbackScene = buildLocalSceneParameters(identity);
-  const alt = buildAccessibleAltText(identity);
-  const contentHash = fnv1aHex(
-    `${ART_RESOLVER_VERSION}:${identity.canonicalId}:${fallbackScene.templateId}:${fallbackScene.paletteId}:${fallbackScene.seedHash}`
-  );
+  // Tier 2: Trusted Regional Master
+  const regionKey = resolveRegionArtworkKey(identity.admin1);
+  if (regionKey && REGIONAL_ARTWORK[regionKey]) {
+    const region = REGIONAL_ARTWORK[regionKey];
+    const fallbackScene = buildLocalSceneParameters(identity);
+    const contentHash = fnv1aHex(
+      `${ART_RESOLVER_VERSION}:${identity.canonicalId}:${region.assetPath}`
+    );
+    return {
+      schemaVersion: ART_SCHEMA_VERSION,
+      artVersion: ART_RESOLVER_VERSION,
+      destinationId: identity.canonicalId,
+      artworkId: `art:region:${regionKey}`,
+      kind: 'curated_local',
+      assetPath: region.assetPath,
+      imageUrl: region.assetPath,
+      fallbackScene,
+      alt: buildAccessibleAltText(identity) || region.alt,
+      landmarkVerified: false,
+      focalPoint: { ...region.focalPoint },
+      resolvedAt,
+      contentHash,
+    };
+  }
 
+  // Tier 3: India Neutral Fallback
+  const fallback = INDIA_FALLBACK_ARTWORK;
+  const fallbackScene = buildLocalSceneParameters(identity);
+  const contentHash = fnv1aHex(
+    `${ART_RESOLVER_VERSION}:${identity.canonicalId}:${fallback.assetPath}`
+  );
   return {
     schemaVersion: ART_SCHEMA_VERSION,
     artVersion: ART_RESOLVER_VERSION,
     destinationId: identity.canonicalId,
-    artworkId: `art:scene:${identity.seedHash}`,
-    kind: 'generated_local_scene',
+    artworkId: 'art:fallback:india',
+    kind: 'curated_local',
+    assetPath: fallback.assetPath,
+    imageUrl: fallback.assetPath,
     fallbackScene,
-    alt,
+    alt: buildAccessibleAltText(identity) || fallback.alt,
     landmarkVerified: false,
-    focalPoint: { x: 0.72, y: 0.48 },
+    focalPoint: { ...fallback.focalPoint },
     resolvedAt,
     contentHash,
   };

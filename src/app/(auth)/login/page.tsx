@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Compass, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
+import { Loader2, AlertCircle, ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -91,75 +92,90 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="sm:mx-auto sm:w-full sm:max-w-md">
-      <div className="flex justify-center">
-        <Link href="/" className="flex items-center gap-2.5 font-black text-2xl text-slate-900 tracking-tight group">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-orange-500/20 group-hover:scale-105 transition-transform">
-            <Compass className="w-5 h-5 stroke-[2.2]" />
+    <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+      <div className="flex justify-center mb-8">
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="relative w-11 h-11 shrink-0">
+            <Image
+              src="/artwork/tripcraft-mark.png"
+              alt=""
+              width={44}
+              height={44}
+              className="w-full h-full object-contain"
+              priority
+            />
           </div>
-          <span>Tripcraft</span>
+          <span className="font-serif text-2xl font-bold tracking-tight text-[var(--color-tc-ink)]">
+            Tripcraft
+          </span>
         </Link>
       </div>
 
-      <h2 className="mt-6 text-center text-2xl font-black text-slate-900 tracking-tight">
-        Sign in to your account
-      </h2>
-      <p className="mt-1.5 text-center text-xs text-slate-500">
-        Don&apos;t have an account?{' '}
-        <Link href="/signup" className="font-bold text-[#1d6b8f] hover:underline">
-          Create account
-        </Link>
-      </p>
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-serif font-bold text-[var(--color-tc-ink)] tracking-tight">
+          Welcome back
+        </h2>
+        <p className="mt-3 text-sm text-[var(--color-tc-ink)]/70 font-medium">
+          Don&apos;t have an account?{' '}
+          <Link href="/signup" className="font-bold text-[var(--color-tc-tangerine)] hover:underline">
+            Create account
+          </Link>
+        </p>
+      </div>
 
-      <div className="mt-6 bg-white py-7 px-5 shadow-xs border border-slate-200 sm:rounded-3xl sm:px-8">
+      <div className="bg-[var(--color-tc-cream)] py-8 px-6 shadow-[8px_8px_0px_rgba(23,60,57,0.1)] border-2 border-[var(--color-tc-sage)]/50 sm:rounded-2xl sm:px-10 relative overflow-hidden">
+        {/* Decorative corner */}
+        <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-[var(--color-tc-ink)]/20 -mt-2 -mr-2"></div>
+        <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-[var(--color-tc-tangerine)]"></div>
+
         {/* Google OAuth Button */}
         <button
           type="button"
           onClick={handleGoogleSignIn}
           disabled={googleLoading || loading}
-          className="w-full py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold shadow-xs flex items-center justify-center gap-2.5 transition-all cursor-pointer disabled:opacity-50"
+          className="w-full py-3.5 px-4 rounded-xl border-2 border-[var(--color-tc-sage)] hover:border-[var(--color-tc-ink)] bg-[var(--color-tc-parchment)] text-[var(--color-tc-ink)] text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-50"
         >
           {googleLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
+            <Loader2 className="w-4 h-4 animate-spin text-[var(--color-tc-ink)]" />
           ) : (
             <GoogleIcon />
           )}
           <span>Continue with Google</span>
         </button>
 
-        <div className="relative my-6">
+        <div className="relative my-8">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200" />
+            <div className="w-full border-t border-[var(--color-tc-sage)] border-dashed" />
           </div>
-          <div className="relative flex justify-center text-[11px] uppercase tracking-wider font-semibold">
-            <span className="bg-white px-3 text-slate-400">or sign in with email</span>
+          <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-bold">
+            <span className="bg-[var(--color-tc-cream)] px-4 text-[var(--color-tc-ink)]/50">or use email</span>
           </div>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSignIn}>
+        <form className="space-y-5" onSubmit={handleSignIn}>
           {error && (
-            <div className="p-3.5 text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600" />
-              <div className="flex-1">{error}</div>
+            <div className="p-4 text-xs text-[#7F1D1D] bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl flex items-start gap-3">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="flex-1 font-medium leading-relaxed">{error}</div>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-[10px] font-bold text-[var(--color-tc-teal)] uppercase tracking-widest mb-1.5 ml-1">
               Email address
             </label>
             <input
               type="email"
               required
-              placeholder="you@domain.com"
+              placeholder="explorer@atlas.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1d6b8f] focus:border-transparent transition-all placeholder:text-slate-400"
+              className="w-full px-4 py-3 rounded-xl border-2 border-[var(--color-tc-sage)] bg-[var(--color-tc-parchment)] text-sm text-[var(--color-tc-ink)] font-medium focus:outline-none focus:border-[var(--color-tc-teal)] transition-colors placeholder:text-[var(--color-tc-ink)]/30"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-[10px] font-bold text-[var(--color-tc-teal)] uppercase tracking-widest mb-1.5 ml-1">
               Password
             </label>
             <input
@@ -168,20 +184,20 @@ export default function LoginPage() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1d6b8f] focus:border-transparent transition-all placeholder:text-slate-400"
+              className="w-full px-4 py-3 rounded-xl border-2 border-[var(--color-tc-sage)] bg-[var(--color-tc-parchment)] text-sm text-[var(--color-tc-ink)] font-medium focus:outline-none focus:border-[var(--color-tc-teal)] transition-colors placeholder:text-[var(--color-tc-ink)]/30"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading || googleLoading}
-            className="w-full py-3.5 px-4 bg-[#1d6b8f] hover:bg-[#155370] text-white rounded-xl text-xs font-bold shadow-md shadow-[#1d6b8f]/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="w-full mt-2 py-4 px-4 bg-[var(--color-tc-ink)] hover:bg-[var(--color-tc-teal)] text-[var(--color-tc-cream)] rounded-xl text-xs font-bold uppercase tracking-widest shadow-[4px_4px_0px_rgba(23,60,57,0.2)] hover:shadow-[2px_2px_0px_rgba(23,60,57,0.2)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <>
-                <span>Sign in</span>
+                <span>Unlock Atlas</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}

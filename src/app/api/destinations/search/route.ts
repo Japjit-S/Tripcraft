@@ -48,7 +48,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const results = await weatherProvider.searchCities(cleanedQuery, 6);
+    // Strict India-only destination scope: provider filter & in-memory verification
+    const results = await weatherProvider.searchCities(cleanedQuery, 6, 'IN');
 
     return NextResponse.json({
       success: true,

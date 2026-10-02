@@ -7,6 +7,7 @@ import {
   DestinationIdentityInput,
   fnv1aHex,
   normalizeDestinationIdentity,
+  normalizeToken,
 } from './canonicalDestination';
 import {
   ART_RESOLVER_VERSION,
@@ -46,8 +47,13 @@ export async function resolveDestinationArtwork(
 
   const identity = normalizeDestinationIdentity(input);
 
-  // Step 2: Incomplete metadata -> immediate local vector scene without external lookup
-  if (!identity.hasCompleteMetadata || !identity.country) {
+  // Step 2: Under India-only scope or incomplete metadata -> immediate local resolution with zero network calls
+  const isIndia =
+    identity.countryCode === 'IN' ||
+    normalizeToken(identity.country) === 'india' ||
+    (!identity.countryCode && !identity.country);
+
+  if (isIndia || !identity.hasCompleteMetadata || !identity.country) {
     return resolveLocalDestinationArtwork(input, resolvedIso);
   }
 

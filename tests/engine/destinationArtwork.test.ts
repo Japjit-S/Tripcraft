@@ -4,8 +4,6 @@ import path from 'node:path';
 import { describe, it } from 'node:test';
 import {
   ART_RESOLVER_VERSION,
-  CURATED_CITY_ARTWORK,
-  CURATED_CITY_KEYS,
   DestinationArtworkCache,
   normalizeDestinationIdentity,
   resolveCuratedCityKey,
@@ -17,23 +15,31 @@ import {
 import { ensureTripArtwork, GeneratedTrip } from '../../src/lib/tripStore';
 
 describe('Destination Banner & Illustration Resolution System', () => {
-  it('resolves all six curated cities and every listed alias to the correct bundled illustration', async () => {
+  it('resolves all 11 curated landmark destinations and listed aliases to approved landmark PNG illustrations', async () => {
     const cases: Array<{ input: string; expectedKey: string; expectedAsset: string }> = [
-      { input: 'Jaipur', expectedKey: 'jaipur', expectedAsset: '/banners/jaipur.svg' },
-      { input: 'Amer', expectedKey: 'jaipur', expectedAsset: '/banners/jaipur.svg' },
-      { input: 'Delhi', expectedKey: 'delhi', expectedAsset: '/banners/delhi.svg' },
-      { input: 'New Delhi', expectedKey: 'delhi', expectedAsset: '/banners/delhi.svg' },
-      { input: 'Dilli', expectedKey: 'delhi', expectedAsset: '/banners/delhi.svg' },
-      { input: 'Agra', expectedKey: 'agra', expectedAsset: '/banners/agra.svg' },
-      { input: 'Varanasi', expectedKey: 'varanasi', expectedAsset: '/banners/varanasi.svg' },
-      { input: 'Banaras', expectedKey: 'varanasi', expectedAsset: '/banners/varanasi.svg' },
-      { input: 'Kashi', expectedKey: 'varanasi', expectedAsset: '/banners/varanasi.svg' },
-      { input: 'Udaipur', expectedKey: 'udaipur', expectedAsset: '/banners/udaipur.svg' },
-      { input: 'Goa', expectedKey: 'goa', expectedAsset: '/banners/goa.svg' },
-      { input: 'Panaji', expectedKey: 'goa', expectedAsset: '/banners/goa.svg' },
-      { input: 'Panjim', expectedKey: 'goa', expectedAsset: '/banners/goa.svg' },
-      { input: 'North Goa', expectedKey: 'goa', expectedAsset: '/banners/goa.svg' },
-      { input: 'South Goa', expectedKey: 'goa', expectedAsset: '/banners/goa.svg' },
+      { input: 'Jaipur', expectedKey: 'jaipur', expectedAsset: '/artwork/landmark-jaipur-hawa-mahal.png' },
+      { input: 'Amer', expectedKey: 'jaipur', expectedAsset: '/artwork/landmark-jaipur-hawa-mahal.png' },
+      { input: 'Delhi', expectedKey: 'delhi', expectedAsset: '/artwork/landmark-delhi-red-fort.png' },
+      { input: 'New Delhi', expectedKey: 'delhi', expectedAsset: '/artwork/landmark-delhi-red-fort.png' },
+      { input: 'Dilli', expectedKey: 'delhi', expectedAsset: '/artwork/landmark-delhi-red-fort.png' },
+      { input: 'Agra', expectedKey: 'agra', expectedAsset: '/artwork/landmark-agra-taj-mahal.png' },
+      { input: 'Varanasi', expectedKey: 'varanasi', expectedAsset: '/artwork/landmark-varanasi-ghats.png' },
+      { input: 'Banaras', expectedKey: 'varanasi', expectedAsset: '/artwork/landmark-varanasi-ghats.png' },
+      { input: 'Kashi', expectedKey: 'varanasi', expectedAsset: '/artwork/landmark-varanasi-ghats.png' },
+      { input: 'Udaipur', expectedKey: 'udaipur', expectedAsset: '/artwork/landmark-udaipur-lake-palace.png' },
+      { input: 'Goa', expectedKey: 'goa', expectedAsset: '/artwork/landmark-goa-panaji-coast.png' },
+      { input: 'Panaji', expectedKey: 'goa', expectedAsset: '/artwork/landmark-goa-panaji-coast.png' },
+      { input: 'Panjim', expectedKey: 'goa', expectedAsset: '/artwork/landmark-goa-panaji-coast.png' },
+      { input: 'North Goa', expectedKey: 'goa', expectedAsset: '/artwork/landmark-goa-panaji-coast.png' },
+      { input: 'South Goa', expectedKey: 'goa', expectedAsset: '/artwork/landmark-goa-panaji-coast.png' },
+      { input: 'Mumbai', expectedKey: 'mumbai', expectedAsset: '/artwork/landmark-mumbai-gateway.png' },
+      { input: 'Bombay', expectedKey: 'mumbai', expectedAsset: '/artwork/landmark-mumbai-gateway.png' },
+      { input: 'Kolkata', expectedKey: 'kolkata', expectedAsset: '/artwork/landmark-kolkata-howrah.png' },
+      { input: 'Calcutta', expectedKey: 'kolkata', expectedAsset: '/artwork/landmark-kolkata-howrah.png' },
+      { input: 'Amritsar', expectedKey: 'amritsar', expectedAsset: '/artwork/landmark-amritsar-golden-temple.png' },
+      { input: 'Hampi', expectedKey: 'hampi', expectedAsset: '/artwork/landmark-hampi-ruins.png' },
+      { input: 'Mysuru', expectedKey: 'mysuru', expectedAsset: '/artwork/landmark-mysuru-palace.png' },
+      { input: 'Mysore', expectedKey: 'mysuru', expectedAsset: '/artwork/landmark-mysuru-palace.png' },
     ];
 
     for (const c of cases) {
@@ -58,7 +64,38 @@ describe('Destination Banner & Illustration Resolution System', () => {
         countryCode: 'IN',
       });
       assert.ok(descriptor.artworkId);
-      assert.ok(descriptor.imageUrl || descriptor.assetPath);
+      assert.equal(descriptor.assetPath, c.expectedAsset);
+    }
+  });
+
+  it('resolves trusted state/region metadata to the correct regional master illustration, or neutral India fallback', async () => {
+    const regionalCases: Array<{ city: string; admin1?: string; expectedAsset: string; expectedKind: string }> = [
+      { city: 'Manali', admin1: 'Himachal Pradesh', expectedAsset: '/artwork/region-north-himalaya.png', expectedKind: 'curated_local' },
+      { city: 'Shimla', admin1: 'Himachal Pradesh', expectedAsset: '/artwork/region-north-himalaya.png', expectedKind: 'curated_local' },
+      { city: 'Gangtok', admin1: 'Sikkim', expectedAsset: '/artwork/region-ne-eastern-hills.png', expectedKind: 'curated_local' },
+      { city: 'Guwahati', admin1: 'Assam', expectedAsset: '/artwork/region-ne-river-tea.png', expectedKind: 'curated_local' },
+      { city: 'Patna', admin1: 'Bihar', expectedAsset: '/artwork/region-gangetic-plains.png', expectedKind: 'curated_local' },
+      { city: 'Jodhpur', admin1: 'Rajasthan', expectedAsset: '/artwork/region-west-arid-desert.png', expectedKind: 'curated_local' },
+      { city: 'Bhopal', admin1: 'Madhya Pradesh', expectedAsset: '/artwork/region-central-plateau-forest.png', expectedKind: 'curated_local' },
+      { city: 'Puri', admin1: 'Odisha', expectedAsset: '/artwork/region-east-delta-coast.png', expectedKind: 'curated_local' },
+      { city: 'Pune', admin1: 'Maharashtra', expectedAsset: '/artwork/region-konkan-west-coast.png', expectedKind: 'curated_local' },
+      { city: 'Bengaluru', admin1: 'Karnataka', expectedAsset: '/artwork/region-deccan-temple-plateau.png', expectedKind: 'curated_local' },
+      { city: 'Kochi', admin1: 'Kerala', expectedAsset: '/artwork/region-western-ghats-backwaters.png', expectedKind: 'curated_local' },
+      { city: 'Port Blair', admin1: 'Andaman and Nicobar Islands', expectedAsset: '/artwork/region-indian-islands.png', expectedKind: 'curated_local' },
+      // Ambiguous or missing admin1 fails safely to neutral India fallback
+      { city: 'Unknown Village', admin1: undefined, expectedAsset: '/artwork/destination-india-fallback.png', expectedKind: 'curated_local' },
+    ];
+
+    for (const rc of regionalCases) {
+      const descriptor = await resolveDestinationArtwork({
+        city: rc.city,
+        admin1: rc.admin1,
+        country: 'India',
+        countryCode: 'IN',
+      });
+      assert.equal(descriptor.assetPath, rc.expectedAsset, `Expected ${rc.city} to resolve to ${rc.expectedAsset}`);
+      assert.equal(descriptor.kind, rc.expectedKind);
+      assert.ok(descriptor.artworkId);
     }
   });
 
@@ -374,26 +411,55 @@ describe('Destination Banner & Illustration Resolution System', () => {
     assert.equal(upgraded.artwork.artVersion, ART_RESOLVER_VERSION);
   });
 
-  it('ships valid, text-free bundled SVG files for all six curated flagship destinations', () => {
-    for (const key of CURATED_CITY_KEYS) {
-      const entry = CURATED_CITY_ARTWORK[key];
-      const svgDiskPath = path.join(
-        process.cwd(),
-        'public',
-        entry.assetPath.replace(/^\//, '')
-      );
-      assert.equal(
-        fs.existsSync(svgDiskPath),
-        true,
-        `Missing bundled SVG file at ${svgDiskPath}`
-      );
-      const content = fs.readFileSync(svgDiskPath, 'utf8');
-      assert.match(content, /<svg[^>]*viewBox="0 0 1200 500"/);
-      assert.doesNotMatch(
-        content,
-        /<text\b/i,
-        `Bundled SVG ${entry.assetPath} must not contain embedded <text> elements`
-      );
+  it('ships all 33 approved Tripcraft Artwork Pack PNG assets (5 brand/persona marks and 28 destination/weather illustrations)', () => {
+    const requiredAssets = [
+      // 5 brand/persona marks
+      'artwork/tripcraft-mark.png',
+      'artwork/persona-backpacker.png',
+      'artwork/persona-culture-seeker.png',
+      'artwork/persona-comfort-traveller.png',
+      'artwork/persona-family.png',
+      // Landing & fallback
+      'artwork/landing-india-atlas-hero.png',
+      'artwork/destination-india-fallback.png',
+      // 11 regional masters
+      'artwork/region-north-himalaya.png',
+      'artwork/region-ne-eastern-hills.png',
+      'artwork/region-ne-river-tea.png',
+      'artwork/region-gangetic-plains.png',
+      'artwork/region-west-arid-desert.png',
+      'artwork/region-central-plateau-forest.png',
+      'artwork/region-east-delta-coast.png',
+      'artwork/region-konkan-west-coast.png',
+      'artwork/region-deccan-temple-plateau.png',
+      'artwork/region-western-ghats-backwaters.png',
+      'artwork/region-indian-islands.png',
+      // 11 landmark exceptions
+      'artwork/landmark-delhi-red-fort.png',
+      'artwork/landmark-jaipur-hawa-mahal.png',
+      'artwork/landmark-agra-taj-mahal.png',
+      'artwork/landmark-varanasi-ghats.png',
+      'artwork/landmark-udaipur-lake-palace.png',
+      'artwork/landmark-goa-panaji-coast.png',
+      'artwork/landmark-mumbai-gateway.png',
+      'artwork/landmark-kolkata-howrah.png',
+      'artwork/landmark-amritsar-golden-temple.png',
+      'artwork/landmark-hampi-ruins.png',
+      'artwork/landmark-mysuru-palace.png',
+      // 4 shared weather illustrations
+      'artwork/weather-clear-sun.png',
+      'artwork/weather-rain-cloud.png',
+      'artwork/weather-thunderstorm.png',
+      'artwork/weather-cold-wind.png',
+    ];
+
+    assert.equal(requiredAssets.length, 33, 'Expected exactly 33 Artwork Pack assets');
+
+    for (const relPath of requiredAssets) {
+      const diskPath = path.join(process.cwd(), 'public', relPath);
+      assert.equal(fs.existsSync(diskPath), true, `Missing Artwork Pack file at ${diskPath}`);
+      const stat = fs.statSync(diskPath);
+      assert.ok(stat.size > 1000, `Artwork Pack file ${relPath} is empty or corrupted (size: ${stat.size})`);
     }
   });
 });

@@ -120,28 +120,49 @@ export function DestinationBanner({
       data-destination-id={descriptor.destinationId}
       className={`relative overflow-hidden select-none ${className}`}
     >
-      {/* Immediate Local Vector Layer (Curated Flagship or Deterministic Scene) */}
-      <div
-        className={`absolute inset-0 transition-transform duration-700 ease-out ${
-          surface === 'dashboard' || surface === 'card'
-            ? 'group-hover:scale-105'
-            : ''
-        }`}
-      >
-        {descriptor.curatedCityKey ? (
-          <CuratedCityScene
-            cityKey={descriptor.curatedCityKey}
-            cropMode={cropMode}
-            className="w-full h-full"
+      {/* Primary Local Asset Layer: Approved PNG Artwork (Landmark, Regional, or India Fallback) */}
+      {descriptor.assetPath ? (
+        <div
+          className={`absolute inset-0 transition-transform duration-700 ease-out ${
+            surface === 'dashboard' || surface === 'card'
+              ? 'group-hover:scale-105'
+              : ''
+          }`}
+        >
+          <Image
+            src={descriptor.assetPath}
+            alt={descriptor.alt}
+            fill
+            sizes={sizes}
+            priority={surface === 'workspace'}
+            style={{ objectPosition: `${focalX}% ${focalY}%` }}
+            className="object-cover"
           />
-        ) : (
-          <LocalVectorScene
-            params={descriptor.fallbackScene}
-            cropMode={cropMode}
-            className="w-full h-full"
-          />
-        )}
-      </div>
+        </div>
+      ) : (
+        /* Fallback Local Vector Layer */
+        <div
+          className={`absolute inset-0 transition-transform duration-700 ease-out ${
+            surface === 'dashboard' || surface === 'card'
+              ? 'group-hover:scale-105'
+              : ''
+          }`}
+        >
+          {descriptor.curatedCityKey ? (
+            <CuratedCityScene
+              cityKey={descriptor.curatedCityKey}
+              cropMode={cropMode}
+              className="w-full h-full"
+            />
+          ) : (
+            <LocalVectorScene
+              params={descriptor.fallbackScene}
+              cropMode={cropMode}
+              className="w-full h-full"
+            />
+          )}
+        </div>
+      )}
 
       {/* Optional External Validated Illustration Layer */}
       {externalUrl && !hasExternalFailed && (
@@ -177,14 +198,11 @@ export function DestinationBanner({
       )}
 
       {surface === 'dashboard' && (
-        <>
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-900/45 to-slate-900/10 pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/40 to-transparent pointer-events-none" />
-        </>
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-tc-ink)]/30 via-transparent to-transparent pointer-events-none" />
       )}
 
       {surface === 'card' && (
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/25 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-tc-ink)]/20 via-transparent to-transparent pointer-events-none" />
       )}
 
       {/* Unobtrusive External Attribution Credit */}

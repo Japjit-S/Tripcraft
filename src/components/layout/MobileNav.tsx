@@ -19,7 +19,7 @@ export default function MobileNav() {
         href="/dashboard"
         className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-colors ${
           pathname === '/dashboard'
-            ? 'text-[#1d6b8f] font-bold'
+            ? 'text-[var(--color-tc-ink)] font-bold'
             : 'text-slate-500 hover:text-slate-900 font-medium'
         }`}
       >
@@ -32,10 +32,10 @@ export default function MobileNav() {
         href="/planner"
         className="flex flex-col items-center -mt-5 group"
       >
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30 group-hover:scale-105 transition-transform">
+        <div className="w-12 h-12 rounded-2xl bg-[var(--color-tc-ink)] hover:bg-[var(--color-tc-teal)] text-white flex items-center justify-center shadow-lg shadow-[var(--color-tc-ink)]/30 group-hover:scale-105 transition-transform">
           <Sparkles className="w-6 h-6 stroke-[2.2]" />
         </div>
-        <span className={`text-[10px] font-bold mt-1 ${pathname === '/planner' ? 'text-orange-600' : 'text-slate-600'}`}>
+        <span className={`text-[10px] font-bold mt-1 ${pathname === '/planner' ? 'text-[var(--color-tc-ink)]' : 'text-slate-600'}`}>
           Plan
         </span>
       </Link>
@@ -45,7 +45,7 @@ export default function MobileNav() {
         href="/trips"
         className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-colors ${
           pathname === '/trips' || isTrip
-            ? 'text-[#1d6b8f] font-bold'
+            ? 'text-[var(--color-tc-ink)] font-bold'
             : 'text-slate-500 hover:text-slate-900 font-medium'
         }`}
       >
@@ -69,7 +69,7 @@ export default function MobileNav() {
           href="/login"
           className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-colors ${
             pathname === '/login'
-              ? 'text-[#1d6b8f] font-bold'
+              ? 'text-[var(--color-tc-ink)] font-bold'
               : 'text-slate-500 hover:text-slate-900 font-medium'
           }`}
         >

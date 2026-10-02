@@ -27,7 +27,7 @@ The approved direction is **“Field Notes meets Modern Atlas”**:
 - Use subtle paper/map texture, contour lines, dotted routes, small travel-stamp/field-note details, and carefully composed vector-like shapes. Keep these as accents around content, not noise behind it.
 - Build one reusable destination illustration as the master artwork for a city/region. Compose it with safe focal areas so the same source can be cropped responsively for the hero and a small side visual; do not create separate activity-specific art or one new art file for each crop.
 - Activity/itinerary cards are **text-only**: no attraction photo, thumbnail, or generated venue image. Use typography, time/slot, category treatment, and small existing/code-native category symbols for hierarchy.
-- Create a coherent, reusable weather-visual family for the engine’s states: `CLEAR` (sun), `RAIN` (rain cloud), `STORM` (thunderstorm), `EXTREME_HEAT` (heat/sun), `COLD_WIND` (wind/cold), and `MIXED`. These are six state assets/components reused across the product—not new images for every forecast, day, or trip. Match their vector/editorial style to the destination artwork. Defer the finished asset generation/production pack until page layouts are approved.
+- Create a coherent, reusable weather-visual family for the engine’s states: `CLEAR`, `RAIN`, `STORM`, `EXTREME_HEAT`, `COLD_WIND`, and `MIXED`. The six states should resolve through four shared illustrations/compositions as specified in `TRIPCRAFT_IMAGE_ASSET_PLAN.md`; do not generate a separate image for every state, day, or trip. Defer production asset generation until page layouts are approved.
 - The generated screenshot is a **design reference only**. Never use a flattened screenshot as the website, and do not copy its accidental text/layout artifacts.
 - Preserve the approved Tripcraft name and explore the concept’s sun/mountain mark as the brand direction. Implement a clean, scalable code-native mark/wordmark if needed; do not use a screenshot crop as a logo.
 
@@ -64,7 +64,7 @@ Redesign these six page types, preserving their existing features and data flows
 
 The brand may be **India-first**, with Indian destinations used in visible examples. For this visual task, **do not add an India-only hard filter, remove international support, rewrite destination resolution, or alter engine/backend behavior**. The user wants to decide/handle geographic product constraints separately; a visual overhaul must not silently make existing destinations unsupported.
 
-**Do not generate, download, or create the final destination-image pack during this task.** The user wants page structure/theme established first and destination illustrations later. Keep the existing artwork resolver and current assets connected, but make the layouts work gracefully with them. Use CSS/SVG/code-native motifs where appropriate; do not burn image-generation budget or add per-city image URLs as part of this task.
+**Do not generate, download, or create the final destination-image pack during this task.** The image pack is separately planned in `TRIPCRAFT_IMAGE_ASSET_PLAN.md`. Keep the artwork rendering boundary and a neutral fallback working, but do not reintroduce the removed six-city preset/image tier, city-specific quick-pick scenes, or per-activity images. Use CSS/SVG/code-native motifs where appropriate; do not burn image-generation budget during this UI pass.
 
 Do not change itinerary algorithms, provider integrations, API contracts, Supabase schema/migrations, authentication semantics, or trip data. Do not add fake testimonials, statistics, ratings, venue recommendations, or sample trip data that could be mistaken for real user/provider data. Keep every existing action functional.
 
@@ -72,8 +72,8 @@ Do not change itinerary algorithms, provider integrations, API contracts, Supaba
 
 ### Pass 1 — Inspect and define the shared system
 
-- Inspect current routes, existing components, assets, functionality, active Git state, and the exact changes currently being made for engineering Stage 2. Read `AGENTS.md`; read the installed Next.js docs relevant to files you will touch, as required by the repository instructions.
-- Preserve any in-progress Stage 2 or user changes. If Antigravity is editing the same working tree or files concurrently, coordinate first; do not overwrite or rebase away its work. Isolate the frontend overhaul on a separate branch/worktree if needed.
+- Inspect current routes, existing components, assets, functionality, and active Git state. Confirm the eight engineering-hardening stages are complete and preserve their resulting code, deployment state, and history. Read `AGENTS.md`; read the installed Next.js docs relevant to files you will touch, as required by the repository instructions.
+- Preserve all completed engineering-stage work, user changes, and uncommitted edits. If the working tree is not clean or the intended starting branch is unclear, inspect and report the exact state before changing anything; do not overwrite, discard, or rebase away existing work. Keep the visual overhaul isolated from the completed engineering work, using a separate branch/worktree if needed.
 - Map the six page types and their current features before changing layout. Identify the shared shell/navigation used by authenticated pages and the separate public landing/auth shells.
 - Establish a small reusable design system: color tokens, type scale, spacing, radii, elevation/border treatment, buttons, inputs, badges, cards, navigation, focus states, and subtle cartographic motifs. Avoid one-off values where shared tokens/components are appropriate.
 - Use the user-approved palette above as the default. Ensure contrast for body text, controls, status labels, and keyboard focus; parchment/cream must not reduce readability.
@@ -118,9 +118,9 @@ Across all pages, provide coherent hover, focus, selected, disabled, loading, em
 
 - Verify the six page types on desktop and at approximately 390–412px mobile widths. Check overflow, sticky/fixed elements, keyboard navigation, contrast, focus visibility, and legibility over textured/illustrated areas.
 - Exercise existing user flows: navigate from landing to planner, submit valid/invalid planner inputs without altering production data, view My Home and trips states, open a trip workspace, change days, focus an activity/map, open Decision Log, and use auth states available in a safe environment.
-- Verify existing destination artwork still loads or degrades gracefully. Do not treat this as approval of the future India illustration pack.
+- Verify that the current neutral destination fallback loads or degrades gracefully; do not restore the removed six-city artwork tier. The future regional illustration pack is specified separately in `TRIPCRAFT_IMAGE_ASSET_PLAN.md`.
 - Run `npm test`, `npx tsc --noEmit`, `npm run lint`, and `npm run build`. Report checks that could not run as **not run** with the exact reason; never present a skipped/failed check as passed.
-- Review the full diff and confirm no backend, engine, database, auth, or unrelated Stage 2 changes slipped into this visual task.
+- Review the full diff and confirm no backend, engine, database, authentication, or unrelated completed engineering-stage changes slipped into this visual task.
 
 ## Completion bar
 
@@ -135,7 +135,7 @@ The overhaul is ready for user review only when:
 ## Branch, deployment, and handoff rules
 
 - The already-submitted production deployment is frozen during this work. Do not replace it, merge to its production branch, change production settings, or trigger a production deployment without Japjit’s explicit approval.
-- Work on an isolated branch/worktree or safe preview. Before doing so, inspect Git state and preserve any ongoing Stage 2 edits. Never force-push, discard uncommitted changes, or mix this visual overhaul into the engineering-stage commit.
+- Work on an isolated branch/worktree or safe preview. Before doing so, inspect Git state and preserve the completed eight-stage result and any user edits. Never force-push, discard uncommitted changes, or rewrite the completed engineering-stage history.
 - Do not push or deploy automatically as part of this prompt. First present the completed local/preview result and evidence to Japjit; he will decide whether to publish it and when.
 - If a choice would require changing production behavior, removing supported countries, altering existing user data, adding a dependency/service, or making a material design departure from the approved reference, stop and ask. For routine reversible visual implementation decisions within this brief, proceed and note the choice.
 

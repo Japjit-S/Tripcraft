@@ -124,12 +124,13 @@ export class WeatherProvider {
   /**
    * Searches for matching cities matching the query with debouncing/capping.
    * Includes destination IANA timezone.
+   * Restricts results to India ('IN') by default per Tripcraft destination product rule.
    */
-  async searchCities(query: string, count = 6): Promise<Destination[]> {
+  async searchCities(query: string, count = 6, countryCode: string | null = 'IN'): Promise<Destination[]> {
     const cleaned = query.trim();
     if (cleaned.length < 2) return [];
 
-    const url = `${GEOCODING_API_URL}?name=${encodeURIComponent(cleaned)}&count=${Math.min(count, 10)}&language=en&format=json`;
+    const url = `${GEOCODING_API_URL}?name=${encodeURIComponent(cleaned)}&count=20&language=en&format=json`;
     const res = await fetch(url, {
       headers: { 'User-Agent': USER_AGENT },
       signal: AbortSignal.timeout(8000),
@@ -155,7 +156,15 @@ export class WeatherProvider {
       return [];
     }
 
-    return data.results.map((r) => ({
+    let filtered = data.results;
+    if (countryCode) {
+      const target = countryCode.toUpperCase().trim();
+      filtered = data.results.filter(
+        (r) => r.country_code && r.country_code.toUpperCase().trim() === target
+      );
+    }
+
+    return filtered.slice(0, count).map((r) => ({
       id: `openmeteo:${r.id}`,
       city: r.name,
       country: r.country || '',

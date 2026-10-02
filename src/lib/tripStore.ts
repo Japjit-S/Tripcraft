@@ -23,7 +23,8 @@ export function ensureTripArtwork(trip: GeneratedTrip): GeneratedTrip {
     trip.artwork &&
     trip.artwork.schemaVersion === ART_SCHEMA_VERSION &&
     trip.artwork.destinationId &&
-    trip.artwork.fallbackScene
+    trip.artwork.fallbackScene &&
+    (trip.artwork.assetPath?.startsWith('/artwork/') || trip.artwork.imageUrl)
   ) {
     return trip;
   }
@@ -47,7 +48,7 @@ export function ensureTripArtwork(trip: GeneratedTrip): GeneratedTrip {
     ...trip,
     destinationId: trip.destinationId || resolvedArtwork.destinationId,
     bannerUrl:
-      trip.bannerUrl || resolvedArtwork.imageUrl || resolvedArtwork.assetPath,
+      trip.bannerUrl || resolvedArtwork.assetPath || resolvedArtwork.imageUrl,
     artwork: resolvedArtwork,
   };
 }
@@ -158,6 +159,14 @@ export function saveTripToStorage(trip: GeneratedTrip): void {
 /**
  * Retrieves a saved trip by ID from client storage
  */
+export function isIndiaDestinationTrip(trip: GeneratedTrip): boolean {
+  const cc = (trip.destinationCountryCode || '').toUpperCase().trim();
+  const country = (trip.destinationCountry || '').toLowerCase().trim();
+  if (cc && cc !== 'IN') return false;
+  if (country && country !== 'india') return false;
+  return true;
+}
+
 export function getTripFromStorage(id: string): GeneratedTrip | null {
   if (typeof window === 'undefined') return null;
 
@@ -165,6 +174,10 @@ export function getTripFromStorage(id: string): GeneratedTrip | null {
     const raw = localStorage.getItem(`${STORAGE_PREFIX}${id}`);
     if (raw) {
       const parsed = JSON.parse(raw) as GeneratedTrip;
+      if (!isIndiaDestinationTrip(parsed)) {
+        localStorage.removeItem(`${STORAGE_PREFIX}${id}`);
+        return null;
+      }
       const upgraded = upgradeLegacyTrip(parsed);
       if (!parsed.artwork || !parsed.version) {
         localStorage.setItem(
@@ -191,7 +204,14 @@ export function getAllStoredTrips(): GeneratedTrip[] {
     if (raw) {
       const parsed = JSON.parse(raw) as GeneratedTrip[];
       let didUpgrade = false;
-      const upgraded = parsed.map((t) => {
+      const indiaOnly = parsed.filter((t) => {
+        if (!isIndiaDestinationTrip(t)) {
+          didUpgrade = true;
+          return false;
+        }
+        return true;
+      });
+      const upgraded = indiaOnly.map((t) => {
         if (!t.artwork || !t.version) didUpgrade = true;
         return upgradeLegacyTrip(t);
       });
@@ -204,6 +224,28 @@ export function getAllStoredTrips(): GeneratedTrip[] {
     console.warn('Failed to retrieve trips list from localStorage:', err);
   }
   return [];
+}
+
+/**
+ * Clears all stored trips and metadata from client storage (used during data wipe / reset)
+ */
+export function clearAllStoredTrips(): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith(STORAGE_PREFIX) || key === LIST_KEY)) {
+        keysToRemove.push(key);
+      }
+    }
+    for (const key of keysToRemove) {
+      localStorage.removeItem(key);
+    }
+  } catch (err) {
+    console.warn('Failed to clear trips from localStorage:', err);
+  }
 }
 
 /**

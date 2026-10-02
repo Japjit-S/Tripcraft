@@ -5,32 +5,29 @@ import { notFound } from 'next/navigation';
 import {
   ChevronLeft,
   ChevronRight,
-  SlidersHorizontal,
   MapPin,
   Clock,
   ShieldCheck,
   AlertTriangle,
-  Share2,
-  Printer,
-  Check,
 } from 'lucide-react';
 import { ensureTripArtwork, getTripFromStorage, GeneratedTrip } from '@/lib/tripStore';
 import { ItineraryItem } from '@/lib/types';
+import Image from 'next/image';
 import { DestinationBanner } from '@/components/artwork/DestinationBanner';
+import { getPersonaArtworkPath } from '@/lib/images';
 import MapPlaceholder from '@/components/workspace/MapPlaceholder';
 import DayNotes from '@/components/workspace/DayNotes';
 import WeatherSummary from '@/components/workspace/WeatherSummary';
-import DecisionLogDrawer from '@/components/workspace/DecisionLogDrawer';
 import { formatDestinationDate, parseDateParts } from '@/lib/engine/timezone';
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; border: string }> = {
-  LANDMARK: { bg: 'bg-amber-50', text: 'text-amber-800', border: 'border-amber-200' },
-  CULTURE: { bg: 'bg-orange-50', text: 'text-orange-800', border: 'border-orange-200' },
-  NATURE: { bg: 'bg-emerald-50', text: 'text-emerald-800', border: 'border-emerald-200' },
-  FOOD: { bg: 'bg-rose-50', text: 'text-rose-800', border: 'border-rose-200' },
-  MARKET: { bg: 'bg-amber-50', text: 'text-amber-800', border: 'border-amber-200' },
-  ENTERTAINMENT: { bg: 'bg-indigo-50', text: 'text-indigo-800', border: 'border-indigo-200' },
-  RELAXATION: { bg: 'bg-purple-50', text: 'text-purple-800', border: 'border-purple-200' },
+  LANDMARK: { bg: 'bg-[var(--color-tc-saffron)]/10', text: 'text-[var(--color-tc-saffron)]', border: 'border-[var(--color-tc-saffron)]' },
+  CULTURE: { bg: 'bg-[var(--color-tc-tangerine)]/10', text: 'text-[var(--color-tc-tangerine)]', border: 'border-[var(--color-tc-tangerine)]' },
+  NATURE: { bg: 'bg-[var(--color-tc-teal)]/10', text: 'text-[var(--color-tc-teal)]', border: 'border-[var(--color-tc-teal)]' },
+  FOOD: { bg: 'bg-[#FEF2F2]', text: 'text-[#7F1D1D]', border: 'border-rose-200' },
+  MARKET: { bg: 'bg-[var(--color-tc-saffron)]/10', text: 'text-[var(--color-tc-saffron)]', border: 'border-[var(--color-tc-saffron)]' },
+  ENTERTAINMENT: { bg: 'bg-indigo-50', text: 'text-[var(--color-tc-ink)]', border: 'border-indigo-200' },
+  RELAXATION: { bg: 'bg-purple-50', text: 'text-[var(--color-tc-ink)]', border: 'border-purple-200' },
 };
 
 export default function TripWorkspacePage({
@@ -44,27 +41,8 @@ export default function TripWorkspacePage({
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  const handleShare = async () => {
-    if (typeof window !== 'undefined') {
-      try {
-        await navigator.clipboard.writeText(window.location.href);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2200);
-      } catch {
-        // Silently tolerate clipboard access refusal
-      }
-    }
-  };
-
-  const handlePrint = () => {
-    if (typeof window !== 'undefined') {
-      window.print();
-    }
-  };
-
+  
+  
   useEffect(() => {
     let isMounted = true;
     const loadTrip = async () => {
@@ -111,8 +89,8 @@ export default function TripWorkspacePage({
     return (
       <div className="h-full flex items-center justify-center bg-transparent">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-[#1d6b8f]/30 border-t-[#1d6b8f] rounded-full animate-spin"></div>
-          <p className="text-sm font-bold text-slate-500">Loading your journey...</p>
+          <div className="w-8 h-8 border-4 border-[var(--color-tc-ink)]/30 border-t-[#1d6b8f] rounded-full animate-spin"></div>
+          <p className="text-sm font-bold text-[var(--color-tc-ink)]/60">Loading your journey...</p>
         </div>
       </div>
     );
@@ -135,41 +113,50 @@ export default function TripWorkspacePage({
     <div className="h-full flex overflow-hidden bg-transparent">
       {/* Center Main Content */}
       <div className="flex-1 overflow-y-auto px-6 py-6 lg:px-10 lg:py-8 flex flex-col">
-        {/* Banner Row */}
-        <div className="flex flex-col xl:flex-row gap-6 mb-8">
+                {/* Banner Row */}
+        <div className="mb-8">
           {/* Destination Banner */}
-          <div className="flex-1 relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl overflow-hidden p-6 sm:p-8 flex items-center shadow-lg min-h-[220px] border border-slate-800">
+          <div className="w-full relative bg-[var(--color-tc-cream)] border-[var(--color-tc-sage)]/50 rounded-2xl overflow-hidden p-6 sm:p-8 flex items-center shadow-[4px_4px_0px_rgba(23,60,57,0.05)] min-h-[220px] border-2">
             {/* Subtle Gradient Overlays for High-Contrast Readability */}
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-0 z-10 pointer-events-none" />
 
-            <div className="relative z-20 max-w-[65%] sm:max-w-[60%] pr-4 text-white">
+            <div className="relative z-20 max-w-[65%] sm:max-w-[60%] pr-4 text-[var(--color-tc-ink)]">
               <div className="flex flex-wrap items-center gap-2 mb-2">
-                <span className="text-[11px] font-black uppercase tracking-widest text-orange-400 bg-orange-400/10 px-2.5 py-0.5 rounded-md border border-orange-400/20">
+                <span className="text-[11px] font-bold font-serif uppercase tracking-widest text-[var(--color-tc-tangerine)] bg-[var(--color-tc-tangerine)]/10 px-2.5 py-0.5 rounded-md border border-[var(--color-tc-tangerine)]/20 flex items-center gap-1.5">
+                  <div className="relative w-4 h-4 shrink-0">
+                    <Image
+                      src={getPersonaArtworkPath(trip.persona)}
+                      alt=""
+                      width={16}
+                      height={16}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                   {trip.persona} Persona
                 </span>
                 {trip.feasibilityStatus === 'CAUTION' ? (
-                  <span className="text-[11px] font-black uppercase tracking-wider text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded-md flex items-center gap-1 border border-amber-400/20">
+                  <span className="text-[11px] font-bold font-serif uppercase tracking-wider text-[var(--color-tc-saffron)] bg-[var(--color-tc-saffron)]/10 px-2 py-0.5 rounded-md flex items-center gap-1 border border-[var(--color-tc-saffron)]/20">
                     <AlertTriangle className="w-3 h-3" /> Caution Advisory
                   </span>
                 ) : (
-                  <span className="text-[11px] font-black uppercase tracking-wider text-emerald-300 bg-emerald-400/10 px-2 py-0.5 rounded-md flex items-center gap-1 border border-emerald-400/20">
+                  <span className="text-[11px] font-bold font-serif uppercase tracking-wider text-[var(--color-tc-teal)] bg-[var(--color-tc-teal)]/10 px-2 py-0.5 rounded-md flex items-center gap-1 border border-[var(--color-tc-teal)]/20">
                     <ShieldCheck className="w-3 h-3" /> Feasibility Passed
                   </span>
                 )}
               </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-2 tracking-tight break-words">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-serif text-[var(--color-tc-ink)] mb-2 tracking-tight break-words">
                 {trip.destination}
               </h1>
 
-              <p className="text-xs sm:text-sm font-medium text-slate-300 flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+              <p className="text-xs sm:text-sm font-medium text-[var(--color-tc-ink)]/70 flex items-center gap-2">
+                <MapPin className="w-3.5 h-3.5 text-[var(--color-tc-tangerine)] shrink-0" />
                 <span>
                   {[trip.destinationAdmin1, trip.destinationCountry].filter(Boolean).join(', ') ||
                     'Global Destination'}
                 </span>
                 {trip.originCity && (
-                  <span className="text-slate-400 text-xs">
+                  <span className="text-[var(--color-tc-ink)]/50 text-xs">
                     • Departed from {trip.originCity}
                   </span>
                 )}
@@ -191,9 +178,64 @@ export default function TripWorkspacePage({
               />
             </div>
           </div>
+        </div>
 
-          {/* Weather Card */}
-          <div className="w-full xl:w-80 shrink-0 flex flex-col justify-center">
+                        {/* Info & Weather Row */}
+        <div className="flex flex-col lg:flex-row gap-6 mb-8">
+          {/* Combined Persona & Duration Card (60%) */}
+          <div className="w-full lg:w-3/5 bg-[var(--color-tc-cream)] px-6 py-4 rounded-[1.5rem] shadow-[4px_4px_0px_rgba(23,60,57,0.05)] border-2 border-[var(--color-tc-sage)] flex flex-col justify-center">
+            <div className="flex flex-col sm:flex-row justify-between gap-6 sm:gap-8 h-full items-center">
+              {/* Duration & Schedule */}
+              <div className="flex-1 flex flex-col justify-center w-full">
+                <p className="text-[10px] font-bold text-[var(--color-tc-ink)]/50 uppercase tracking-wider mb-1">Duration & Schedule</p>
+                <div className="flex items-baseline gap-2">
+                  <h3 className="text-xl sm:text-2xl font-bold font-serif text-[var(--color-tc-ink)] mb-0.5">
+                    {trip.days} {trip.days === 1 ? 'Day Excursion' : 'Days Total'}
+                  </h3>
+                  <span className="text-xs sm:text-sm font-semibold text-[var(--color-tc-ink)]/60 hidden xl:inline">
+                    ({formatDestinationDate(trip.startDate, { month: 'short', day: 'numeric' }, trip.destinationTimezone)} —{' '}
+                    {formatDestinationDate(
+                      trip.itineraryDays[trip.itineraryDays.length - 1]?.date || trip.startDate,
+                      { month: 'short', day: 'numeric' },
+                      trip.destinationTimezone
+                    )})
+                  </span>
+                </div>
+                <p className="text-xs sm:text-sm font-semibold text-[var(--color-tc-ink)]/60 xl:hidden">
+                  {formatDestinationDate(trip.startDate, { month: 'short', day: 'numeric' }, trip.destinationTimezone)} —{' '}
+                  {formatDestinationDate(
+                    trip.itineraryDays[trip.itineraryDays.length - 1]?.date || trip.startDate,
+                    { month: 'short', day: 'numeric', year: 'numeric' },
+                    trip.destinationTimezone
+                  )}
+                </p>
+              </div>
+
+              {/* Persona */}
+              <div className="flex-1 flex flex-col justify-center sm:border-l-2 sm:border-[var(--color-tc-sage)]/30 sm:pl-8 h-full w-full pt-4 sm:pt-0 border-t-2 border-[var(--color-tc-sage)]/30 sm:border-t-0">
+                <p className="text-[10px] font-bold text-[var(--color-tc-ink)]/50 uppercase tracking-wider mb-1">Pacing Algorithm</p>
+                <div className="flex items-center gap-2">
+                  <div className="relative w-6 h-6 shrink-0">
+                    <Image
+                      src={getPersonaArtworkPath(trip.persona)}
+                      alt=""
+                      width={24}
+                      height={24}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold font-serif text-[var(--color-tc-ink)] mb-0.5">{trip.persona}</h3>
+                </div>
+                <p className="text-xs sm:text-sm font-semibold text-[var(--color-tc-ink)]/60 flex items-center gap-2 mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-tc-ink)] animate-pulse shrink-0"></span>
+                  Weather-tuned slot distribution
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Weather Card (40%) */}
+          <div className="w-full lg:w-2/5 shrink-0 flex flex-col">
             <WeatherSummary
               summary={selectedDay.weatherSummary}
               weatherState={selectedDay.weatherState}
@@ -203,58 +245,16 @@ export default function TripWorkspacePage({
               weatherResolution={selectedDay.weatherResolution}
             />
           </div>
-        </div>
-
-        {/* Stat Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-          {/* Card 1: Dates */}
-          <div className="bg-white p-5 rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-slate-100 flex flex-col justify-center">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Duration & Schedule</p>
-            <h3 className="text-lg font-black text-slate-900 mb-0.5">
-              {trip.days} {trip.days === 1 ? 'Day Excursion' : 'Days Total'}
-            </h3>
-            <p className="text-xs font-semibold text-slate-500">
-              {formatDestinationDate(trip.startDate, { month: 'short', day: 'numeric' }, trip.destinationTimezone)} –{' '}
-              {formatDestinationDate(
-                trip.itineraryDays[trip.itineraryDays.length - 1]?.date || trip.startDate,
-                { month: 'short', day: 'numeric', year: 'numeric' },
-                trip.destinationTimezone
-              )}
-            </p>
-          </div>
-
-          {/* Card 2: Persona */}
-          <div className="bg-white p-5 rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-slate-100 flex flex-col justify-center">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Pacing Algorithm</p>
-            <h3 className="text-lg font-black text-slate-900 mb-0.5">{trip.persona}</h3>
-            <p className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#1d6b8f] animate-pulse"></span>
-              Weather-tuned slot distribution active
-            </p>
-          </div>
-
-          {/* Card 3: Arrival */}
-          <div className="bg-white p-5 rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-slate-100 flex flex-col justify-center">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Transit Gate</p>
-            <h3 className="text-lg font-black text-slate-900 mb-0.5">
-              {trip.arrivalAt || trip.arrivalTime || '10:00 AM'} ({trip.arrivalMode})
-            </h3>
-            <p className="text-xs font-semibold text-slate-500 truncate">
-              {trip.originCity ? `Inbound transit from ${trip.originCity}` : 'Direct destination check-in'}
-            </p>
-          </div>
-        </div>
-
-        {/* Content Area: Map + Itinerary */}
+        </div>{/* Content Area: Map + Itinerary */}
         <div className="flex flex-col lg:flex-row gap-8 pb-8">
           {/* Left: Interactive Map with Pan-on-Hover */}
           <div className="w-full lg:w-1/3 shrink-0 no-print">
             <div className="sticky top-4">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-tc-ink)]/60">
                   Spatial Radar
                 </span>
-                <span className="text-[10px] font-semibold text-[#1d6b8f] bg-[#1d6b8f]/10 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-semibold text-[var(--color-tc-tangerine)] bg-[var(--color-tc-parchment)] px-2 py-0.5 rounded-full">
                   Pan on Hover
                 </span>
               </div>
@@ -276,13 +276,13 @@ export default function TripWorkspacePage({
           </div>
 
           {/* Right: Itinerary List */}
-          <div className="flex-1 bg-white rounded-3xl p-6 lg:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-slate-100">
-            <div className="flex flex-wrap justify-between items-center gap-4 mb-6 pb-4 border-b border-slate-100">
+          <div className="flex-1 bg-[var(--color-tc-cream)] rounded-2xl p-6 lg:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-[var(--color-tc-sage)]/50">
+            <div className="flex flex-wrap justify-between items-center gap-4 mb-6 pb-4 border-b border-[var(--color-tc-sage)]/50">
               <div>
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                <h2 className="text-2xl font-bold font-serif text-[var(--color-tc-ink)] tracking-tight">
                   Day {selectedDay.dayNumber} Timeline
                 </h2>
-                <p className="text-xs font-medium text-slate-400 mt-0.5">
+                <p className="text-xs font-medium text-[var(--color-tc-ink)]/50 mt-0.5">
                   {formatDestinationDate(
                     selectedDay.date,
                     {
@@ -296,50 +296,10 @@ export default function TripWorkspacePage({
               </div>
 
               <div className="flex items-center gap-2 sm:gap-3 no-print">
-                {/* Share Link Button */}
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all shadow-2xs hover:scale-102 cursor-pointer"
-                  title="Copy shareable link"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="text-emerald-700">Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Share2 className="w-3.5 h-3.5 text-slate-500" />
-                      <span className="hidden sm:inline">Share</span>
-                    </>
-                  )}
-                </button>
+                
+                
 
-                {/* Print / PDF Button */}
-                <button
-                  type="button"
-                  onClick={handlePrint}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all shadow-2xs hover:scale-102 cursor-pointer"
-                  title="Print or Export to PDF"
-                >
-                  <Printer className="w-3.5 h-3.5 text-slate-500" />
-                  <span className="hidden sm:inline">Print / PDF</span>
-                </button>
-
-                {/* Decision Log Drawer Trigger Button */}
-                {trip.auditLog && trip.auditLog.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setIsDrawerOpen(true)}
-                    className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-all shadow-xs hover:scale-102 cursor-pointer"
-                  >
-                    <SlidersHorizontal className="w-3.5 h-3.5" />
-                    <span>Decision Log ({trip.auditLog.length})</span>
-                  </button>
-                )}
-
-                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+                <div className="flex items-center gap-1 bg-[var(--color-tc-parchment)] p-1 rounded-xl">
                   <button
                     disabled={selectedDayIndex === 0}
                     onClick={() =>
@@ -347,14 +307,14 @@ export default function TripWorkspacePage({
                     }
                     className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
                       selectedDayIndex === 0 
-                        ? 'bg-transparent text-slate-300 cursor-not-allowed' 
-                        : 'bg-white shadow-2xs text-slate-700 hover:text-[#1d6b8f]'
+                        ? 'bg-transparent text-[var(--color-tc-ink)]/70 cursor-not-allowed' 
+                        : 'bg-[var(--color-tc-cream)] shadow-2xs text-[var(--color-tc-ink)] hover:text-[var(--color-tc-tangerine)]'
                     }`}
                     title="Previous Day"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <span className="text-xs font-bold text-slate-700 px-2 min-w-[3.5rem] text-center">
+                  <span className="text-xs font-bold text-[var(--color-tc-ink)] px-2 min-w-[3.5rem] text-center">
                     Day {selectedDay.dayNumber} of {trip.days}
                   </span>
                   <button
@@ -366,8 +326,8 @@ export default function TripWorkspacePage({
                     }
                     className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
                       selectedDayIndex === trip.itineraryDays.length - 1 
-                        ? 'bg-transparent text-slate-300 cursor-not-allowed' 
-                        : 'bg-white shadow-2xs text-slate-700 hover:text-[#1d6b8f]'
+                        ? 'bg-transparent text-[var(--color-tc-ink)]/70 cursor-not-allowed' 
+                        : 'bg-[var(--color-tc-cream)] shadow-2xs text-[var(--color-tc-ink)] hover:text-[var(--color-tc-tangerine)]'
                     }`}
                     title="Next Day"
                   >
@@ -414,14 +374,14 @@ export default function TripWorkspacePage({
       </div>
 
       {/* Right Sidebar: Calendar, Notes */}
-      <div className="w-80 shrink-0 bg-white border-l border-slate-100 flex flex-col h-full overflow-y-auto hidden xl:flex no-print">
+      <div className="w-80 shrink-0 bg-[var(--color-tc-cream)] border-l border-[var(--color-tc-sage)]/50 flex flex-col h-full overflow-y-auto hidden xl:flex no-print">
         {/* Calendar Widget */}
         <div className="px-6 pt-6 py-4">
-          <h3 className="text-xl font-black text-slate-900 mb-4">Journey Calendar</h3>
+          <h3 className="text-xl font-bold font-serif text-[var(--color-tc-ink)] mb-4">Journey Calendar</h3>
 
           <div className="grid grid-cols-7 gap-1 text-center mb-3">
             {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((d) => (
-              <div key={d} className="text-[10px] font-bold text-slate-400">
+              <div key={d} className="text-[10px] font-bold text-[var(--color-tc-ink)]/50">
                 {d}
               </div>
             ))}
@@ -453,9 +413,9 @@ export default function TripWorkspacePage({
                   const isSelected = selectedDayIndex === tripDayInfo.tripDayIndex;
                   let className = 'py-1 text-xs font-bold rounded-xl cursor-pointer transition-all mx-auto w-7 h-7 flex items-center justify-center ';
                   if (isSelected) {
-                    className += 'bg-[#1d6b8f] text-white shadow-sm scale-105';
+                    className += 'bg-[var(--color-tc-ink)] text-[var(--color-tc-cream)] shadow-[2px_2px_0px_rgba(23,60,57,0.1)] scale-105';
                   } else {
-                    className += 'bg-[#1d6b8f]/10 text-[#1d6b8f] hover:bg-[#1d6b8f]/20';
+                    className += 'bg-[var(--color-tc-parchment)] text-[var(--color-tc-tangerine)] hover:bg-[var(--color-tc-ink)]/20';
                   }
 
                   grid.push(
@@ -474,7 +434,7 @@ export default function TripWorkspacePage({
                 } else {
                   grid.push(
                     <div key={`day-${i}`} className="flex justify-center items-center">
-                      <div className="py-1 text-xs font-medium text-slate-300 w-7 h-7 flex items-center justify-center">
+                      <div className="py-1 text-xs font-medium text-[var(--color-tc-ink)]/70 w-7 h-7 flex items-center justify-center">
                         {i}
                       </div>
                     </div>
@@ -488,13 +448,13 @@ export default function TripWorkspacePage({
 
         {/* Divider */}
         <div className="px-6 py-3">
-          <div className="h-px w-full bg-slate-100"></div>
+          <div className="h-px w-full bg-[var(--color-tc-parchment)]"></div>
         </div>
 
         {/* Collaborative Day Notes */}
         <div className="flex-1 px-6 pb-6 flex flex-col min-h-0">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-black text-slate-900">
+            <h3 className="text-lg font-bold font-serif text-[var(--color-tc-ink)]">
               Day {selectedDay.dayNumber} Notes
             </h3>
           </div>
@@ -504,14 +464,7 @@ export default function TripWorkspacePage({
         </div>
       </div>
 
-      {/* Decision Log Slide-Over Drawer */}
-      <DecisionLogDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        auditLog={trip.auditLog || []}
-        totalDays={trip.days}
-      />
-    </div>
+      </div>
   );
 }
 
@@ -540,12 +493,12 @@ function ItinerarySection({
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-3 px-2">
-        <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#1d6b8f]"></span>
+        <h3 className="text-xs font-bold font-serif uppercase tracking-wider text-[var(--color-tc-ink)] flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[var(--color-tc-ink)]"></span>
           {title}
         </h3>
         {slotBadge && (
-          <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
+          <span className="text-[10px] font-bold text-[var(--color-tc-ink)]/50 bg-[var(--color-tc-parchment)] px-2 py-0.5 rounded-md">
             {slotBadge}
           </span>
         )}
@@ -569,28 +522,28 @@ function ItinerarySection({
               className={`p-4 rounded-2xl transition-all cursor-pointer flex gap-4 items-start group relative border ${
                 isSelected || isHovered
                   ? isFlex
-                    ? 'bg-amber-50/80 shadow-md border-amber-300 scale-[1.01]'
-                    : 'bg-slate-50/90 shadow-md border-[#1d6b8f]/40 scale-[1.01]'
-                  : 'bg-white hover:bg-slate-50/60 border-slate-100 hover:border-slate-200'
+                    ? 'bg-[var(--color-tc-saffron)]/10/80 shadow-[4px_4px_0px_rgba(23,60,57,0.15)] border-[var(--color-tc-saffron)] scale-[1.01]'
+                    : 'bg-[var(--color-tc-parchment)]/90 shadow-[4px_4px_0px_rgba(23,60,57,0.15)] border-[var(--color-tc-ink)]/40 scale-[1.01]'
+                  : 'bg-[var(--color-tc-cream)] hover:bg-[var(--color-tc-parchment)]/60 border-[var(--color-tc-sage)]/50 hover:border-[var(--color-tc-sage)]'
               }`}
             >
               {/* Left Slot Accent Bar */}
               {(isSelected || isHovered) && (
                 <div
                   className={`absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl ${
-                    isFlex ? 'bg-amber-500' : 'bg-[#1d6b8f]'
+                    isFlex ? 'bg-[var(--color-tc-saffron)]/10' : 'bg-[var(--color-tc-ink)]'
                   }`}
                 />
               )}
 
               {/* Numerical Index Badge */}
               <div
-                className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                className={`w-6 h-6 rounded-lg text-xs font-bold font-serif flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                   isSelected || isHovered
                     ? isFlex
-                      ? 'bg-amber-500 text-white'
-                      : 'bg-[#1d6b8f] text-white'
-                    : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'
+                      ? 'bg-[var(--color-tc-saffron)]/10 text-[var(--color-tc-ink)]'
+                      : 'bg-[var(--color-tc-ink)] text-[var(--color-tc-ink)]'
+                    : 'bg-[var(--color-tc-parchment)] text-[var(--color-tc-ink)]/60 group-hover:bg-[var(--color-tc-parchment)]'
                 }`}
               >
                 {index + 1}
@@ -601,15 +554,15 @@ function ItinerarySection({
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <h4
-                      className={`font-black text-sm tracking-tight ${
-                        isSelected || isHovered ? 'text-slate-900' : 'text-slate-800'
+                      className={`font-bold font-serif text-sm tracking-tight ${
+                        isSelected || isHovered ? 'text-[var(--color-tc-ink)]' : 'text-[var(--color-tc-ink)]'
                       }`}
                     >
                       {item.title}
                     </h4>
                     {item.startTime && item.endTime && (
-                      <span className="text-[11px] font-mono font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md flex items-center gap-1 border border-slate-200/60">
-                        <Clock className="w-3 h-3 text-[#1d6b8f]" />
+                      <span className="text-[11px] font-mono font-bold text-[var(--color-tc-ink)]/80 bg-[var(--color-tc-parchment)] px-2 py-0.5 rounded-md flex items-center gap-1 border border-[var(--color-tc-sage)]/60">
+                        <Clock className="w-3 h-3 text-[var(--color-tc-tangerine)]" />
                         {item.startTime} – {item.endTime}
                       </span>
                     )}
@@ -618,12 +571,12 @@ function ItinerarySection({
                   {/* Badges */}
                   <div className="flex flex-wrap items-center gap-1.5">
                     {item.continuationOfId && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-purple-50 text-[var(--color-tc-ink)] border border-purple-200">
                         Trail Continuation
                       </span>
                     )}
                     {item.linkedExpeditionId && !item.continuationOfId && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 text-[var(--color-tc-ink)] border border-indigo-200">
                         Expedition Phase
                       </span>
                     )}
@@ -636,8 +589,8 @@ function ItinerarySection({
                     <span
                       className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
                         item.indoor
-                          ? 'bg-orange-50 text-orange-700 border border-orange-200'
-                          : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          ? 'bg-[var(--color-tc-tangerine)]/10 text-[var(--color-tc-tangerine)] border border-[var(--color-tc-tangerine)]'
+                          : 'bg-[var(--color-tc-teal)]/10 text-[var(--color-tc-teal)] border border-[var(--color-tc-teal)]'
                       }`}
                     >
                       {item.indoor ? 'Indoor' : 'Outdoor'}
@@ -645,32 +598,32 @@ function ItinerarySection({
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                <p className="text-xs text-[var(--color-tc-ink)]/60 leading-relaxed font-medium">
                   {item.reason}
                 </p>
 
                 {isFlex && item.flexReason && (
-                  <p className="mt-1.5 text-[11px] font-bold text-amber-800 bg-amber-100/90 px-2 py-0.5 rounded-md inline-block">
+                  <p className="mt-1.5 text-[11px] font-bold text-[var(--color-tc-saffron)] bg-[var(--color-tc-saffron)]/10/90 px-2 py-0.5 rounded-md inline-block">
                     Notice: {item.flexReason}
                   </p>
                 )}
 
                 {/* Details Footer */}
-                <div className="mt-2.5 pt-2 border-t border-slate-100/80 flex flex-wrap items-center gap-4 text-[11px] text-slate-400 font-medium">
+                <div className="mt-2.5 pt-2 border-t border-[var(--color-tc-sage)]/50/80 flex flex-wrap items-center gap-4 text-[11px] text-[var(--color-tc-ink)]/50 font-medium">
                   {item.coords && (
-                    <span className="flex items-center gap-1 hover:text-[#1d6b8f] transition-colors">
-                      <MapPin className="w-3 h-3 text-[#1d6b8f]" />
+                    <span className="flex items-center gap-1 hover:text-[var(--color-tc-tangerine)] transition-colors">
+                      <MapPin className="w-3 h-3 text-[var(--color-tc-tangerine)]" />
                       <span className="font-mono">
                         {item.coords.lat.toFixed(3)}, {item.coords.lon.toFixed(3)}
                       </span>
                     </span>
                   )}
                   <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-slate-400" />
+                    <Clock className="w-3 h-3 text-[var(--color-tc-ink)]/50" />
                     <span>{item.durationMin || 90} min scheduled</span>
                   </span>
                   {item.eventKind && item.eventKind !== 'activity' && (
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-tc-ink)]/60 bg-[var(--color-tc-parchment)] px-1.5 py-0.5 rounded">
                       {item.eventKind.replace('_', ' ')}
                     </span>
                   )}

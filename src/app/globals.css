@@ -1,21 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8f9fc;
-  --foreground: #0f172a;
+  --background: #F3EEE4;
+  --foreground: #173C39;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-tc-parchment: #F3EEE4;
+  --color-tc-cream: #FFFBF3;
+  --color-tc-ink: #173C39;
+  --color-tc-teal: #146B67;
+  --color-tc-tangerine: #F28B55;
+  --color-tc-saffron: #E6C85C;
+  --color-tc-sage: #B5CCBC;
+  
+  --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: var(--font-serif), Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -43,4 +50,26 @@ body {
     page-break-after: always;
     break-after: page;
   }
+}
+
+
+/* Custom Scrollbars to match Tripcraft theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-tc-cream);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-tc-sage);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-tc-teal);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-tc-sage) var(--color-tc-cream);
 }

@@ -104,8 +104,41 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Geocoding & Disambiguation
-    let destination: Destination | null = null;
+    // 2. Server-Side Geocoding & India-Only Scope Verification
+    // The browser is not a trust boundary: independently resolve destination via authoritative server geocoding
+    const resolvedDest = await weatherProvider.geocodeCity(city, {
+      admin1: body.admin1,
+    });
+
+    if (!resolvedDest) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Unable to geocode city "${city}". Please check the spelling.`,
+        },
+        { status: 404 }
+      );
+    }
+
+    // Require trusted, normalized country metadata indicating India ('IN')
+    const resolvedCountryCode = resolvedDest.countryCode?.toUpperCase();
+    const resolvedCountryName = resolvedDest.country?.toLowerCase();
+    const isVerifiedIndia =
+      resolvedCountryCode === 'IN' || resolvedCountryName === 'india';
+
+    if (!isVerifiedIndia) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Tripcraft currently plans destinations within India.',
+          code: 'INDIA_ONLY_DESTINATION',
+        },
+        { status: 400 }
+      );
+    }
+
+    // If client supplied custom coordinates, validate bounds and ensure they fall within India's envelope
+    let destination: Destination = resolvedDest;
     if (body.latitude !== undefined || body.longitude !== undefined) {
       if (!isValidCoordinate(body.latitude, body.longitude)) {
         return NextResponse.json(
@@ -116,32 +149,32 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
+
+      // India geographic envelope: Latitude ~6.0° to 38.5°, Longitude ~68.0° to 98.5°
+      const isWithinIndiaBBox =
+        body.latitude >= 6.0 &&
+        body.latitude <= 38.5 &&
+        body.longitude >= 68.0 &&
+        body.longitude <= 98.5;
+
+      if (!isWithinIndiaBBox) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Tripcraft currently plans destinations within India.',
+            code: 'INDIA_ONLY_DESTINATION',
+          },
+          { status: 400 }
+        );
+      }
+
       destination = {
-        id: body.destinationId || `dest:${city.toLowerCase().replace(/\s+/g, '-')}`,
-        city: body.cityName || city.split(',')[0].trim(),
-        country: body.country || '',
-        countryCode: body.countryCode || '',
-        admin1: body.admin1 || '',
+        ...resolvedDest,
         latitude: body.latitude,
         longitude: body.longitude,
-        timezone: body.timezone || 'UTC',
+        country: 'India',
+        countryCode: 'IN',
       };
-    } else {
-      destination = await weatherProvider.geocodeCity(city, {
-        admin1: body.admin1,
-        country: body.country,
-        countryCode: body.countryCode,
-      });
-    }
-
-    if (!destination) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Unable to geocode city "${city}". Please check the spelling.`,
-        },
-        { status: 404 }
-      );
     }
 
     // 3. Weather Forecast (with destination timezone and per-day 16-day horizon fallback)
@@ -216,6 +249,9 @@ export async function POST(req: NextRequest) {
 
     // 6. Server-Side Destination Artwork Resolution (Non-Blocking Fallback Guaranteed)
     const artwork = await resolveDestinationArtwork(destination);
+    if (!artwork.imageUrl && artwork.assetPath) {
+      artwork.imageUrl = artwork.assetPath;
+    }
     const enrichedDestination = {
       ...destination,
       imageUrl: artwork.imageUrl || artwork.assetPath,

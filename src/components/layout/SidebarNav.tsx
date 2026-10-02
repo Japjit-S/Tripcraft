@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Compass, Map, LogOut, LogIn, Plus } from 'lucide-react';
+import { Compass, Map as MapIcon, LogOut, LogIn, Plus } from 'lucide-react';
 import { useAuth } from '@/lib/auth/AuthContext';
 
 export default function SidebarNav() {
@@ -11,8 +11,8 @@ export default function SidebarNav() {
   const { user, signOut } = useAuth();
 
   const navItems = [
-    { name: 'Home', href: '/dashboard', icon: Compass },
-    { name: 'All trips', href: '/trips', icon: Map },
+    { name: 'My Home', href: '/dashboard', icon: Compass },
+    { name: 'All Trips', href: '/trips', icon: MapIcon },
   ];
 
   const handleSignOut = async () => {
@@ -21,18 +21,18 @@ export default function SidebarNav() {
   };
 
   return (
-    <nav className="w-64 bg-white h-full hidden md:flex flex-col z-10 shrink-0 border-r border-slate-100">
-      <div className="px-6 mt-8 mb-6">
+    <nav className="w-64 bg-[var(--color-tc-cream)] h-full hidden md:flex flex-col z-10 shrink-0 border-r border-[var(--color-tc-sage)] shadow-[4px_0px_20px_rgba(23,60,57,0.02)]">
+      <div className="px-5 mt-8 mb-6">
         <Link 
           href="/planner" 
-          className="flex items-center justify-center gap-2 w-full bg-[#1d6b8f] hover:bg-[#155370] text-white py-3.5 rounded-2xl font-bold text-sm transition-all shadow-md shadow-[#1d6b8f]/15 hover:-translate-y-0.5 cursor-pointer"
+          className="flex items-center justify-center gap-2 w-full bg-[var(--color-tc-ink)] hover:bg-[var(--color-tc-teal)] text-[var(--color-tc-cream)] py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-[3px_3px_0px_var(--color-tc-sage)] hover:shadow-[1px_1px_0px_var(--color-tc-sage)] hover:translate-y-[2px] hover:translate-x-[2px] cursor-pointer"
         >
-          <span>New trip</span>
+          <span>New Trip</span>
           <Plus className="w-4 h-4" />
         </Link>
       </div>
 
-      <div className="flex-1 px-4 space-y-1.5">
+      <div className="flex-1 px-4 space-y-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
           const Icon = item.icon;
@@ -41,13 +41,13 @@ export default function SidebarNav() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm ${
+              className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all font-bold text-xs uppercase tracking-widest ${
                 isActive 
-                  ? 'bg-slate-100/80 text-slate-900 shadow-2xs' 
-                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-[var(--color-tc-parchment)] text-[var(--color-tc-tangerine)] border-2 border-[var(--color-tc-tangerine)] shadow-[2px_2px_0px_var(--color-tc-ink)]' 
+                  : 'border-2 border-transparent text-[var(--color-tc-ink)]/60 hover:text-[var(--color-tc-ink)] hover:bg-[var(--color-tc-parchment)]'
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-[#1d6b8f]' : 'text-slate-400'}`} />
+              <Icon className={`w-4 h-4 ${isActive ? 'text-[var(--color-tc-tangerine)]' : 'text-[var(--color-tc-ink)]/40'}`} />
               {item.name}
             </Link>
           );
@@ -55,22 +55,22 @@ export default function SidebarNav() {
       </div>
       
       {/* User / Auth Footer */}
-      <div className="p-4 border-t border-slate-100">
+      <div className="p-4 border-t border-[var(--color-tc-sage)]/50 bg-[var(--color-tc-parchment)]">
         {user ? (
           <div className="space-y-3">
             <div className="flex items-center gap-3 px-2 py-1">
-              <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0">
+              <div className="w-9 h-9 rounded-full bg-[var(--color-tc-ink)] text-[var(--color-tc-cream)] flex items-center justify-center text-xs font-bold shrink-0 border-2 border-[var(--color-tc-sage)] shadow-sm">
                 {user.initials}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-slate-900 truncate">{user.name}</p>
-                <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
+                <p className="text-xs font-bold text-[var(--color-tc-ink)] truncate">{user.name}</p>
+                <p className="text-[10px] text-[var(--color-tc-ink)]/60 font-medium truncate">{user.email}</p>
               </div>
             </div>
             <button
               type="button"
               onClick={handleSignOut}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors font-bold text-xs cursor-pointer"
+              className="flex items-center gap-2.5 w-full px-3 py-2 text-[var(--color-tc-ink)]/70 hover:text-[#7F1D1D] hover:bg-[#FEF2F2] rounded-xl transition-colors font-bold text-xs uppercase tracking-wider cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               <span>Sign Out</span>
@@ -79,10 +79,10 @@ export default function SidebarNav() {
         ) : (
           <Link
             href="/login"
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-3 px-3 bg-[var(--color-tc-cream)] hover:bg-[var(--color-tc-parchment)] border-2 border-[var(--color-tc-sage)] text-[var(--color-tc-ink)] rounded-xl text-xs font-bold uppercase tracking-wider transition-colors"
           >
-            <LogIn className="w-4 h-4 text-slate-500" />
-            <span>Sign In to Account</span>
+            <LogIn className="w-4 h-4 text-[var(--color-tc-tangerine)]" />
+            <span>Sign In to Atlas</span>
           </Link>
         )}
       </div>

@@ -6,26 +6,18 @@ import {
   Calendar,
   Trash2,
   Plus,
-  Clock,
-  Navigation,
   ArrowRight,
   AlertTriangle,
-  Compass,
 } from 'lucide-react';
 import {
   getAllStoredTrips,
   deleteTripFromStorage,
   GeneratedTrip,
 } from '@/lib/tripStore';
-import { DestinationBanner } from '@/components/artwork/DestinationBanner';
+import Image from 'next/image';
 import { formatDestinationDate } from '@/lib/engine/timezone';
-
-const PERSONA_PILL_STYLES: Record<string, string> = {
-  Backpacker: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  'Culture Seeker': 'bg-amber-50 text-amber-700 border-amber-200',
-  'Comfort Traveller': 'bg-blue-50 text-blue-700 border-blue-200',
-  Family: 'bg-purple-50 text-purple-700 border-purple-200',
-};
+import { DestinationBanner } from '@/components/artwork/DestinationBanner';
+import { getPersonaArtworkPath } from '@/lib/images';
 
 export default function TripsPage() {
   const [trips, setTrips] = useState<GeneratedTrip[]>([]);
@@ -86,182 +78,157 @@ export default function TripsPage() {
 
   if (!isLoaded) {
     return (
-      <div className="max-w-5xl mx-auto py-16 px-4 flex justify-center items-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-[#1d6b8f]/30 border-t-[#1d6b8f] rounded-full animate-spin"></div>
-          <p className="text-sm font-bold text-slate-500">Loading your journeys...</p>
-        </div>
+      <div className="h-full flex items-center justify-center bg-transparent">
+        <div className="w-8 h-8 border-4 border-[var(--color-tc-sage)] border-t-[var(--color-tc-tangerine)] rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-10 px-6 lg:px-12 w-full h-full overflow-y-auto">
+    <div className="max-w-6xl mx-auto py-12 px-6 lg:px-12 w-full h-full overflow-y-auto">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 border-b-2 border-[var(--color-tc-ink)] pb-6">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 mb-1 tracking-tight">Your Journeys</h1>
-          <p className="text-sm font-medium text-slate-500">
-            Revisit and manage all your physically validated travel itineraries ({trips.length}).
-          </p>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--color-tc-tangerine)] mb-2">Saved Journeys</h2>
+          <h1 className="text-4xl sm:text-5xl font-serif font-bold text-[var(--color-tc-ink)] tracking-tight">
+            The Atlas
+          </h1>
         </div>
-        <Link 
-          href="/planner" 
-          className="px-5 py-3 bg-[#1d6b8f] text-white rounded-2xl hover:bg-[#155370] transition-all font-bold text-xs shadow-md shadow-[#1d6b8f]/20 hover:-translate-y-0.5 flex items-center gap-2 cursor-pointer"
+        <Link
+          href="/planner"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-tc-ink)] hover:bg-[var(--color-tc-teal)] text-[var(--color-tc-cream)] font-bold text-xs uppercase tracking-widest rounded-full shadow-[4px_4px_0px_var(--color-tc-sage)] hover:shadow-[2px_2px_0px_var(--color-tc-sage)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4" />
-          <span>Plan New Journey</span>
+          <span>New Expedition</span>
         </Link>
       </div>
 
       {trips.length === 0 ? (
         /* Empty State */
-        <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-slate-100 p-12 sm:p-16 text-center flex flex-col items-center">
-          <div className="w-20 h-20 bg-[#1d6b8f]/10 text-[#1d6b8f] rounded-2xl flex items-center justify-center mb-5">
-            <Compass className="w-10 h-10" />
+        <div className="flex flex-col items-center justify-center py-20 bg-[var(--color-tc-cream)] rounded-3xl border-2 border-[var(--color-tc-sage)]/50 shadow-[8px_8px_0px_rgba(23,60,57,0.05)] px-6">
+          <div className="relative w-48 h-32 sm:w-64 sm:h-40 mb-6 rounded-2xl overflow-hidden border-2 border-[var(--color-tc-sage)]/60 bg-[var(--color-tc-parchment)] shadow-xs">
+            <Image
+              src="/artwork/landing-india-atlas-hero.png"
+              alt="Tripcraft India Atlas"
+              fill
+              sizes="(max-width: 640px) 192px, 256px"
+              className="object-cover object-center opacity-85"
+            />
           </div>
-          <h3 className="text-2xl font-black text-slate-900 mb-2">No itineraries saved yet</h3>
-          <p className="text-slate-500 font-medium text-xs mb-6 max-w-md mx-auto">
-            You haven&apos;t generated any travel itineraries yet. Launch the planner to generate your first physical schedule.
+          <h3 className="text-2xl font-serif font-bold text-[var(--color-tc-ink)] mb-3">No saved trips</h3>
+          <p className="text-[var(--color-tc-ink)]/60 max-w-md text-center text-sm font-medium mb-8 leading-relaxed">
+            Your atlas is currently empty. Generate a physically feasible itinerary to populate your field notes.
           </p>
-          <Link 
-            href="/planner" 
-            className="inline-flex items-center justify-center px-6 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all font-bold text-xs shadow-md hover:-translate-y-0.5"
+          <Link
+            href="/planner"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-tc-tangerine)] hover:bg-[#e07740] text-[var(--color-tc-cream)] font-bold text-xs uppercase tracking-widest rounded-full shadow-[4px_4px_0px_var(--color-tc-ink)] hover:shadow-[2px_2px_0px_var(--color-tc-ink)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all cursor-pointer"
           >
-            Create Your First Trip
+            <span>Start Planning</span>
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       ) : (
-        /* Responsive Card Grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {trips.map((trip) => {
-            const pillStyle =
-              PERSONA_PILL_STYLES[trip.persona] ||
-              'bg-slate-100 text-slate-700 border-slate-200';
-
-            return (
-              <div 
-                key={trip.id} 
-                className="bg-white rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-slate-100 hover:border-[#1d6b8f]/40 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all group overflow-hidden flex flex-col justify-between"
+        /* Trips Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {trips.map((trip) => (
+            <div
+              key={trip.id}
+              className="group flex flex-col bg-[var(--color-tc-cream)] rounded-2xl border-2 border-[var(--color-tc-sage)]/50 overflow-hidden hover:border-[var(--color-tc-ink)] transition-colors shadow-[4px_4px_0px_rgba(23,60,57,0.05)] hover:shadow-[4px_4px_0px_rgba(23,60,57,0.15)] hover:-translate-y-1 relative"
+            >
+              {/* Delete Button overlay */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setTripToDelete(trip);
+                }}
+                className="absolute top-3 right-3 z-20 w-8 h-8 bg-[var(--color-tc-cream)]/90 backdrop-blur border border-[var(--color-tc-sage)] text-[var(--color-tc-ink)]/50 hover:text-[#7F1D1D] hover:bg-[#FEF2F2] rounded-full flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+                aria-label="Delete Trip"
               >
-                <div>
-                  {/* Top Thumbnail Banner */}
-                  <Link href={`/trip/${trip.id}`} className="block relative h-48 w-full overflow-hidden bg-slate-900">
-                    <DestinationBanner
-                      artwork={trip.artwork}
-                      destination={trip.destination}
-                      destinationId={trip.destinationId}
-                      country={trip.destinationCountry}
-                      countryCode={trip.destinationCountryCode}
-                      admin1={trip.destinationAdmin1}
-                      coords={trip.destinationCoords}
-                      surface="card"
-                      showAttribution={false}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
+                <Trash2 className="w-4 h-4" />
+              </button>
 
-                    {/* Gradient Overlay & Badges */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex flex-col justify-between p-4 z-10 pointer-events-none">
-                      <div className="flex justify-between items-start">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wide uppercase border backdrop-blur-md ${pillStyle}`}>
-                          {trip.persona}
-                        </span>
-                        {trip.feasibilityStatus === 'CAUTION' && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-500 text-white shadow-xs">
-                            <AlertTriangle className="w-3 h-3" /> Caution
-                          </span>
-                        )}
-                      </div>
+              <Link href={`/trip/${trip.id}`} className="flex-1 flex flex-col">
+                <div className="h-32 bg-[var(--color-tc-parchment)] relative overflow-hidden border-b-2 border-[var(--color-tc-sage)]/50">
+                  <DestinationBanner
+                    artwork={trip.artwork}
+                    destination={trip.destination}
+                    destinationId={trip.destinationId}
+                    country={trip.destinationCountry}
+                    countryCode={trip.destinationCountryCode}
+                    admin1={trip.destinationAdmin1}
+                    coords={trip.destinationCoords}
+                    surface="card"
+                    className="w-full h-full"
+                  />
+                </div>
 
-                      <div>
-                        <h3 className="text-2xl font-black text-white tracking-tight drop-shadow-md">
-                          {trip.destination}
-                        </h3>
-                        <p className="text-xs text-white/80 font-medium">
-                          {[trip.destinationAdmin1, trip.destinationCountry].filter(Boolean).join(', ')}
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-
-                  {/* Card Body */}
-                  <div className="p-5">
-                    <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-500 mb-4">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        <span>
-                          {formatDestinationDate(trip.startDate, {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          }, trip.destinationTimezone)}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{trip.days} {trip.days === 1 ? 'day' : 'days'}</span>
-                      </div>
-                      {trip.originCity && (
-                        <div className="flex items-center gap-1.5 truncate">
-                          <Navigation className="w-3.5 h-3.5 text-slate-400" />
-                          <span>From {trip.originCity}</span>
-                        </div>
-                      )}
+                <div className="p-6 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-serif font-bold text-2xl text-[var(--color-tc-ink)] mb-2 truncate">
+                      {trip.destination}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs font-medium text-[var(--color-tc-ink)]/70 mb-4">
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>{formatDestinationDate(trip.startDate, undefined, trip.destinationTimezone)}</span>
                     </div>
                   </div>
-                </div>
 
-                {/* Card Actions Footer */}
-                <div className="px-5 pb-5 pt-0 flex items-center justify-between border-t border-slate-100 pt-4">
-                  <button 
-                    type="button"
-                    className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
-                    title="Delete Itinerary"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setTripToDelete(trip);
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-
-                  <Link
-                    href={`/trip/${trip.id}`}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-[#1d6b8f] text-white text-xs font-bold rounded-xl transition-all shadow-xs group-hover:bg-[#1d6b8f]"
-                  >
-                    <span>View Itinerary</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                  <div className="pt-4 mt-auto border-t border-[var(--color-tc-sage)]/50 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--color-tc-teal)] bg-[var(--color-tc-teal)]/10 px-2 py-1 rounded">
+                          <div className="relative w-3.5 h-3.5 shrink-0">
+                            <Image
+                              src={getPersonaArtworkPath(trip.persona)}
+                              alt=""
+                              width={14}
+                              height={14}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          {trip.persona}
+                        </span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-tc-ink)] bg-[var(--color-tc-sage)]/30 px-2 py-1 rounded border border-[var(--color-tc-sage)]/50">
+                          {trip.itineraryDays.length} Days
+                        </span>
+                      </div>
+                    <ArrowRight className="w-4 h-4 text-[var(--color-tc-ink)]/30 group-hover:text-[var(--color-tc-tangerine)] transition-colors" />
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              </Link>
+            </div>
+          ))}
         </div>
       )}
 
       {/* Delete Confirmation Modal */}
       {tripToDelete && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4">
-              <AlertTriangle className="w-6 h-6" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-[var(--color-tc-ink)]/40 backdrop-blur-sm"
+            onClick={() => setTripToDelete(null)}
+          ></div>
+          <div className="relative bg-[var(--color-tc-cream)] w-full max-w-sm rounded-2xl shadow-xl border-2 border-[#7F1D1D]/20 p-6 animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 bg-[#FEF2F2] rounded-full flex items-center justify-center border-2 border-[#FCA5A5] mb-5">
+              <AlertTriangle className="w-5 h-5 text-[#7F1D1D]" />
             </div>
-            <h3 className="text-xl font-black text-slate-900 mb-2">Delete Itinerary?</h3>
-            <p className="text-xs text-slate-500 font-medium mb-6 leading-relaxed">
-              Are you sure you want to remove your itinerary for <span className="font-bold text-slate-900">{tripToDelete.destination}</span>? This will remove all day schedules and notes.
+            
+            <h3 className="text-xl font-serif font-bold text-[var(--color-tc-ink)] mb-2">Delete Field Notes?</h3>
+            <p className="text-sm text-[var(--color-tc-ink)]/70 font-medium mb-6 leading-relaxed">
+              Are you sure you want to delete the itinerary for <strong className="text-[var(--color-tc-ink)]">{tripToDelete.destination}</strong>? This action cannot be undone.
             </p>
-            <div className="flex gap-3 justify-end">
+            
+            <div className="flex items-center gap-3 w-full">
               <button
-                type="button"
                 onClick={() => setTripToDelete(null)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 transition-colors cursor-pointer"
+                className="flex-1 py-3 bg-[var(--color-tc-parchment)] border-2 border-[var(--color-tc-sage)] hover:bg-[var(--color-tc-sage)]/20 text-[var(--color-tc-ink)] rounded-xl text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
-                type="button"
                 onClick={() => handleDelete(tripToDelete)}
-                className="px-4 py-2 rounded-xl bg-rose-600 text-white font-bold text-xs hover:bg-rose-700 shadow-md shadow-rose-600/20 transition-all cursor-pointer"
+                className="flex-1 py-3 bg-[#7F1D1D] hover:bg-[#991B1B] text-[var(--color-tc-cream)] rounded-xl text-xs font-bold uppercase tracking-widest shadow-[4px_4px_0px_rgba(127,29,29,0.2)] hover:translate-y-[2px] hover:translate-x-[2px] transition-all cursor-pointer border-2 border-[#7F1D1D]"
               >
                 Delete
               </button>
