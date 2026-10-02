@@ -493,4 +493,47 @@ describe('Tripcraft India-Only Destination Scope & Validation Core', () => {
     delete (globalThis as unknown as { window?: unknown }).window;
     delete (globalThis as unknown as { localStorage?: unknown }).localStorage;
   });
+
+  it('9. Search ranking prioritizes major cities and resolves Goa and aliases accurately', async () => {
+    const provider = new WeatherProvider();
+
+    // 1. Search for Goa must return Goa (admin1: Goa, countryCode: IN) as top result
+    const goaResults = await provider.searchCities('goa', 6, 'IN');
+    assert.ok(goaResults.length > 0);
+    assert.equal(goaResults[0].city, 'Goa');
+    assert.equal(goaResults[0].admin1, 'Goa');
+    assert.equal(goaResults[0].countryCode, 'IN');
+
+    // 2. Geocode for Goa must resolve to Goa (not a village in Rajasthan)
+    const geocodedGoa = await provider.geocodeCity('Goa');
+    assert.ok(geocodedGoa);
+    assert.equal(geocodedGoa.admin1, 'Goa');
+    assert.equal(geocodedGoa.countryCode, 'IN');
+    assert.ok(Math.abs(geocodedGoa.latitude - 15.495) < 0.1);
+
+    // 3. Search for Bangalore alias resolves to Bengaluru
+    const blrResults = await provider.searchCities('bangalore', 6, 'IN');
+    assert.ok(blrResults.length > 0);
+    assert.ok(blrResults[0].city.includes('Bengaluru'));
+    assert.equal(blrResults[0].countryCode, 'IN');
+
+    // 4. Search for Dharmshala resolves to Dharamshala, Himachal Pradesh (not hamlets in Maharashtra/Rajasthan/UP)
+    const dharmshalaResults = await provider.searchCities('dharmshala', 6, 'IN');
+    assert.ok(dharmshalaResults.length > 0);
+    assert.equal(dharmshalaResults[0].city, 'Dharamshala');
+    assert.equal(dharmshalaResults[0].admin1, 'Himachal Pradesh');
+    assert.equal(dharmshalaResults[0].countryCode, 'IN');
+
+    // 5. Search for Coorg resolves to Coorg (Madikeri), Karnataka
+    const coorgResults = await provider.searchCities('coorg', 6, 'IN');
+    assert.ok(coorgResults.length > 0);
+    assert.ok(coorgResults[0].city.includes('Coorg') || coorgResults[0].city.includes('Madikeri'));
+    assert.equal(coorgResults[0].admin1, 'Karnataka');
+
+    // 6. Regional search expansion: Kashmir returns Srinagar
+    const kashmirResults = await provider.searchCities('kashmir', 6, 'IN');
+    assert.ok(kashmirResults.length > 0);
+    assert.equal(kashmirResults[0].city, 'Srinagar');
+    assert.equal(kashmirResults[0].admin1, 'Jammu and Kashmir');
+  });
 });
