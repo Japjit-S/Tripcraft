@@ -461,5 +461,10 @@ describe('Destination Banner & Illustration Resolution System', () => {
       const stat = fs.statSync(diskPath);
       assert.ok(stat.size > 1000, `Artwork Pack file ${relPath} is empty or corrupted (size: ${stat.size})`);
     }
+
+    // Verify v2 landing hero artwork exists and is valid
+    const v2Path = path.join(process.cwd(), 'public/artwork/landing-india-atlas-hero-v2.png');
+    assert.equal(fs.existsSync(v2Path), true, 'Missing landing-india-atlas-hero-v2.png');
+    assert.ok(fs.statSync(v2Path).size > 1000, 'landing-india-atlas-hero-v2.png is empty');
   });
 });
