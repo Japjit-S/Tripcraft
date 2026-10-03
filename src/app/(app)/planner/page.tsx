@@ -714,8 +714,8 @@ function PlannerForm() {
             </div>
           ) : (
             <>
-              {/* Left Tripcraft Brand Mark (Steady with button, no tilt) */}
-              <div className="w-12 h-12 rounded-2xl bg-[var(--color-tc-teal)]/30 border border-[var(--color-tc-sage)]/30 flex items-center justify-center shrink-0 p-2 overflow-hidden">
+              {/* Left Tripcraft Brand Mark on crisp cream tile (High contrast, zero green-on-green) */}
+              <div className="w-12 h-12 rounded-2xl bg-[var(--color-tc-cream)] border border-white/20 shadow-sm flex items-center justify-center shrink-0 p-1.5 overflow-hidden">
                 <Image
                   src="/artwork/tripcraft-mark.png"
                   alt="Tripcraft"
@@ -732,9 +732,9 @@ function PlannerForm() {
                 </span>
               </div>
 
-              {/* Right Arrow Action */}
-              <div className="w-12 h-12 rounded-2xl bg-white/10 group-hover:bg-white/20 flex items-center justify-center shrink-0 group-hover:translate-x-1.5 transition-all duration-300">
-                <ArrowRight className="w-6 h-6 text-[var(--color-tc-cream)]" />
+              {/* Right Arrow Action on matching cream tile */}
+              <div className="w-12 h-12 rounded-2xl bg-[var(--color-tc-cream)] group-hover:bg-white text-[var(--color-tc-ink)] shadow-sm flex items-center justify-center shrink-0 group-hover:translate-x-1 transition-all duration-200">
+                <ArrowRight className="w-6 h-6 text-[var(--color-tc-ink)]" />
               </div>
             </>
           )}
