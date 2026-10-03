@@ -8,6 +8,18 @@ interface TimePickerProps {
   onChange: (time: string) => void;
 }
 
+const MINUTES = ['00', '15', '30', '45'] as const;
+
+function snapToQuarterMinute(mStr: string): string {
+  const m = parseInt(mStr, 10);
+  if (isNaN(m)) return '00';
+  if (m < 8) return '00';
+  if (m < 23) return '15';
+  if (m < 38) return '30';
+  if (m < 53) return '45';
+  return '00';
+}
+
 export function TimePicker({ value, onChange }: TimePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -23,19 +35,19 @@ export function TimePicker({ value, onChange }: TimePickerProps) {
     if (isAmPm) {
       const match = value.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
       if (match) {
-        initHour = String(parseInt(match[1])).padStart(2, '0');
-        initMinute = match[2];
+        initHour = String(parseInt(match[1], 10)).padStart(2, '0');
+        initMinute = snapToQuarterMinute(match[2]);
         initPeriod = match[3].toUpperCase();
       }
     } else {
       const [h, m] = value.split(':');
       if (h && m) {
-        let hourNum = parseInt(h);
+        let hourNum = parseInt(h, 10);
         initPeriod = hourNum >= 12 ? 'PM' : 'AM';
         if (hourNum === 0) hourNum = 12;
         if (hourNum > 12) hourNum -= 12;
         initHour = String(hourNum).padStart(2, '0');
-        initMinute = m;
+        initMinute = snapToQuarterMinute(m);
       }
     }
   } else {
@@ -68,7 +80,7 @@ export function TimePicker({ value, onChange }: TimePickerProps) {
   };
 
   const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
-  const minutes = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'));
+  const minutes = MINUTES;
 
   return (
     <div className="relative" ref={containerRef}>
