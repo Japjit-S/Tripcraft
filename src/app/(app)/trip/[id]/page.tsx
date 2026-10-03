@@ -133,11 +133,11 @@ function cleanReason(reason?: string): string {
   );
   cleaned = cleaned.replace(
     /Thin candidate pool for [a-z]+ under [A-Z_]+ conditions; emitted explicit FLEX block\.?/gi,
-    'Flexible window reserved for spontaneous exploration.'
+    'Relaxed leisure and scenic exploration.'
   );
   cleaned = cleaned.replace(
     /Flexible window scheduled due to thin pool of [a-z]+ options\.?/gi,
-    'Flexible window reserved for leisurely exploration.'
+    'Relaxed leisure and scenic exploration.'
   );
   cleaned = cleaned.replace(
     /Morning slot occupied by inbound travel to destination\.?/gi,
@@ -171,14 +171,6 @@ function cleanReason(reason?: string): string {
   cleaned = cleaned.replace(/high affinity/gi, 'travel preferences');
 
   return cleaned.replace(/\s{2,}/g, ' ').replace(/\.\.+/g, '.').trim();
-}
-
-function cleanFlexReason(reason?: string): string {
-  if (!reason) return '';
-  let cleaned = reason;
-  cleaned = cleaned.replace(/Thin candidate pool for [a-z]+ under [A-Z_]+ conditions\.?/gi, 'Flexible window for leisure and local discovery.');
-  cleaned = cleaned.replace(/thin candidate pool/gi, 'flexible schedule');
-  return cleaned.trim();
 }
 
 export default function TripWorkspacePage({
@@ -598,7 +590,6 @@ function ItinerarySection({
           const index = startIndex + localIndex;
           const isSelected = selectedId === item.id;
           const isHovered = hoveredId === item.id;
-          const isFlex = Boolean(item.isFlex);
           const catStyle =
             CATEGORY_STYLES[item.category] || CATEGORY_STYLES.LANDMARK;
 
@@ -610,28 +601,20 @@ function ItinerarySection({
               onMouseLeave={() => onHover(null)}
               className={`p-4 rounded-2xl transition-all cursor-pointer flex gap-4 items-start group relative border ${
                 isSelected || isHovered
-                  ? isFlex
-                    ? 'bg-[var(--color-tc-saffron)]/10/80 shadow-[4px_4px_0px_rgba(23,60,57,0.15)] border-[var(--color-tc-saffron)] scale-[1.01]'
-                    : 'bg-[var(--color-tc-parchment)]/90 shadow-[4px_4px_0px_rgba(23,60,57,0.15)] border-[var(--color-tc-ink)]/40 scale-[1.01]'
+                  ? 'bg-[var(--color-tc-parchment)]/90 shadow-[4px_4px_0px_rgba(23,60,57,0.15)] border-[var(--color-tc-ink)]/40 scale-[1.01]'
                   : 'bg-[var(--color-tc-cream)] hover:bg-[var(--color-tc-parchment)]/60 border-[var(--color-tc-sage)]/50 hover:border-[var(--color-tc-sage)]'
               }`}
             >
               {/* Left Slot Accent Bar */}
               {(isSelected || isHovered) && (
-                <div
-                  className={`absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl ${
-                    isFlex ? 'bg-[var(--color-tc-saffron)]/10' : 'bg-[var(--color-tc-ink)]'
-                  }`}
-                />
+                <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl bg-[var(--color-tc-ink)]" />
               )}
 
               {/* Numerical Index Badge */}
               <div
                 className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl text-sm sm:text-base font-bold font-serif flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                   isSelected || isHovered
-                    ? isFlex
-                      ? 'bg-[var(--color-tc-saffron)] text-[var(--color-tc-ink)] shadow-xs'
-                      : 'bg-[var(--color-tc-ink)] text-white shadow-xs'
+                    ? 'bg-[var(--color-tc-ink)] text-white shadow-xs'
                     : 'bg-[var(--color-tc-parchment)] text-[var(--color-tc-ink)]/70 group-hover:bg-[var(--color-tc-sage)]/30 group-hover:text-[var(--color-tc-ink)]'
                 }`}
               >
@@ -643,9 +626,7 @@ function ItinerarySection({
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <h4
-                      className={`font-bold font-serif text-sm tracking-tight ${
-                        isSelected || isHovered ? 'text-[var(--color-tc-ink)]' : 'text-[var(--color-tc-ink)]'
-                      }`}
+                      className="font-bold font-serif text-sm tracking-tight text-[var(--color-tc-ink)]"
                     >
                       {item.title}
                     </h4>
@@ -690,12 +671,6 @@ function ItinerarySection({
                 <p className="text-xs text-[var(--color-tc-ink)]/70 leading-relaxed font-medium">
                   {cleanReason(item.reason)}
                 </p>
-
-                {isFlex && item.flexReason && (
-                  <p className="mt-1.5 text-[11px] font-bold text-[var(--color-tc-saffron)] bg-[var(--color-tc-saffron)]/10 px-2 py-0.5 rounded-md inline-block">
-                    Notice: {cleanFlexReason(item.flexReason)}
-                  </p>
-                )}
               </div>
             </div>
           );

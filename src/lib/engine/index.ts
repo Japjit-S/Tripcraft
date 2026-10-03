@@ -162,7 +162,8 @@ export function generateItinerary(input: EngineInput): EngineOutput {
   // ==========================================
   const allocationResult = allocateItinerarySlots(
     daysAllocationInput,
-    input.persona
+    input.persona,
+    input.destination
   );
 
   allAuditLog.push(...allocationResult.auditEntries);

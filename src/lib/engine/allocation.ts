@@ -4,6 +4,7 @@ import {
   CandidateActivity,
   DayOfWeek,
   DayWeatherState,
+  Destination,
   EngineItineraryItem,
   EngineTripDay,
   Persona,
@@ -17,6 +18,7 @@ import {
   timeStrToMinutes,
 } from './timeline';
 import { sequenceDayStops } from './geography';
+import { getRelaxationVenueForSlot } from './relaxationVenues';
 
 export interface DayAllocationInput {
   dayNumber: number;
@@ -60,10 +62,15 @@ function getDayOfWeek(dateStr: string): DayOfWeek {
  */
 export function allocateItinerarySlots(
   daysInput: DayAllocationInput[],
-  persona: Persona
+  persona: Persona,
+  destination?: Destination
 ): AllocationResult {
   const auditEntries: AuditEntry[] = [];
   const usedCandidateIds = new Set<string>();
+
+  const destCoords = destination
+    ? { lat: destination.latitude, lon: destination.longitude }
+    : daysInput[0]?.survivors[0]?.coords ?? { lat: 26.9124, lon: 75.7873 };
 
   // ==========================================
   // PASS A: Distribute High-Prominence Anchors & Linked Expeditions
@@ -271,7 +278,7 @@ export function allocateItinerarySlots(
         reason: `Morning slot occupied by inbound travel to destination.`,
         intensity: 'LOW',
         typicalDurationMin: 180,
-        coords: anchor?.coords ?? { lat: 0, lon: 0 },
+        coords: anchor?.coords ?? destCoords,
       };
 
       const transitAfternoon: EngineItineraryItem = {
@@ -288,7 +295,7 @@ export function allocateItinerarySlots(
         reason: `Afternoon slot reserved for terminal transit, transfer, and hotel room check-in.`,
         intensity: 'LOW',
         typicalDurationMin: 210,
-        coords: anchor?.coords ?? { lat: 0, lon: 0 },
+        coords: anchor?.coords ?? destCoords,
       };
 
       const dinnerEvening: EngineItineraryItem = {
@@ -305,7 +312,7 @@ export function allocateItinerarySlots(
         reason: `Evening dinner and relaxed settling-in following arrival. No strenuous sightseeing scheduled.`,
         intensity: 'LOW',
         typicalDurationMin: 90,
-        coords: anchor?.coords ?? { lat: 0, lon: 0 },
+        coords: anchor?.coords ?? destCoords,
       };
 
       slotItems.MORNING.push(transitMorning);
@@ -514,7 +521,7 @@ export function allocateItinerarySlots(
         reason: `Morning window reserved for arrival transit and check-in logistics.`,
         intensity: 'LOW',
         typicalDurationMin: 180,
-        coords: anchor?.coords ?? { lat: 0, lon: 0 },
+        coords: anchor?.coords ?? destCoords,
       };
       slotItems.MORNING.push(transitItem);
       dayTimeline.push(transitItem);
@@ -643,22 +650,23 @@ export function allocateItinerarySlots(
           dayCategories.push(best.candidate.category);
           dayIntensityLoad += best.candidate.intensity === 'HIGH' ? 3 : 1;
         } else {
-          // Graceful degradation for morning
+          // Graceful degradation for morning: resolve authentic destination relaxation venue
+          const venue = getRelaxationVenueForSlot(destination, 'MORNING', day.dayNumber, day.weatherState);
           const flexItem: EngineItineraryItem = {
             id: `flex-${day.dayNumber}-morning`,
             candidateId: `flex-morning`,
-            title: 'Flexible Local Exploration & Morning Cafe',
-            category: 'RELAXATION',
-            indoor: day.weatherState === 'RAIN' || day.weatherState === 'STORM',
+            title: venue.title,
+            category: venue.category,
+            indoor: venue.indoor,
             slot: 'MORNING',
             eventKind: 'rest',
             startTime: '09:30',
             endTime: '11:30',
             durationMin: 120,
-            reason: `Flexible window scheduled due to thin pool of morning options.`,
-            intensity: 'LOW',
-            typicalDurationMin: 120,
-            coords: anchor?.coords ?? { lat: 0, lon: 0 },
+            reason: venue.reason,
+            intensity: venue.intensity,
+            typicalDurationMin: venue.typicalDurationMin,
+            coords: anchor?.coords ?? venue.coords,
             isFlex: true,
             flexReason: `Thin candidate pool for morning under ${day.weatherState} conditions.`,
           };
@@ -672,7 +680,7 @@ export function allocateItinerarySlots(
             candidateTitle: flexItem.title,
             verdict: 'SELECTED',
             ruleId: 'DEGRADATION_THIN_POOL',
-            reason: `Thin candidate pool for morning under ${day.weatherState} conditions; emitted explicit FLEX block.`,
+            reason: `Thin candidate pool for morning under ${day.weatherState} conditions; scheduled destination relaxation venue: ${venue.title}.`,
           });
         }
       }
@@ -695,7 +703,7 @@ export function allocateItinerarySlots(
           reason: `Afternoon slot reserved for arrival transit and check-in logistics.`,
           intensity: 'LOW',
           typicalDurationMin: 180,
-          coords: anchor?.coords ?? { lat: 0, lon: 0 },
+          coords: anchor?.coords ?? destCoords,
         };
         slotItems.AFTERNOON.push(transitItem);
         dayTimeline.push(transitItem);
@@ -781,21 +789,23 @@ export function allocateItinerarySlots(
           dayCategories.push(best.candidate.category);
           dayIntensityLoad += best.candidate.intensity === 'HIGH' ? 3 : 1;
         } else {
+          // Graceful degradation for afternoon: resolve authentic destination relaxation venue
+          const venue = getRelaxationVenueForSlot(destination, 'AFTERNOON', day.dayNumber, day.weatherState);
           const flexItem: EngineItineraryItem = {
             id: `flex-${day.dayNumber}-afternoon`,
             candidateId: `flex-afternoon`,
-            title: 'Flexible Local Exploration & Tea House',
-            category: 'RELAXATION',
-            indoor: day.weatherState === 'RAIN' || day.weatherState === 'STORM',
+            title: venue.title,
+            category: venue.category,
+            indoor: venue.indoor,
             slot: 'AFTERNOON',
             eventKind: 'rest',
             startTime: '14:00',
             endTime: '16:00',
             durationMin: 120,
-            reason: `Flexible window scheduled due to thin pool of afternoon options.`,
-            intensity: 'LOW',
-            typicalDurationMin: 120,
-            coords: anchor?.coords ?? { lat: 0, lon: 0 },
+            reason: venue.reason,
+            intensity: venue.intensity,
+            typicalDurationMin: venue.typicalDurationMin,
+            coords: anchor?.coords ?? venue.coords,
             isFlex: true,
             flexReason: `Thin candidate pool for afternoon under ${day.weatherState} conditions.`,
           };
@@ -809,7 +819,7 @@ export function allocateItinerarySlots(
             candidateTitle: flexItem.title,
             verdict: 'SELECTED',
             ruleId: 'DEGRADATION_THIN_POOL',
-            reason: `Thin candidate pool for afternoon under ${day.weatherState} conditions; emitted explicit FLEX block.`,
+            reason: `Thin candidate pool for afternoon under ${day.weatherState} conditions; scheduled destination relaxation venue: ${venue.title}.`,
           });
         }
       }
@@ -831,7 +841,7 @@ export function allocateItinerarySlots(
         reason: `Evening slot reserved for arrival transit and check-in logistics.`,
         intensity: 'LOW',
         typicalDurationMin: 120,
-        coords: anchor?.coords ?? { lat: 0, lon: 0 },
+        coords: anchor?.coords ?? destCoords,
       };
       slotItems.EVENING.push(transitItem);
       dayTimeline.push(transitItem);
@@ -880,21 +890,23 @@ export function allocateItinerarySlots(
         dayCategories.push(best.candidate.category);
         dayIntensityLoad += best.candidate.intensity === 'HIGH' ? 3 : 1;
       } else {
+        // Graceful degradation for evening: resolve authentic destination relaxation venue
+        const venue = getRelaxationVenueForSlot(destination, 'EVENING', day.dayNumber, day.weatherState);
         const flexItem: EngineItineraryItem = {
           id: `flex-${day.dayNumber}-evening`,
           candidateId: `flex-evening`,
-          title: 'Evening Promenade & Local Dining',
-          category: 'FOOD',
-          indoor: day.weatherState === 'RAIN' || day.weatherState === 'STORM',
+          title: venue.title,
+          category: venue.category,
+          indoor: venue.indoor,
           slot: 'EVENING',
           eventKind: 'meal',
           startTime: '18:30',
           endTime: '20:30',
           durationMin: 120,
-          reason: `Evening dining and leisure exploration scheduled.`,
-          intensity: 'LOW',
-          typicalDurationMin: 120,
-          coords: anchor?.coords ?? { lat: 0, lon: 0 },
+          reason: venue.reason,
+          intensity: venue.intensity,
+          typicalDurationMin: venue.typicalDurationMin,
+          coords: anchor?.coords ?? venue.coords,
           isFlex: true,
           flexReason: `Thin candidate pool for evening under ${day.weatherState} conditions.`,
         };
@@ -908,7 +920,7 @@ export function allocateItinerarySlots(
           candidateTitle: flexItem.title,
           verdict: 'SELECTED',
           ruleId: 'DEGRADATION_THIN_POOL',
-          reason: `Thin candidate pool for evening under ${day.weatherState} conditions; emitted explicit FLEX block.`,
+          reason: `Thin candidate pool for evening under ${day.weatherState} conditions; scheduled destination relaxation venue: ${venue.title}.`,
         });
       }
     }

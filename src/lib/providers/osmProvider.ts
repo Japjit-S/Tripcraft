@@ -9,6 +9,7 @@ import {
 import { normalizeOsmElement, RawOsmElement } from './normalize';
 import { deduplicateCandidates, resolveSearchRadius } from '../engine/geography';
 import { isCircuitAvailable, recordFailure, recordSuccess } from './circuitBreaker';
+import { getCuratedSeedCandidates } from '../engine/relaxationVenues';
 
 export type CandidateDiscoveryOutcome =
   | 'fresh'
@@ -368,6 +369,12 @@ out center tags;`;
           candidates.push(normalized);
         }
       }
+    }
+
+    // Step 3.5: Enrich candidate pool with verified destination relaxation & cultural seeds
+    const curatedSeeds = getCuratedSeedCandidates(dest);
+    for (const seed of curatedSeeds) {
+      candidates.push(seed);
     }
 
     // Step 4: Spatial proximity deduplication and identity merging
