@@ -61,7 +61,7 @@ export default function DecisionLogDrawer({
         <div className="p-6 lg:p-8 border-b border-[var(--color-tc-sage)]/50 bg-[var(--color-tc-parchment)]">
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[var(--color-tc-ink)] text-[var(--color-tc-ink)] flex items-center justify-center shadow-[4px_4px_0px_rgba(23,60,57,0.15)] shadow-[#1d6b8f]/20">
+              <div className="w-10 h-10 rounded-2xl bg-[var(--color-tc-ink)] text-white flex items-center justify-center shadow-[4px_4px_0px_rgba(23,60,57,0.15)]">
                 <SlidersHorizontal className="w-5 h-5" />
               </div>
               <div>

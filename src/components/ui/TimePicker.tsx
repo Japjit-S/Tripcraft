@@ -74,28 +74,28 @@ export function TimePicker({ value, onChange }: TimePickerProps) {
     <div className="relative" ref={containerRef}>
       <div 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full pl-12 pr-4 py-4 bg-[#f8f9fc] rounded-2xl cursor-pointer hover:bg-slate-100 transition-all flex items-center min-h-[56px] h-full"
+        className="w-full pl-12 pr-4 py-4 bg-[var(--color-tc-parchment)] rounded-2xl cursor-pointer hover:bg-[var(--color-tc-parchment)]/80 border border-[var(--color-tc-sage)]/60 transition-all flex items-center min-h-[56px] h-full"
       >
-        <Clock className="absolute left-4 h-5 w-5 text-slate-400" />
-        <span className={`font-bold ${value ? 'text-slate-900' : 'text-slate-400 font-normal'}`}>
+        <Clock className="absolute left-4 h-5 w-5 text-[var(--color-tc-ink)]/50" />
+        <span className={`font-bold ${value ? 'text-[var(--color-tc-ink)]' : 'text-[var(--color-tc-ink)]/40 font-normal'}`}>
           {value || 'Select Time'}
         </span>
       </div>
 
       {isOpen && (
-        <div className="absolute bottom-full left-0 mb-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 flex overflow-hidden animate-in fade-in zoom-in-95 duration-150 h-56 w-[260px]">
+        <div className="absolute bottom-full left-0 mb-2 bg-[var(--color-tc-cream)] rounded-2xl shadow-xl border-2 border-[var(--color-tc-sage)]/60 z-50 flex overflow-hidden animate-in fade-in zoom-in-95 duration-150 h-56 w-[260px]">
           
           {/* Hours Column */}
-          <div className="flex-1 overflow-y-auto no-scrollbar border-r border-slate-100 p-2 scroll-smooth">
-            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center mb-2">Hour</div>
+          <div className="flex-1 overflow-y-auto no-scrollbar border-r border-[var(--color-tc-sage)]/40 p-2 scroll-smooth">
+            <div className="text-[10px] font-black text-[var(--color-tc-ink)]/60 uppercase tracking-widest text-center mb-2">Hour</div>
             <div className="space-y-1">
               {hours.map(h => (
                 <button
                   key={`h-${h}`}
                   type="button"
                   onClick={() => handleTimeChange(h, minute, period)}
-                  className={`w-full py-2 rounded-xl text-sm font-bold transition-colors ${
-                    hour === h ? 'bg-[#1d6b8f] text-white' : 'text-slate-600 hover:bg-blue-50 hover:text-[#1d6b8f]'
+                  className={`w-full py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer ${
+                    hour === h ? 'bg-[var(--color-tc-ink)] text-white shadow-xs' : 'text-[var(--color-tc-ink)]/80 hover:bg-[var(--color-tc-sage)]/25 hover:text-[var(--color-tc-ink)]'
                   }`}
                 >
                   {h}
@@ -105,16 +105,16 @@ export function TimePicker({ value, onChange }: TimePickerProps) {
           </div>
 
           {/* Minutes Column */}
-          <div className="flex-1 overflow-y-auto no-scrollbar border-r border-slate-100 p-2 scroll-smooth">
-            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center mb-2">Min</div>
+          <div className="flex-1 overflow-y-auto no-scrollbar border-r border-[var(--color-tc-sage)]/40 p-2 scroll-smooth">
+            <div className="text-[10px] font-black text-[var(--color-tc-ink)]/60 uppercase tracking-widest text-center mb-2">Min</div>
             <div className="space-y-1">
               {minutes.map(m => (
                 <button
                   key={`m-${m}`}
                   type="button"
                   onClick={() => handleTimeChange(hour, m, period)}
-                  className={`w-full py-2 rounded-xl text-sm font-bold transition-colors ${
-                    minute === m ? 'bg-[#1d6b8f] text-white' : 'text-slate-600 hover:bg-blue-50 hover:text-[#1d6b8f]'
+                  className={`w-full py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer ${
+                    minute === m ? 'bg-[var(--color-tc-ink)] text-white shadow-xs' : 'text-[var(--color-tc-ink)]/80 hover:bg-[var(--color-tc-sage)]/25 hover:text-[var(--color-tc-ink)]'
                   }`}
                 >
                   {m}
@@ -124,12 +124,12 @@ export function TimePicker({ value, onChange }: TimePickerProps) {
           </div>
 
           {/* AM/PM Column */}
-          <div className="flex-1 p-2 flex flex-col gap-2 pt-8 bg-slate-50/50">
+          <div className="flex-1 p-2 flex flex-col gap-2 pt-8 bg-[var(--color-tc-parchment)]/60">
             <button
               type="button"
               onClick={() => handleTimeChange(hour, minute, 'AM')}
-              className={`w-full py-3 rounded-xl text-sm font-black transition-colors ${
-                period === 'AM' ? 'bg-[#1d6b8f] text-white shadow-md' : 'bg-white text-slate-600 hover:bg-blue-50 border border-slate-100 hover:text-[#1d6b8f]'
+              className={`w-full py-3 rounded-xl text-sm font-black transition-colors cursor-pointer ${
+                period === 'AM' ? 'bg-[var(--color-tc-ink)] text-white shadow-md shadow-[var(--color-tc-ink)]/20' : 'bg-[var(--color-tc-cream)] text-[var(--color-tc-ink)]/70 hover:bg-[var(--color-tc-sage)]/20 border border-[var(--color-tc-sage)]/50 hover:text-[var(--color-tc-ink)]'
               }`}
             >
               AM
@@ -137,8 +137,8 @@ export function TimePicker({ value, onChange }: TimePickerProps) {
             <button
               type="button"
               onClick={() => handleTimeChange(hour, minute, 'PM')}
-              className={`w-full py-3 rounded-xl text-sm font-black transition-colors ${
-                period === 'PM' ? 'bg-[#1d6b8f] text-white shadow-md' : 'bg-white text-slate-600 hover:bg-blue-50 border border-slate-100 hover:text-[#1d6b8f]'
+              className={`w-full py-3 rounded-xl text-sm font-black transition-colors cursor-pointer ${
+                period === 'PM' ? 'bg-[var(--color-tc-ink)] text-white shadow-md shadow-[var(--color-tc-ink)]/20' : 'bg-[var(--color-tc-cream)] text-[var(--color-tc-ink)]/70 hover:bg-[var(--color-tc-sage)]/20 border border-[var(--color-tc-sage)]/50 hover:text-[var(--color-tc-ink)]'
               }`}
             >
               PM

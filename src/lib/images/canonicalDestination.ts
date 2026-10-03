@@ -12,6 +12,7 @@ export const CURATED_CITY_KEYS: readonly CuratedCityKey[] = [
   'amritsar',
   'hampi',
   'mysuru',
+  'bengaluru',
 ] as const;
 
 const EXPLICIT_CURATED_LOOKUP: Readonly<Record<string, CuratedCityKey>> = {
@@ -41,6 +42,11 @@ const EXPLICIT_CURATED_LOOKUP: Readonly<Record<string, CuratedCityKey>> = {
   hosapete: 'hampi',
   mysuru: 'mysuru',
   mysore: 'mysuru',
+  bengaluru: 'bengaluru',
+  bangalore: 'bengaluru',
+  'bangalore urban': 'bengaluru',
+  'bangalore rural': 'bengaluru',
+  bengalooru: 'bengaluru',
 };
 
 const ALLOWED_INDIAN_QUALIFIERS = new Set([

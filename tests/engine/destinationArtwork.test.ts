@@ -15,7 +15,7 @@ import {
 import { ensureTripArtwork, GeneratedTrip } from '../../src/lib/tripStore';
 
 describe('Destination Banner & Illustration Resolution System', () => {
-  it('resolves all 11 curated landmark destinations and listed aliases to approved landmark PNG illustrations', async () => {
+  it('resolves all 12 curated landmark destinations and listed aliases to approved landmark PNG illustrations', async () => {
     const cases: Array<{ input: string; expectedKey: string; expectedAsset: string }> = [
       { input: 'Jaipur', expectedKey: 'jaipur', expectedAsset: '/artwork/landmark-jaipur-hawa-mahal.png' },
       { input: 'Amer', expectedKey: 'jaipur', expectedAsset: '/artwork/landmark-jaipur-hawa-mahal.png' },
@@ -40,6 +40,8 @@ describe('Destination Banner & Illustration Resolution System', () => {
       { input: 'Hampi', expectedKey: 'hampi', expectedAsset: '/artwork/landmark-hampi-ruins.png' },
       { input: 'Mysuru', expectedKey: 'mysuru', expectedAsset: '/artwork/landmark-mysuru-palace.png' },
       { input: 'Mysore', expectedKey: 'mysuru', expectedAsset: '/artwork/landmark-mysuru-palace.png' },
+      { input: 'Bengaluru', expectedKey: 'bengaluru', expectedAsset: '/artwork/landmark-bengaluru-vidhana-soudha.png' },
+      { input: 'Bangalore', expectedKey: 'bengaluru', expectedAsset: '/artwork/landmark-bengaluru-vidhana-soudha.png' },
     ];
 
     for (const c of cases) {
@@ -79,7 +81,7 @@ describe('Destination Banner & Illustration Resolution System', () => {
       { city: 'Bhopal', admin1: 'Madhya Pradesh', expectedAsset: '/artwork/region-central-plateau-forest.png', expectedKind: 'curated_local' },
       { city: 'Puri', admin1: 'Odisha', expectedAsset: '/artwork/region-east-delta-coast.png', expectedKind: 'curated_local' },
       { city: 'Pune', admin1: 'Maharashtra', expectedAsset: '/artwork/region-konkan-west-coast.png', expectedKind: 'curated_local' },
-      { city: 'Bengaluru', admin1: 'Karnataka', expectedAsset: '/artwork/region-deccan-temple-plateau.png', expectedKind: 'curated_local' },
+      { city: 'Hubli', admin1: 'Karnataka', expectedAsset: '/artwork/region-deccan-temple-plateau.png', expectedKind: 'curated_local' },
       { city: 'Kochi', admin1: 'Kerala', expectedAsset: '/artwork/region-western-ghats-backwaters.png', expectedKind: 'curated_local' },
       { city: 'Port Blair', admin1: 'Andaman and Nicobar Islands', expectedAsset: '/artwork/region-indian-islands.png', expectedKind: 'curated_local' },
       // Ambiguous or missing admin1 fails safely to neutral India fallback
@@ -434,7 +436,7 @@ describe('Destination Banner & Illustration Resolution System', () => {
       'artwork/region-deccan-temple-plateau.png',
       'artwork/region-western-ghats-backwaters.png',
       'artwork/region-indian-islands.png',
-      // 11 landmark exceptions
+      // 12 landmark exceptions
       'artwork/landmark-delhi-red-fort.png',
       'artwork/landmark-jaipur-hawa-mahal.png',
       'artwork/landmark-agra-taj-mahal.png',
@@ -446,6 +448,7 @@ describe('Destination Banner & Illustration Resolution System', () => {
       'artwork/landmark-amritsar-golden-temple.png',
       'artwork/landmark-hampi-ruins.png',
       'artwork/landmark-mysuru-palace.png',
+      'artwork/landmark-bengaluru-vidhana-soudha.png',
       // 4 shared weather illustrations
       'artwork/weather-clear-sun.png',
       'artwork/weather-rain-cloud.png',
@@ -453,7 +456,7 @@ describe('Destination Banner & Illustration Resolution System', () => {
       'artwork/weather-cold-wind.png',
     ];
 
-    assert.equal(requiredAssets.length, 33, 'Expected exactly 33 Artwork Pack assets');
+    assert.equal(requiredAssets.length, 34, 'Expected exactly 34 Artwork Pack assets');
 
     for (const relPath of requiredAssets) {
       const diskPath = path.join(process.cwd(), 'public', relPath);

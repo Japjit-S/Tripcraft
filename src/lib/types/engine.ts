@@ -111,7 +111,8 @@ export type CuratedCityKey =
   | 'kolkata'
   | 'amritsar'
   | 'hampi'
-  | 'mysuru';
+  | 'mysuru'
+  | 'bengaluru';
 
 export type LocalSceneTemplateId =
   | 'coastal-harbor'

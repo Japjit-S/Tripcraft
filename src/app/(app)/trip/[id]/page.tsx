@@ -240,7 +240,7 @@ export default function TripWorkspacePage({
     return (
       <div className="h-full flex items-center justify-center bg-transparent">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-[var(--color-tc-ink)]/30 border-t-[#1d6b8f] rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-[var(--color-tc-ink)]/30 border-t-[var(--color-tc-ink)] rounded-full animate-spin"></div>
           <p className="text-sm font-bold text-[var(--color-tc-ink)]/60">Loading your journey...</p>
         </div>
       </div>
@@ -627,12 +627,12 @@ function ItinerarySection({
 
               {/* Numerical Index Badge */}
               <div
-                className={`w-6 h-6 rounded-lg text-xs font-bold font-serif flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl text-sm sm:text-base font-bold font-serif flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                   isSelected || isHovered
                     ? isFlex
-                      ? 'bg-[var(--color-tc-saffron)]/10 text-[var(--color-tc-ink)]'
-                      : 'bg-[var(--color-tc-ink)] text-[var(--color-tc-ink)]'
-                    : 'bg-[var(--color-tc-parchment)] text-[var(--color-tc-ink)]/60 group-hover:bg-[var(--color-tc-parchment)]'
+                      ? 'bg-[var(--color-tc-saffron)] text-[var(--color-tc-ink)] shadow-xs'
+                      : 'bg-[var(--color-tc-ink)] text-white shadow-xs'
+                    : 'bg-[var(--color-tc-parchment)] text-[var(--color-tc-ink)]/70 group-hover:bg-[var(--color-tc-sage)]/30 group-hover:text-[var(--color-tc-ink)]'
                 }`}
               >
                 {index + 1}

@@ -82,32 +82,32 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
     <div className="relative" ref={containerRef}>
       <div 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full pl-12 pr-4 py-4 bg-[#f8f9fc] rounded-2xl cursor-pointer hover:bg-slate-100 transition-all flex items-center min-h-[56px]"
+        className="w-full pl-12 pr-4 py-4 bg-[var(--color-tc-parchment)] rounded-2xl cursor-pointer hover:bg-[var(--color-tc-parchment)]/80 border border-[var(--color-tc-sage)]/60 transition-all flex items-center min-h-[56px]"
       >
-        <CalendarIcon className="absolute left-4 h-5 w-5 text-slate-400" />
-        <span className={`font-bold ${value ? 'text-slate-900' : 'text-slate-400 font-normal'}`}>
+        <CalendarIcon className="absolute left-4 h-5 w-5 text-[var(--color-tc-ink)]/50" />
+        <span className={`font-bold ${value ? 'text-[var(--color-tc-ink)]' : 'text-[var(--color-tc-ink)]/40 font-normal'}`}>
           {displayValue}
         </span>
       </div>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 p-4 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 w-72 animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute top-full left-0 mt-2 p-4 bg-[var(--color-tc-cream)] rounded-2xl shadow-xl border-2 border-[var(--color-tc-sage)]/60 z-50 w-72 animate-in fade-in zoom-in-95 duration-150">
           
           <div className="flex justify-between items-center mb-4">
             <button 
               type="button"
               onClick={handlePrevMonth}
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--color-tc-sage)]/20 text-[var(--color-tc-ink)]/70 hover:text-[var(--color-tc-ink)] transition-colors cursor-pointer"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <div className="font-black text-slate-900">
+            <div className="font-bold font-serif text-[var(--color-tc-ink)]">
               {monthNames[viewMonth]} {viewYear}
             </div>
             <button 
               type="button"
               onClick={handleNextMonth}
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--color-tc-sage)]/20 text-[var(--color-tc-ink)]/70 hover:text-[var(--color-tc-ink)] transition-colors cursor-pointer"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -115,7 +115,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
 
           <div className="grid grid-cols-7 gap-1 text-center mb-2">
             {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((d) => (
-              <div key={d} className="text-[10px] font-bold text-slate-400 py-1">
+              <div key={d} className="text-[10px] font-bold text-[var(--color-tc-ink)]/60 py-1">
                 {d}
               </div>
             ))}
@@ -135,10 +135,10 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
                   key={day}
                   type="button"
                   onClick={() => handleSelectDate(day)}
-                  className={`w-8 h-8 mx-auto rounded-full text-xs font-bold flex items-center justify-center transition-all ${
+                  className={`w-8 h-8 mx-auto rounded-full text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${
                     isSelected 
-                      ? 'bg-[#1d6b8f] text-white shadow-md scale-110' 
-                      : 'text-slate-700 hover:bg-blue-50 hover:text-[#1d6b8f]'
+                      ? 'bg-[var(--color-tc-ink)] text-white shadow-md scale-110' 
+                      : 'text-[var(--color-tc-ink)] hover:bg-[var(--color-tc-sage)]/30 hover:text-[var(--color-tc-ink)]'
                   }`}
                 >
                   {day}

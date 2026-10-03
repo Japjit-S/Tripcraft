@@ -368,6 +368,23 @@ export const CURATED_CITY_ARTWORK: Record<CuratedCityKey, CuratedCityCatalogEntr
       seedHash: 'c01a1011',
     },
   },
+  bengaluru: {
+    key: 'bengaluru',
+    displayName: 'Bengaluru',
+    assetPath: '/artwork/landmark-bengaluru-vidhana-soudha.png',
+    landmarkName: 'Vidhana Soudha',
+    alt: 'Illustrated view of Vidhana Soudha in Bengaluru',
+    focalPoint: { x: 0.70, y: 0.48 },
+    fallbackScene: {
+      templateId: 'metropolitan-skyline',
+      paletteId: 'apricot-teal',
+      skyVariant: 0,
+      skylineVariant: 1,
+      terrainVariant: 0,
+      motifVariant: 'plane-route',
+      seedHash: 'c01a1012',
+    },
+  },
 };
 
 const SCENE_TEMPLATES: readonly LocalSceneTemplateId[] = [
@@ -670,7 +687,7 @@ export function resolveRegionArtworkKey(admin1?: string | null): string | null {
  * with zero network calls.
  *
  * 3-tier India-only resolution hierarchy:
- * 1. Exact, confidently matched landmark image (11 landmark exceptions)
+ * 1. Exact, confidently matched landmark image (12 landmark exceptions)
  * 2. Region image from trusted state/region metadata (11 regional masters)
  * 3. Neutral India-wide fallback (/artwork/destination-india-fallback.png)
  *

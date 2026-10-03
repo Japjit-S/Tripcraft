@@ -349,10 +349,10 @@ function PlannerForm() {
           <Sparkles className="w-3.5 h-3.5" />
           <span>Curated Journey Planner</span>
         </div>
-        <h1 className="text-4xl sm:text-5xl font-black text-slate-900 mb-3 tracking-tight">
+        <h1 className="text-4xl sm:text-5xl font-bold font-serif text-[var(--color-tc-ink)] mb-3 tracking-tight">
           Design your journey.
         </h1>
-        <p className="text-base sm:text-lg text-slate-500 font-medium max-w-2xl">
+        <p className="text-base sm:text-lg text-[var(--color-tc-ink)]/75 font-medium max-w-2xl">
           Enter your travel details to create a handcrafted, weather-aware 1-to-7 day journey across India.
         </p>
       </div>
@@ -372,9 +372,9 @@ function PlannerForm() {
         <div className="lg:col-span-7 space-y-10">
           
           {/* Destination & Dates Card */}
-          <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-7 lg:p-9">
-            <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)]/10 flex items-center justify-center text-[var(--color-tc-ink)] font-bold text-sm">
+          <div className="bg-[var(--color-tc-cream)] rounded-3xl shadow-[8px_8px_0px_rgba(23,60,57,0.05)] border-2 border-[var(--color-tc-sage)]/50 p-7 lg:p-9">
+            <h3 className="text-2xl font-bold font-serif text-[var(--color-tc-ink)] mb-6 flex items-center gap-3">
+              <span className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)] flex items-center justify-center text-white font-bold font-serif text-sm shadow-xs">
                 1
               </span>
               Where & When
@@ -383,11 +383,11 @@ function PlannerForm() {
             <div className="space-y-6">
               {/* Autocomplete Destination City */}
               <div ref={autocompleteContainerRef} className="space-y-2 relative">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider ml-1">
+                <label className="text-xs font-bold font-serif uppercase tracking-wider text-[var(--color-tc-ink)]/80 ml-1">
                   Destination City
                 </label>
                 <div className="relative">
-                  <MapPin className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
+                  <MapPin className="absolute left-4 top-3.5 h-5 w-5 text-[var(--color-tc-ink)]/50" />
                   <input 
                     required
                     value={destination}
@@ -401,7 +401,7 @@ function PlannerForm() {
                     }}
                     type="text" 
                     placeholder="Where are you heading? (e.g. Delhi, Jaipur, Mumbai, Bengaluru)" 
-                    className="w-full pl-12 pr-12 py-3.5 bg-[#f8f9fc] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[var(--color-tc-ink)]/30 border border-transparent focus:border-[var(--color-tc-ink)] transition-all text-slate-900 font-bold placeholder:font-normal placeholder:text-slate-400 text-base"
+                    className="w-full pl-12 pr-12 py-3.5 bg-[var(--color-tc-parchment)] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[var(--color-tc-ink)]/20 border border-[var(--color-tc-sage)]/60 focus:border-[var(--color-tc-ink)] focus:bg-white transition-all text-[var(--color-tc-ink)] font-bold placeholder:font-normal placeholder:text-[var(--color-tc-ink)]/40 text-base"
                   />
                   {isSearchingCities && (
                     <div className="absolute right-4 top-4 w-4 h-4 border-2 border-[var(--color-tc-ink)]/30 border-t-[var(--color-tc-ink)] rounded-full animate-spin"></div>
@@ -409,7 +409,7 @@ function PlannerForm() {
                 </div>
 
                 {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden divide-y divide-slate-50 animate-in fade-in duration-150 max-h-64 overflow-y-auto">
+                  <div className="absolute left-0 right-0 top-full mt-2 bg-[var(--color-tc-cream)] rounded-2xl shadow-xl border-2 border-[var(--color-tc-sage)]/60 z-50 overflow-hidden divide-y divide-[var(--color-tc-sage)]/20 animate-in fade-in duration-150 max-h-64 overflow-y-auto">
                     {suggestions.map((s) => (
                       <button
                         key={s.id}
@@ -420,14 +420,14 @@ function PlannerForm() {
                           setSelectedCityObj(s);
                           setShowSuggestions(false);
                         }}
-                        className="w-full text-left px-5 py-3 hover:bg-slate-50 flex items-center justify-between transition-colors group cursor-pointer"
+                        className="w-full text-left px-5 py-3 hover:bg-[var(--color-tc-parchment)]/70 flex items-center justify-between transition-colors group cursor-pointer"
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)]/10 text-[var(--color-tc-ink)] flex items-center justify-center font-bold text-xs shrink-0">
                             <MapPin className="w-4 h-4" />
                           </div>
                           <div>
-                            <span className="font-bold text-slate-900 group-hover:text-[var(--color-tc-ink)] transition-colors text-sm">
+                            <span className="font-bold text-[var(--color-tc-ink)] group-hover:text-[var(--color-tc-ink)] transition-colors text-sm">
                               {s.city}
                             </span>
                             <span className="text-xs text-slate-400 ml-2 font-medium">
@@ -436,7 +436,7 @@ function PlannerForm() {
                           </div>
                         </div>
                         {s.countryCode && (
-                          <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md">
+                          <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-[var(--color-tc-sage)]/30 text-[var(--color-tc-ink)] rounded-md">
                             {s.countryCode}
                           </span>
                         )}
@@ -447,13 +447,13 @@ function PlannerForm() {
 
                 {/* Popular Quick Picks */}
                 <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  <span className="text-[11px] font-bold text-slate-400 mr-0.5">Quick picks:</span>
+                  <span className="text-[11px] font-bold text-[var(--color-tc-ink)]/60 mr-0.5">Quick picks:</span>
                   {POPULAR_DESTINATIONS.map((pop) => (
                     <button
                       key={pop.name}
                       type="button"
                       onClick={() => handleSelectPopularCity(pop.name)}
-                      className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[var(--color-tc-cream)] hover:bg-[var(--color-tc-sage)]/20 text-[var(--color-tc-ink)]/70 hover:text-[var(--color-tc-ink)] hover:border-[var(--color-tc-sage)] border border-[var(--color-tc-sage)]/30 transition-all cursor-pointer"
+                      className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-[var(--color-tc-parchment)] hover:bg-[var(--color-tc-sage)]/30 text-[var(--color-tc-ink)]/80 hover:text-[var(--color-tc-ink)] hover:border-[var(--color-tc-ink)]/40 border border-[var(--color-tc-sage)]/50 transition-all cursor-pointer"
                     >
                       {pop.label}
                     </button>
@@ -464,7 +464,7 @@ function PlannerForm() {
               {/* Start Date & Duration */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider ml-1">
+                  <label className="text-xs font-bold font-serif uppercase tracking-wider text-[var(--color-tc-ink)]/80 ml-1">
                     Start Date
                   </label>
                   <DatePicker 
@@ -476,20 +476,20 @@ function PlannerForm() {
                 {/* Duration Stepper with Day Capsules */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between ml-1">
-                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    <label className="text-xs font-bold font-serif uppercase tracking-wider text-[var(--color-tc-ink)]/80">
                       Duration
                     </label>
-                    <span className="text-xs font-black text-[var(--color-tc-ink)]">
+                    <span className="text-xs font-bold font-serif text-[var(--color-tc-ink)]">
                       {duration} {duration === 1 ? 'Day' : 'Days'}
                     </span>
                   </div>
 
-                  <div className="bg-[#f8f9fc] rounded-2xl p-2 border border-slate-100 flex items-center justify-between">
+                  <div className="bg-[var(--color-tc-parchment)] rounded-2xl p-2 border border-[var(--color-tc-sage)]/60 flex items-center justify-between">
                     <button
                       type="button"
                       onClick={() => setDuration((prev) => Math.max(1, prev - 1))}
                       disabled={duration <= 1}
-                      className="w-10 h-10 rounded-xl bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-50 flex items-center justify-center shadow-xs disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                      className="w-10 h-10 rounded-xl bg-[var(--color-tc-cream)] text-[var(--color-tc-ink)] hover:text-[var(--color-tc-ink)] hover:bg-white flex items-center justify-center shadow-xs border border-[var(--color-tc-sage)]/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
                       title="Decrease duration"
                     >
                       <Minus className="w-4 h-4" />
@@ -497,7 +497,7 @@ function PlannerForm() {
 
                     <div className="flex items-center gap-1.5 px-2">
                       <Clock className="w-4 h-4 text-[var(--color-tc-ink)]" />
-                      <span className="text-sm font-black text-slate-900">
+                      <span className="text-sm font-serif font-bold text-[var(--color-tc-ink)]">
                         {duration} {duration === 1 ? 'day' : 'days'}
                       </span>
                     </div>
@@ -506,7 +506,7 @@ function PlannerForm() {
                       type="button"
                       onClick={() => setDuration((prev) => Math.min(7, prev + 1))}
                       disabled={duration >= 7}
-                      className="w-10 h-10 rounded-xl bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-50 flex items-center justify-center shadow-xs disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                      className="w-10 h-10 rounded-xl bg-[var(--color-tc-cream)] text-[var(--color-tc-ink)] hover:text-[var(--color-tc-ink)] hover:bg-white flex items-center justify-center shadow-xs border border-[var(--color-tc-sage)]/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
                       title="Increase duration"
                     >
                       <Plus className="w-4 h-4" />
@@ -523,7 +523,7 @@ function PlannerForm() {
                         className={`flex-1 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                           duration === d
                             ? 'bg-[var(--color-tc-ink)] text-white shadow-xs'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            : 'bg-[var(--color-tc-parchment)] text-[var(--color-tc-ink)]/70 hover:bg-[var(--color-tc-sage)]/30 hover:text-[var(--color-tc-ink)] border border-[var(--color-tc-sage)]/40'
                         }`}
                       >
                         {d}d
@@ -536,9 +536,9 @@ function PlannerForm() {
           </div>
 
           {/* Arrival Logistics Card */}
-          <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-7 lg:p-9">
-            <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)]/10 flex items-center justify-center text-[var(--color-tc-ink)] font-bold text-sm">
+          <div className="bg-[var(--color-tc-cream)] rounded-3xl shadow-[8px_8px_0px_rgba(23,60,57,0.05)] border-2 border-[var(--color-tc-sage)]/50 p-7 lg:p-9">
+            <h3 className="text-2xl font-bold font-serif text-[var(--color-tc-ink)] mb-6 flex items-center gap-3">
+              <span className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)] flex items-center justify-center text-white font-bold font-serif text-sm shadow-xs">
                 2
               </span>
               Transit & Timing Gate
@@ -546,24 +546,24 @@ function PlannerForm() {
 
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider ml-1">
+                <label className="text-xs font-bold font-serif uppercase tracking-wider text-[var(--color-tc-ink)]/80 ml-1">
                   Origin City (Optional)
                 </label>
                 <div className="relative">
-                  <Navigation className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
+                  <Navigation className="absolute left-4 top-3.5 h-5 w-5 text-[var(--color-tc-ink)]/50" />
                   <input 
                     value={originCity}
                     onChange={e => setOriginCity(e.target.value)}
                     type="text" 
                     placeholder="Where are you travelling from? (e.g. Delhi, London, Tokyo)" 
-                    className="w-full pl-12 pr-4 py-3.5 bg-[#f8f9fc] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[var(--color-tc-ink)]/30 border border-transparent focus:border-[var(--color-tc-ink)] transition-all text-slate-900 font-bold placeholder:font-normal placeholder:text-slate-400 text-base"
+                    className="w-full pl-12 pr-4 py-3.5 bg-[var(--color-tc-parchment)] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[var(--color-tc-ink)]/20 border border-[var(--color-tc-sage)]/60 focus:border-[var(--color-tc-ink)] focus:bg-white transition-all text-[var(--color-tc-ink)] font-bold placeholder:font-normal placeholder:text-[var(--color-tc-ink)]/40 text-base"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider ml-1">
+                  <label className="text-xs font-bold font-serif uppercase tracking-wider text-[var(--color-tc-ink)]/80 ml-1">
                     Arrival Mode
                   </label>
                   <div className="flex gap-2">
@@ -572,10 +572,10 @@ function PlannerForm() {
                         key={mode.id}
                         type="button" 
                         onClick={() => setArrivalMode(mode.id)} 
-                        className={`flex-1 py-3 flex flex-col items-center justify-center gap-1.5 rounded-2xl transition-all border cursor-pointer ${
+                        className={`flex-1 py-3 flex flex-col items-center justify-center gap-1.5 rounded-2xl transition-all border-2 cursor-pointer ${
                           arrivalMode === mode.id 
                             ? 'bg-[var(--color-tc-ink)] border-[var(--color-tc-ink)] text-white shadow-md shadow-[var(--color-tc-ink)]/20 scale-102 font-bold' 
-                            : 'bg-[#f8f9fc] border-slate-100 text-slate-500 hover:bg-slate-100 font-semibold'
+                            : 'bg-[var(--color-tc-parchment)] border-[var(--color-tc-sage)]/50 text-[var(--color-tc-ink)]/70 hover:bg-[var(--color-tc-sage)]/20 hover:text-[var(--color-tc-ink)] hover:border-[var(--color-tc-sage)] font-semibold'
                         }`}
                       >
                         <mode.icon className="w-4 h-4" />
@@ -586,7 +586,7 @@ function PlannerForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider ml-1">
+                  <label className="text-xs font-bold font-serif uppercase tracking-wider text-[var(--color-tc-ink)]/80 ml-1">
                     Arrival Time (Day 1 Slot Gate)
                   </label>
                   <TimePicker 
@@ -603,14 +603,14 @@ function PlannerForm() {
         <div className="lg:col-span-5 space-y-10">
           
           {/* Persona Card */}
-          <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-7 lg:p-9">
-            <h3 className="text-xl font-black text-slate-900 mb-1 flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)]/10 flex items-center justify-center text-[var(--color-tc-ink)] font-bold text-sm">
+          <div className="bg-[var(--color-tc-cream)] rounded-3xl shadow-[8px_8px_0px_rgba(23,60,57,0.05)] border-2 border-[var(--color-tc-sage)]/50 p-7 lg:p-9">
+            <h3 className="text-2xl font-bold font-serif text-[var(--color-tc-ink)] mb-1 flex items-center gap-3">
+              <span className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)] flex items-center justify-center text-white font-bold font-serif text-sm shadow-xs">
                 3
               </span>
               Travel Persona
             </h3>
-            <p className="text-xs text-slate-500 mb-6 ml-11 font-medium">
+            <p className="text-xs text-[var(--color-tc-ink)]/70 mb-6 ml-11 font-medium">
               Customizes activity pacing, cultural landmarks, and daily rhythm for your style.
             </p>
             
@@ -624,12 +624,15 @@ function PlannerForm() {
                     onClick={() => setPersona(p.id)}
                     className={`p-4 rounded-2xl cursor-pointer transition-all border-2 relative overflow-hidden group ${
                       isSelected
-                        ? 'border-[var(--color-tc-ink)] ring-2 ring-[var(--color-tc-ink)]/10 bg-[var(--color-tc-sage)]/10' : 'border-[var(--color-tc-sage)]/30 bg-[var(--color-tc-cream)] hover:bg-[var(--color-tc-parchment)] hover:border-[var(--color-tc-ink)]/50'
+                        ? 'border-[var(--color-tc-ink)] bg-[var(--color-tc-sage)]/15 shadow-[4px_4px_0px_rgba(23,60,57,0.12)] scale-[1.01]' 
+                        : 'border-[var(--color-tc-sage)]/50 bg-[var(--color-tc-parchment)]/60 hover:bg-[var(--color-tc-parchment)] hover:border-[var(--color-tc-ink)]/40'
                     }`}
                   >
                     <div className="flex items-start gap-3.5">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 p-1 relative overflow-hidden ${
-                        isSelected ? 'bg-[var(--color-tc-ink)] border-2 border-[var(--color-tc-ink)] shadow-xs' : 'bg-[var(--color-tc-parchment)] border border-[var(--color-tc-sage)]/50'
+                        isSelected 
+                          ? 'bg-[var(--color-tc-ink)] border-2 border-[var(--color-tc-ink)] shadow-xs' 
+                          : 'bg-[var(--color-tc-cream)] border border-[var(--color-tc-sage)]/60'
                       }`}>
                         <Image
                           src={p.artworkPath}
@@ -642,16 +645,18 @@ function PlannerForm() {
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <h4 className="font-black text-sm text-slate-900 tracking-tight">
+                          <h4 className="font-bold font-serif text-sm text-[var(--color-tc-ink)] tracking-tight">
                             {p.title}
                           </h4>
-                          <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                            isSelected ? 'bg-[var(--color-tc-ink)] text-[var(--color-tc-cream)]' : 'bg-[var(--color-tc-sage)]/30 text-[var(--color-tc-ink)]/70'
+                          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                            isSelected 
+                              ? 'bg-[var(--color-tc-ink)] text-white shadow-xs' 
+                              : 'bg-[var(--color-tc-sage)]/30 text-[var(--color-tc-ink)]/80'
                           }`}>
                             {p.badge}
                           </span>
                         </div>
-                        <p className="text-xs font-medium text-slate-500 leading-relaxed mb-2">
+                        <p className="text-xs font-medium text-[var(--color-tc-ink)]/70 leading-relaxed mb-2">
                           {p.desc}
                         </p>
                         <div className="flex flex-wrap gap-1.5">
@@ -660,8 +665,8 @@ function PlannerForm() {
                               key={trait} 
                               className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${
                                 isSelected 
-                                  ? 'bg-white/80 text-slate-800 border border-slate-200' 
-                                  : 'bg-white text-slate-500 border border-slate-100'
+                                  ? 'bg-[var(--color-tc-cream)] text-[var(--color-tc-ink)] border border-[var(--color-tc-ink)]/20 shadow-xs' 
+                                  : 'bg-[var(--color-tc-cream)] text-[var(--color-tc-ink)]/60 border border-[var(--color-tc-sage)]/40'
                               }`}
                             >
                               {trait}
@@ -681,7 +686,7 @@ function PlannerForm() {
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="w-full py-4 px-6 bg-[var(--color-tc-ink)] hover:bg-[var(--color-tc-teal)] text-[var(--color-tc-cream)] font-black text-base rounded-2xl transition-all focus:outline-none focus:ring-4 focus:ring-[var(--color-tc-sage)]/30 disabled:opacity-80 disabled:cursor-not-allowed flex justify-center items-center gap-3 shadow-lg shadow-[var(--color-tc-ink)]/25 hover:-translate-y-0.5 cursor-pointer"
+              className="w-full py-4 px-6 bg-[var(--color-tc-ink)] hover:bg-[var(--color-tc-teal)] text-[var(--color-tc-cream)] font-serif font-bold text-base rounded-2xl transition-all focus:outline-none focus:ring-4 focus:ring-[var(--color-tc-sage)]/30 disabled:opacity-80 disabled:cursor-not-allowed flex justify-center items-center gap-3 shadow-lg shadow-[var(--color-tc-ink)]/20 hover:-translate-y-0.5 cursor-pointer"
             >
               {isSubmitting ? (
                 <>
@@ -696,7 +701,7 @@ function PlannerForm() {
               )}
             </button>
 
-            <p className="text-center text-[11px] font-medium text-slate-400">
+            <p className="text-center text-[11px] font-medium text-[var(--color-tc-ink)]/50">
               Verified local destinations • Real-time weather integration
             </p>
           </div>
