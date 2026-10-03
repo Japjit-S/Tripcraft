@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Plus,
   Minus,
+  ArrowRight,
 } from 'lucide-react';
 import { saveTripToStorage, GeneratedTrip } from '@/lib/tripStore';
 import { Destination } from '@/lib/types';
@@ -367,9 +368,10 @@ function PlannerForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Left Column: Core Logistics */}
-        <div className="lg:col-span-7 space-y-10">
+      <form onSubmit={handleSubmit} className="space-y-8 lg:space-y-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
+          {/* Left Column: Core Logistics */}
+          <div className="lg:col-span-7 flex flex-col gap-8 lg:gap-10">
           
           {/* Destination & Dates Card */}
           <div className="bg-[var(--color-tc-cream)] rounded-3xl shadow-[8px_8px_0px_rgba(23,60,57,0.05)] border-2 border-[var(--color-tc-sage)]/50 p-7 lg:p-9">
@@ -536,85 +538,98 @@ function PlannerForm() {
           </div>
 
           {/* Arrival Logistics Card */}
-          <div className="bg-[var(--color-tc-cream)] rounded-3xl shadow-[8px_8px_0px_rgba(23,60,57,0.05)] border-2 border-[var(--color-tc-sage)]/50 p-7 lg:p-9">
-            <h3 className="text-2xl font-bold font-serif text-[var(--color-tc-ink)] mb-6 flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)] flex items-center justify-center text-white font-bold font-serif text-sm shadow-xs">
-                2
-              </span>
-              Transit & Timing Gate
-            </h3>
+          <div className="bg-[var(--color-tc-cream)] rounded-3xl shadow-[8px_8px_0px_rgba(23,60,57,0.05)] border-2 border-[var(--color-tc-sage)]/50 p-7 lg:p-9 flex-1 flex flex-col justify-between">
+            <div>
+              <h3 className="text-2xl font-bold font-serif text-[var(--color-tc-ink)] mb-6 flex items-center gap-3">
+                <span className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)] flex items-center justify-center text-white font-bold font-serif text-sm shadow-xs">
+                  2
+                </span>
+                Transit & Timing Gate
+              </h3>
 
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-xs font-bold font-serif uppercase tracking-wider text-[var(--color-tc-ink)]/80 ml-1">
-                  Origin City (Optional)
-                </label>
-                <div className="relative">
-                  <Navigation className="absolute left-4 top-3.5 h-5 w-5 text-[var(--color-tc-ink)]/50" />
-                  <input 
-                    value={originCity}
-                    onChange={e => setOriginCity(e.target.value)}
-                    type="text" 
-                    placeholder="Where are you travelling from? (e.g. Delhi, London, Tokyo)" 
-                    className="w-full pl-12 pr-4 py-3.5 bg-[var(--color-tc-parchment)] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[var(--color-tc-ink)]/20 border border-[var(--color-tc-sage)]/60 focus:border-[var(--color-tc-ink)] focus:bg-white transition-all text-[var(--color-tc-ink)] font-bold placeholder:font-normal placeholder:text-[var(--color-tc-ink)]/40 text-base"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-xs font-bold font-serif uppercase tracking-wider text-[var(--color-tc-ink)]/80 ml-1">
-                    Arrival Mode
+                    Origin City (Optional)
                   </label>
-                  <div className="flex gap-2">
-                    {ARRIVAL_MODES.map(mode => (
-                      <button 
-                        key={mode.id}
-                        type="button" 
-                        onClick={() => setArrivalMode(mode.id)} 
-                        className={`flex-1 py-3 flex flex-col items-center justify-center gap-1.5 rounded-2xl transition-all border-2 cursor-pointer ${
-                          arrivalMode === mode.id 
-                            ? 'bg-[var(--color-tc-ink)] border-[var(--color-tc-ink)] text-white shadow-md shadow-[var(--color-tc-ink)]/20 scale-102 font-bold' 
-                            : 'bg-[var(--color-tc-parchment)] border-[var(--color-tc-sage)]/50 text-[var(--color-tc-ink)]/70 hover:bg-[var(--color-tc-sage)]/20 hover:text-[var(--color-tc-ink)] hover:border-[var(--color-tc-sage)] font-semibold'
-                        }`}
-                      >
-                        <mode.icon className="w-4 h-4" />
-                        <span className="text-[11px] uppercase tracking-wider">{mode.label}</span>
-                      </button>
-                    ))}
+                  <div className="relative">
+                    <Navigation className="absolute left-4 top-3.5 h-5 w-5 text-[var(--color-tc-ink)]/50" />
+                    <input 
+                      value={originCity}
+                      onChange={e => setOriginCity(e.target.value)}
+                      type="text" 
+                      placeholder="Where are you travelling from? (e.g. Delhi, London, Tokyo)" 
+                      className="w-full pl-12 pr-4 py-3.5 bg-[var(--color-tc-parchment)] rounded-2xl focus:outline-none focus:ring-2 focus:ring-[var(--color-tc-ink)]/20 border border-[var(--color-tc-sage)]/60 focus:border-[var(--color-tc-ink)] focus:bg-white transition-all text-[var(--color-tc-ink)] font-bold placeholder:font-normal placeholder:text-[var(--color-tc-ink)]/40 text-base"
+                    />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-bold font-serif uppercase tracking-wider text-[var(--color-tc-ink)]/80 ml-1">
-                    Arrival Time (Day 1 Slot Gate)
-                  </label>
-                  <TimePicker 
-                    value={arrivalTime}
-                    onChange={setArrivalTime}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold font-serif uppercase tracking-wider text-[var(--color-tc-ink)]/80 ml-1">
+                      Arrival Mode
+                    </label>
+                    <div className="flex gap-2">
+                      {ARRIVAL_MODES.map(mode => (
+                        <button 
+                          key={mode.id}
+                          type="button" 
+                          onClick={() => setArrivalMode(mode.id)} 
+                          className={`flex-1 py-3 flex flex-col items-center justify-center gap-1.5 rounded-2xl transition-all border-2 cursor-pointer ${
+                            arrivalMode === mode.id 
+                              ? 'bg-[var(--color-tc-ink)] border-[var(--color-tc-ink)] text-white shadow-md shadow-[var(--color-tc-ink)]/20 scale-102 font-bold' 
+                              : 'bg-[var(--color-tc-parchment)] border-[var(--color-tc-sage)]/50 text-[var(--color-tc-ink)]/70 hover:bg-[var(--color-tc-sage)]/20 hover:text-[var(--color-tc-ink)] hover:border-[var(--color-tc-sage)] font-semibold'
+                          }`}
+                        >
+                          <mode.icon className="w-4 h-4" />
+                          <span className="text-[11px] uppercase tracking-wider">{mode.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold font-serif uppercase tracking-wider text-[var(--color-tc-ink)]/80 ml-1">
+                      Arrival Time (Day 1 Slot Gate)
+                    </label>
+                    <TimePicker 
+                      value={arrivalTime}
+                      onChange={setArrivalTime}
+                    />
+                  </div>
                 </div>
               </div>
+            </div>
+
+            {/* Smart Timing Gate Guidance Note */}
+            <div className="mt-8 pt-5 border-t border-[var(--color-tc-sage)]/40 flex items-start gap-3.5 text-xs text-[var(--color-tc-ink)]/75 font-medium">
+              <div className="w-8 h-8 rounded-xl bg-[var(--color-tc-parchment)] border border-[var(--color-tc-sage)]/60 flex items-center justify-center shrink-0 text-[var(--color-tc-teal)] mt-0.5">
+                <Clock className="w-4 h-4" />
+              </div>
+              <p className="leading-relaxed">
+                <strong className="text-[var(--color-tc-ink)] font-bold">Dynamic Slot Gating:</strong> Arrival times before 1:00 PM unlock full afternoon anchors. Evening arrivals automatically defer primary sights to Day 2 for effortless pacing.
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Persona & Submit */}
-        <div className="lg:col-span-5 space-y-10">
-          
+        {/* Right Column: Persona */}
+        <div className="lg:col-span-5 flex flex-col">
           {/* Persona Card */}
-          <div className="bg-[var(--color-tc-cream)] rounded-3xl shadow-[8px_8px_0px_rgba(23,60,57,0.05)] border-2 border-[var(--color-tc-sage)]/50 p-7 lg:p-9">
-            <h3 className="text-2xl font-bold font-serif text-[var(--color-tc-ink)] mb-1 flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)] flex items-center justify-center text-white font-bold font-serif text-sm shadow-xs">
-                3
-              </span>
-              Travel Persona
-            </h3>
-            <p className="text-xs text-[var(--color-tc-ink)]/70 mb-6 ml-11 font-medium">
-              Customizes activity pacing, cultural landmarks, and daily rhythm for your style.
-            </p>
+          <div className="bg-[var(--color-tc-cream)] rounded-3xl shadow-[8px_8px_0px_rgba(23,60,57,0.05)] border-2 border-[var(--color-tc-sage)]/50 p-7 lg:p-9 h-full flex flex-col justify-between">
+            <div>
+              <h3 className="text-2xl font-bold font-serif text-[var(--color-tc-ink)] mb-1 flex items-center gap-3">
+                <span className="w-8 h-8 rounded-xl bg-[var(--color-tc-ink)] flex items-center justify-center text-white font-bold font-serif text-sm shadow-xs">
+                  3
+                </span>
+                Travel Persona
+              </h3>
+              <p className="text-xs text-[var(--color-tc-ink)]/70 mb-5 ml-11 font-medium">
+                Customizes activity pacing, cultural landmarks, and daily rhythm for your style.
+              </p>
+            </div>
             
-            <div className="space-y-3">
+            <div className="space-y-3.5 flex-1 flex flex-col justify-between">
               {PERSONAS.map((p) => {
                 const isSelected = persona === p.id;
 
@@ -680,33 +695,62 @@ function PlannerForm() {
               })}
             </div>
           </div>
-
-          {/* Submit Action */}
-          <div className="space-y-4">
-            <button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="w-full py-4 px-6 bg-[var(--color-tc-ink)] hover:bg-[var(--color-tc-teal)] text-[var(--color-tc-cream)] font-serif font-bold text-base rounded-2xl transition-all focus:outline-none focus:ring-4 focus:ring-[var(--color-tc-sage)]/30 disabled:opacity-80 disabled:cursor-not-allowed flex justify-center items-center gap-3 shadow-lg shadow-[var(--color-tc-ink)]/20 hover:-translate-y-0.5 cursor-pointer"
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Charting your journey...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5" />
-                  <span>Chart {duration}-Day Itinerary</span>
-                </>
-              )}
-            </button>
-
-            <p className="text-center text-[11px] font-medium text-[var(--color-tc-ink)]/50">
-              Verified local destinations • Real-time weather integration
-            </p>
-          </div>
         </div>
-      </form>
+      </div>
+
+      {/* Full-Width Hero Journey Launch Button */}
+      <div className="pt-2">
+        <button 
+          type="submit" 
+          disabled={isSubmitting}
+          className="w-full py-5 sm:py-6 px-6 sm:px-10 bg-[var(--color-tc-ink)] hover:bg-[#102d2a] text-[var(--color-tc-cream)] rounded-3xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[var(--color-tc-teal)]/30 disabled:opacity-80 disabled:cursor-not-allowed border-2 border-[var(--color-tc-ink)] shadow-[8px_8px_0px_var(--color-tc-teal)] hover:shadow-[4px_4px_0px_var(--color-tc-teal)] hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none cursor-pointer group flex items-center justify-between gap-4"
+        >
+          {isSubmitting ? (
+            <div className="w-full flex items-center justify-center gap-3.5 py-1">
+              <div className="w-6 h-6 border-3 border-[var(--color-tc-cream)]/30 border-t-[var(--color-tc-cream)] rounded-full animate-spin shrink-0"></div>
+              <span className="font-serif font-bold text-xl sm:text-2xl tracking-tight text-[var(--color-tc-cream)]">
+                Crafting Your {duration}-Day Journey...
+              </span>
+            </div>
+          ) : (
+            <>
+              {/* Left Sparkle Badge */}
+              <div className="w-12 h-12 rounded-2xl bg-[var(--color-tc-teal)]/40 border border-[var(--color-tc-sage)]/30 flex items-center justify-center shrink-0 group-hover:rotate-12 transition-transform duration-300">
+                <Sparkles className="w-6 h-6 text-[var(--color-tc-saffron)]" />
+              </div>
+
+              {/* Center Magical & Obvious Headline */}
+              <div className="flex-1 text-center py-0.5">
+                <div className="font-serif font-bold text-xl sm:text-2xl lg:text-3xl text-white tracking-tight flex items-center justify-center gap-2">
+                  <span>Craft Your {duration}-Day Journey</span>
+                </div>
+                <div className="text-[11px] sm:text-xs font-sans font-semibold text-[var(--color-tc-sage)] uppercase tracking-wider sm:tracking-widest mt-1">
+                  Weather-Aware • 100% Deterministic • Tailored for {persona}
+                </div>
+              </div>
+
+              {/* Right Arrow Action */}
+              <div className="w-12 h-12 rounded-2xl bg-white/10 group-hover:bg-white/20 flex items-center justify-center shrink-0 group-hover:translate-x-1.5 transition-all duration-300">
+                <ArrowRight className="w-6 h-6 text-[var(--color-tc-cream)]" />
+              </div>
+            </>
+          )}
+        </button>
+
+        {/* Micro Trust Indicators */}
+        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 pt-4 text-xs font-semibold text-[var(--color-tc-ink)]/60">
+          <span className="flex items-center gap-1.5">
+            <span className="text-[var(--color-tc-teal)]">✦</span> Instant Bespoke Itinerary
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="text-[var(--color-tc-teal)]">✦</span> Verified Local Heritage & Landmarks
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="text-[var(--color-tc-teal)]">✦</span> Real-Time Meteorological Alignment
+          </span>
+        </div>
+      </div>
+    </form>
 
       {/* Restored parchment loading treatment from the earlier planner design. */}
       {isSubmitting && (
@@ -728,7 +772,7 @@ function PlannerForm() {
               aria-live="polite"
               className="font-serif text-xl font-bold text-[var(--color-tc-ink)]"
             >
-              Charting your journey...
+              Crafting your journey...
             </p>
             <p
               id="itinerary-loading-description"
