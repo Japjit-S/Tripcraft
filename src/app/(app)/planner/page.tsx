@@ -698,62 +698,50 @@ function PlannerForm() {
         </div>
       </div>
 
-      {/* Full-Width Hero Journey Launch Button */}
-      <div className="pt-2">
-        <button 
-          type="submit" 
-          disabled={isSubmitting}
-          className="relative w-full rounded-3xl overflow-hidden border-2 border-[var(--color-tc-ink)] shadow-[8px_8px_0px_var(--color-tc-teal)] hover:shadow-[4px_4px_0px_var(--color-tc-teal)] hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-200 cursor-pointer group flex items-stretch disabled:opacity-80 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? (
-            <div className="w-full bg-[var(--color-tc-ink)] py-5 sm:py-6 px-6 sm:px-10 flex items-center justify-center gap-3.5">
-              <div className="w-6 h-6 border-3 border-[var(--color-tc-cream)]/30 border-t-[var(--color-tc-cream)] rounded-full animate-spin shrink-0"></div>
-              <span className="font-serif font-bold text-xl sm:text-2xl tracking-tight text-[var(--color-tc-cream)]">
-                Crafting a journey that fits you...
-              </span>
-            </div>
-          ) : (
-            <>
-              {/* Left Ticket Main Body: Deep Ink Green (~78%) */}
-              <div className="flex-1 bg-[var(--color-tc-ink)] group-hover:bg-[#12312e] py-5 sm:py-6 px-5 sm:px-9 flex items-center gap-4 transition-colors">
-                {/* Tripcraft Brand Mark on crisp cream medallion */}
-                <div className="w-12 h-12 rounded-2xl bg-[var(--color-tc-cream)] border border-white/20 shadow-sm flex items-center justify-center shrink-0 p-1.5 overflow-hidden">
-                  <Image
-                    src="/artwork/tripcraft-mark.png"
-                    alt="Tripcraft"
-                    width={36}
-                    height={36}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-
-                {/* Headline */}
-                <div className="flex-1 text-center sm:text-left sm:pl-2">
-                  <span className="font-serif font-bold text-xl sm:text-2xl lg:text-3xl text-white tracking-tight">
-                    Craft a journey that fits you
+        {/* Full-Width Hero Journey Launch Button */}
+        <div className="pt-2">
+          {/* Dual-Chassis Two-Tone Console: Warm Cream outer plaque framing Deep Ink Green core */}
+          <div className="p-1.5 sm:p-2 rounded-[28px] bg-[var(--color-tc-cream)] border-2 border-[var(--color-tc-ink)] shadow-[8px_8px_0px_var(--color-tc-teal)] hover:shadow-[4px_4px_0px_var(--color-tc-teal)] hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all duration-200 group">
+            <button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="w-full py-4 sm:py-5 px-5 sm:px-9 bg-[var(--color-tc-ink)] hover:bg-[#12312e] text-[var(--color-tc-cream)] rounded-[20px] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-tc-teal)]/30 disabled:opacity-80 disabled:cursor-not-allowed flex items-center justify-between gap-4 cursor-pointer"
+            >
+              {isSubmitting ? (
+                <div className="w-full flex items-center justify-center gap-3.5 py-1">
+                  <div className="w-6 h-6 border-3 border-[var(--color-tc-cream)]/30 border-t-[var(--color-tc-cream)] rounded-full animate-spin shrink-0"></div>
+                  <span className="font-serif font-bold text-xl sm:text-2xl tracking-tight text-[var(--color-tc-cream)]">
+                    Crafting a journey that fits you...
                   </span>
                 </div>
-              </div>
+              ) : (
+                <>
+                  {/* Left Tripcraft Brand Mark on crisp cream tile */}
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--color-tc-cream)] border border-white/20 shadow-sm flex items-center justify-center shrink-0 p-1.5 overflow-hidden">
+                    <Image
+                      src="/artwork/tripcraft-mark.png"
+                      alt="Tripcraft"
+                      width={36}
+                      height={36}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
 
-              {/* Perforated Divider with Authentic Ticket Punch Cutouts */}
-              <div className="relative flex flex-col justify-between items-center bg-[var(--color-tc-ink)] group-hover:bg-[#12312e] w-[1px] transition-colors shrink-0">
-                <div className="w-4 h-4 bg-[var(--color-tc-parchment)] rounded-full -mt-2.5 -mx-2 z-10 border border-[var(--color-tc-ink)]/40" />
-                <div className="h-full border-r-2 border-dashed border-[var(--color-tc-sage)]/50 my-1" />
-                <div className="w-4 h-4 bg-[var(--color-tc-parchment)] rounded-full -mb-2.5 -mx-2 z-10 border border-[var(--color-tc-ink)]/40" />
-              </div>
+                  {/* Center Headline (Clean & Uncluttered) */}
+                  <div className="flex-1 text-center py-1">
+                    <span className="font-serif font-bold text-xl sm:text-2xl lg:text-3xl text-white tracking-tight">
+                      Craft a journey that fits you
+                    </span>
+                  </div>
 
-              {/* Right Ticket Action Stub: Warm Ivory Cream (~22%) */}
-              <div className="bg-[var(--color-tc-cream)] group-hover:bg-white px-5 sm:px-8 flex items-center justify-center gap-2.5 shrink-0 transition-colors border-l border-[var(--color-tc-sage)]/40">
-                <span className="text-xs font-serif font-bold uppercase tracking-wider text-[var(--color-tc-ink)] hidden sm:inline">
-                  Begin
-                </span>
-                <div className="w-10 h-10 rounded-xl bg-[var(--color-tc-ink)] text-white flex items-center justify-center shadow-xs group-hover:translate-x-1 transition-transform">
-                  <ArrowRight className="w-5 h-5 text-[var(--color-tc-cream)]" />
-                </div>
-              </div>
-            </>
-          )}
-        </button>
+                  {/* Right Arrow Action on matching cream tile */}
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--color-tc-cream)] group-hover:bg-white text-[var(--color-tc-ink)] shadow-sm flex items-center justify-center shrink-0 group-hover:translate-x-1 transition-all duration-200">
+                    <ArrowRight className="w-6 h-6 text-[var(--color-tc-ink)]" />
+                  </div>
+                </>
+              )}
+            </button>
+          </div>
 
         {/* Micro Trust Indicators (Consolidated 3 items) */}
         <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 pt-4 text-xs font-semibold text-[var(--color-tc-ink)]/60">
