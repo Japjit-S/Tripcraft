@@ -709,24 +709,27 @@ function PlannerForm() {
             <div className="w-full flex items-center justify-center gap-3.5 py-1">
               <div className="w-6 h-6 border-3 border-[var(--color-tc-cream)]/30 border-t-[var(--color-tc-cream)] rounded-full animate-spin shrink-0"></div>
               <span className="font-serif font-bold text-xl sm:text-2xl tracking-tight text-[var(--color-tc-cream)]">
-                Crafting Your Bespoke Journey...
+                Crafting a journey that fits you...
               </span>
             </div>
           ) : (
             <>
-              {/* Left Sparkle Badge */}
-              <div className="w-12 h-12 rounded-2xl bg-[var(--color-tc-teal)]/40 border border-[var(--color-tc-sage)]/30 flex items-center justify-center shrink-0 group-hover:rotate-12 transition-transform duration-300">
-                <Sparkles className="w-6 h-6 text-[var(--color-tc-saffron)]" />
+              {/* Left Tripcraft Brand Mark (Steady with button, no tilt) */}
+              <div className="w-12 h-12 rounded-2xl bg-[var(--color-tc-teal)]/30 border border-[var(--color-tc-sage)]/30 flex items-center justify-center shrink-0 p-2 overflow-hidden">
+                <Image
+                  src="/artwork/tripcraft-mark.png"
+                  alt="Tripcraft"
+                  width={36}
+                  height={36}
+                  className="w-full h-full object-contain"
+                />
               </div>
 
-              {/* Center Magical & Obvious Headline */}
-              <div className="flex-1 text-center py-0.5">
-                <div className="font-serif font-bold text-xl sm:text-2xl lg:text-3xl text-white tracking-tight flex items-center justify-center gap-2">
-                  <span>Craft Your Bespoke Journey</span>
-                </div>
-                <div className="text-[11px] sm:text-xs font-sans font-semibold text-[var(--color-tc-sage)] uppercase tracking-wider sm:tracking-widest mt-1">
-                  Weather-Aware • 100% Deterministic • Tailored for {persona}
-                </div>
+              {/* Center Headline (Clean & Uncluttered) */}
+              <div className="flex-1 text-center py-1">
+                <span className="font-serif font-bold text-xl sm:text-2xl lg:text-3xl text-white tracking-tight">
+                  Craft a journey that fits you
+                </span>
               </div>
 
               {/* Right Arrow Action */}
@@ -737,10 +740,10 @@ function PlannerForm() {
           )}
         </button>
 
-        {/* Micro Trust Indicators */}
+        {/* Micro Trust Indicators (Consolidated 3 items) */}
         <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 pt-4 text-xs font-semibold text-[var(--color-tc-ink)]/60">
           <span className="flex items-center gap-1.5">
-            <span className="text-[var(--color-tc-teal)]">✦</span> Instant Bespoke Itinerary
+            <span className="text-[var(--color-tc-teal)]">✦</span> 100% Deterministic Engine
           </span>
           <span className="flex items-center gap-1.5">
             <span className="text-[var(--color-tc-teal)]">✦</span> Verified Local Heritage & Landmarks
@@ -772,7 +775,7 @@ function PlannerForm() {
               aria-live="polite"
               className="font-serif text-xl font-bold text-[var(--color-tc-ink)]"
             >
-              Crafting your bespoke journey...
+              Crafting a journey that fits you...
             </p>
             <p
               id="itinerary-loading-description"
