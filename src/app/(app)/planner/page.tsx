@@ -347,13 +347,13 @@ function PlannerForm() {
       <div className="mb-12">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-tc-ink)]/10 text-[var(--color-tc-ink)] text-xs font-bold uppercase tracking-wider mb-3">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Deterministic Procedural Engine</span>
+          <span>Curated Journey Planner</span>
         </div>
         <h1 className="text-4xl sm:text-5xl font-black text-slate-900 mb-3 tracking-tight">
           Design your journey.
         </h1>
         <p className="text-base sm:text-lg text-slate-500 font-medium max-w-2xl">
-          Enter your travel logistics and our unified OpenStreetMap + Open-Meteo engine will synthesize a physically validated, 1-to-7 day schedule.
+          Enter your travel details to create a handcrafted, weather-aware 1-to-7 day journey across India.
         </p>
       </div>
 
@@ -611,7 +611,7 @@ function PlannerForm() {
               Travel Persona
             </h3>
             <p className="text-xs text-slate-500 mb-6 ml-11 font-medium">
-              Calibrates mathematical weights for endurance, historic prominence, and relaxed pacing.
+              Customizes activity pacing, cultural landmarks, and daily rhythm for your style.
             </p>
             
             <div className="space-y-3">
@@ -697,7 +697,7 @@ function PlannerForm() {
             </button>
 
             <p className="text-center text-[11px] font-medium text-slate-400">
-              100% deterministic • OpenStreetMap Overpass (18 km) + Open-Meteo Weather
+              Verified local destinations • Real-time weather integration
             </p>
           </div>
         </div>

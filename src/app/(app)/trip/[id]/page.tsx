@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation';
 import {
   ChevronLeft,
   ChevronRight,
-  MapPin,
   Clock,
 } from 'lucide-react';
 import { ensureTripArtwork, getTripFromStorage, GeneratedTrip } from '@/lib/tripStore';
@@ -82,6 +81,104 @@ function formatCityWithSoftHyphens(name: string): string {
   }
 
   return name;
+}
+
+function cleanReason(reason?: string): string {
+  if (!reason) return '';
+
+  let cleaned = reason;
+
+  // Remove percentages and raw score numbers in parentheses: e.g. (88%), (25), (30), (240m)
+  cleaned = cleaned.replace(/\s*\(\d+%\)/g, '');
+  cleaned = cleaned.replace(/\s*\(\d+\)/g, '');
+  cleaned = cleaned.replace(/\s*\(\d+m\)/g, '');
+  cleaned = cleaned.replace(/\s*\(\d+\+\s*hours\)/g, '');
+
+  // Transform algorithmic internal phrases into natural travel highlights
+  cleaned = cleaned.replace(
+    /Day anchor landmark with highest city prominence\.?/gi,
+    'Iconic city landmark and primary cultural highlight.'
+  );
+  cleaned = cleaned.replace(
+    /Day anchor landmark allocated to afternoon window\.?/gi,
+    'Key landmark and highlight of your afternoon itinerary.'
+  );
+  cleaned = cleaned.replace(
+    /Selected as primary high-prominence anchor landmark for Day \d+\.?/gi,
+    'Primary city landmark and anchor visit for the day.'
+  );
+  cleaned = cleaned.replace(
+    /Selected for [A-Za-z\s]+ in morning based on high affinity and weather fit\.?/gi,
+    'Curated morning visit aligned with your travel style and weather.'
+  );
+  cleaned = cleaned.replace(
+    /Selected for [A-Za-z\s]+ in afternoon based on category affinity\.?/gi,
+    'Curated afternoon visit tailored to your travel preferences.'
+  );
+  cleaned = cleaned.replace(
+    /Selected for [A-Za-z\s]+ evening window based on atmosphere and dining fit\.?/gi,
+    'Atmospheric evening destination ideal for dining and local culture.'
+  );
+  cleaned = cleaned.replace(
+    /Cumulative exertion index triggered a \d+-minute relaxed morning start window\.?/gi,
+    'Relaxed morning start scheduled to balance travel pacing.'
+  );
+  cleaned = cleaned.replace(
+    /Multi-slot continuation: Anchor activity requires [^;]+; afternoon is reserved for relaxed pacing and transit buffer\.?/gi,
+    'Extended excursion with built-in relaxation buffers.'
+  );
+  cleaned = cleaned.replace(
+    /Anchor excursion spans into afternoon; reserved relaxation buffer\.?/gi,
+    'Extended excursion with built-in relaxation buffer.'
+  );
+  cleaned = cleaned.replace(
+    /Thin candidate pool for [a-z]+ under [A-Z_]+ conditions; emitted explicit FLEX block\.?/gi,
+    'Flexible window reserved for spontaneous exploration.'
+  );
+  cleaned = cleaned.replace(
+    /Flexible window scheduled due to thin pool of [a-z]+ options\.?/gi,
+    'Flexible window reserved for leisurely exploration.'
+  );
+  cleaned = cleaned.replace(
+    /Morning slot occupied by inbound travel to destination\.?/gi,
+    'Inbound travel and arrival window.'
+  );
+  cleaned = cleaned.replace(
+    /Afternoon slot reserved for terminal transit, transfer, and hotel room check-in\.?/gi,
+    'Terminal transfer, hotel check-in, and settling in.'
+  );
+  cleaned = cleaned.replace(
+    /Evening dinner and relaxed settling-in following arrival\. No strenuous sightseeing scheduled\.?/gi,
+    'Welcome dinner and relaxed evening settling in.'
+  );
+  cleaned = cleaned.replace(
+    /Morning window reserved for arrival transit and check-in logistics\.?/gi,
+    'Morning arrival and transfer window.'
+  );
+  cleaned = cleaned.replace(
+    /Afternoon slot reserved for arrival transit and check-in logistics\.?/gi,
+    'Afternoon check-in and settling in.'
+  );
+  cleaned = cleaned.replace(
+    /Evening slot reserved for arrival transit and check-in logistics\.?/gi,
+    'Evening arrival and settling in.'
+  );
+
+  // General vocabulary sanitization
+  cleaned = cleaned.replace(/highest city prominence/gi, 'iconic city highlight');
+  cleaned = cleaned.replace(/city prominence/gi, 'city highlight');
+  cleaned = cleaned.replace(/category affinity/gi, 'travel preferences');
+  cleaned = cleaned.replace(/high affinity/gi, 'travel preferences');
+
+  return cleaned.replace(/\s{2,}/g, ' ').replace(/\.\.+/g, '.').trim();
+}
+
+function cleanFlexReason(reason?: string): string {
+  if (!reason) return '';
+  let cleaned = reason;
+  cleaned = cleaned.replace(/Thin candidate pool for [a-z]+ under [A-Z_]+ conditions\.?/gi, 'Flexible window for leisure and local discovery.');
+  cleaned = cleaned.replace(/thin candidate pool/gi, 'flexible schedule');
+  return cleaned.trim();
 }
 
 export default function TripWorkspacePage({
@@ -254,7 +351,7 @@ export default function TripWorkspacePage({
             <div className="sticky top-4">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-tc-ink)]/60">
-                  Spatial Radar
+                  Interactive Map
                 </span>
                 <span className="text-[10px] font-semibold text-[var(--color-tc-tangerine)] bg-[var(--color-tc-parchment)] px-2 py-0.5 rounded-full">
                   Pan on Hover
@@ -342,7 +439,6 @@ export default function TripWorkspacePage({
             <div className="space-y-6">
               <ItinerarySection
                 title="Morning"
-                slotBadge="09:00 - 12:30"
                 items={selectedDay.morning}
                 startIndex={0}
                 selectedId={selectedItemId}
@@ -352,7 +448,6 @@ export default function TripWorkspacePage({
               />
               <ItinerarySection
                 title="Afternoon"
-                slotBadge="13:30 - 17:00"
                 items={selectedDay.afternoon}
                 startIndex={selectedDay.morning.length}
                 selectedId={selectedItemId}
@@ -362,7 +457,6 @@ export default function TripWorkspacePage({
               />
               <ItinerarySection
                 title="Evening"
-                slotBadge="18:00 - 21:30"
                 items={selectedDay.evening}
                 startIndex={selectedDay.morning.length + selectedDay.afternoon.length}
                 selectedId={selectedItemId}
@@ -473,7 +567,6 @@ export default function TripWorkspacePage({
 // Subcomponent for sections
 function ItinerarySection({
   title,
-  slotBadge,
   items,
   startIndex,
   selectedId,
@@ -482,7 +575,6 @@ function ItinerarySection({
   onHover,
 }: {
   title: string;
-  slotBadge?: string;
   items: ItineraryItem[];
   startIndex: number;
   selectedId: string | null;
@@ -499,11 +591,6 @@ function ItinerarySection({
           <span className="w-2 h-2 rounded-full bg-[var(--color-tc-ink)]"></span>
           {title}
         </h3>
-        {slotBadge && (
-          <span className="text-[10px] font-bold text-[var(--color-tc-ink)]/50 bg-[var(--color-tc-parchment)] px-2 py-0.5 rounded-md">
-            {slotBadge}
-          </span>
-        )}
       </div>
 
       <div className="space-y-2.5">
@@ -600,36 +687,15 @@ function ItinerarySection({
                   </div>
                 </div>
 
-                <p className="text-xs text-[var(--color-tc-ink)]/60 leading-relaxed font-medium">
-                  {item.reason}
+                <p className="text-xs text-[var(--color-tc-ink)]/70 leading-relaxed font-medium">
+                  {cleanReason(item.reason)}
                 </p>
 
                 {isFlex && item.flexReason && (
-                  <p className="mt-1.5 text-[11px] font-bold text-[var(--color-tc-saffron)] bg-[var(--color-tc-saffron)]/10/90 px-2 py-0.5 rounded-md inline-block">
-                    Notice: {item.flexReason}
+                  <p className="mt-1.5 text-[11px] font-bold text-[var(--color-tc-saffron)] bg-[var(--color-tc-saffron)]/10 px-2 py-0.5 rounded-md inline-block">
+                    Notice: {cleanFlexReason(item.flexReason)}
                   </p>
                 )}
-
-                {/* Details Footer */}
-                <div className="mt-2.5 pt-2 border-t border-[var(--color-tc-sage)]/50/80 flex flex-wrap items-center gap-4 text-[11px] text-[var(--color-tc-ink)]/50 font-medium">
-                  {item.coords && (
-                    <span className="flex items-center gap-1 hover:text-[var(--color-tc-tangerine)] transition-colors">
-                      <MapPin className="w-3 h-3 text-[var(--color-tc-tangerine)]" />
-                      <span className="font-mono">
-                        {item.coords.lat.toFixed(3)}, {item.coords.lon.toFixed(3)}
-                      </span>
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-[var(--color-tc-ink)]/50" />
-                    <span>{item.durationMin || 90} min scheduled</span>
-                  </span>
-                  {item.eventKind && item.eventKind !== 'activity' && (
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-tc-ink)]/60 bg-[var(--color-tc-parchment)] px-1.5 py-0.5 rounded">
-                      {item.eventKind.replace('_', ' ')}
-                    </span>
-                  )}
-                </div>
               </div>
             </div>
           );
