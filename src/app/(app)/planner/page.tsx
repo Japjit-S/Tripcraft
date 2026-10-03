@@ -30,7 +30,7 @@ const POPULAR_DESTINATIONS = [
   { name: 'Jaipur', label: 'Jaipur, RJ' },
   { name: 'Mumbai', label: 'Mumbai, MH' },
   { name: 'Bengaluru', label: 'Bengaluru, KA' },
-  { name: 'Kochi', label: 'Kochi, KL' },
+  { name: 'Calcutta', label: 'Calcutta, WB' },
 ];
 
 const PERSONAS = [
