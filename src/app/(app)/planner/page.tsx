@@ -709,7 +709,7 @@ function PlannerForm() {
             <div className="w-full flex items-center justify-center gap-3.5 py-1">
               <div className="w-6 h-6 border-3 border-[var(--color-tc-cream)]/30 border-t-[var(--color-tc-cream)] rounded-full animate-spin shrink-0"></div>
               <span className="font-serif font-bold text-xl sm:text-2xl tracking-tight text-[var(--color-tc-cream)]">
-                Crafting Your {duration}-Day Journey...
+                Crafting Your Bespoke Journey...
               </span>
             </div>
           ) : (
@@ -722,7 +722,7 @@ function PlannerForm() {
               {/* Center Magical & Obvious Headline */}
               <div className="flex-1 text-center py-0.5">
                 <div className="font-serif font-bold text-xl sm:text-2xl lg:text-3xl text-white tracking-tight flex items-center justify-center gap-2">
-                  <span>Craft Your {duration}-Day Journey</span>
+                  <span>Craft Your Bespoke Journey</span>
                 </div>
                 <div className="text-[11px] sm:text-xs font-sans font-semibold text-[var(--color-tc-sage)] uppercase tracking-wider sm:tracking-widest mt-1">
                   Weather-Aware • 100% Deterministic • Tailored for {persona}
@@ -772,7 +772,7 @@ function PlannerForm() {
               aria-live="polite"
               className="font-serif text-xl font-bold text-[var(--color-tc-ink)]"
             >
-              Crafting your journey...
+              Crafting your bespoke journey...
             </p>
             <p
               id="itinerary-loading-description"
