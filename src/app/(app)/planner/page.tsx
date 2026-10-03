@@ -717,13 +717,13 @@ function PlannerForm() {
               ) : (
                 <>
                   {/* Left Tripcraft Brand Mark on crisp cream tile (Maximized logo prominence) */}
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--color-tc-cream)] border border-white/20 shadow-sm flex items-center justify-center shrink-0 p-0.5 overflow-hidden">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--color-tc-cream)] border border-white/20 shadow-sm flex items-center justify-center shrink-0 overflow-hidden">
                     <Image
                       src="/artwork/tripcraft-mark.png"
                       alt="Tripcraft"
-                      width={44}
-                      height={44}
-                      className="w-full h-full object-contain scale-115"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain scale-130"
                     />
                   </div>
 
