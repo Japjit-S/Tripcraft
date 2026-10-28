@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, safeGetServerUser } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { deleteItineraryFromDb, getItineraryByIdFromDb } from '@/lib/supabase/itineraryRepo';
 
@@ -18,12 +18,10 @@ export async function GET(
     return NextResponse.json({ error: 'Supabase unavailable' }, { status: 500 });
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await safeGetServerUser(supabase);
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized or database unavailable' }, { status: 401 });
   }
 
   if (!id || typeof id !== 'string' || id.length > 100) {
@@ -57,12 +55,10 @@ export async function DELETE(
     return NextResponse.json({ error: 'Supabase unavailable' }, { status: 500 });
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await safeGetServerUser(supabase);
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized or database unavailable' }, { status: 401 });
   }
 
   const deleted = await deleteItineraryFromDb(supabase, id, user.id);

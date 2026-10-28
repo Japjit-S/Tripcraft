@@ -32,3 +32,29 @@ export async function createServerSupabaseClient() {
     },
   });
 }
+
+/**
+ * Safely fetches the authenticated user on the server with a bounded timeout and try/catch.
+ * Returns null if Supabase is offline, paused, unresolvable, or unauthenticated,
+ * preventing server endpoints from crashing or hanging indefinitely.
+ */
+export async function safeGetServerUser(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  timeoutMs = 2000
+) {
+  if (!supabase) return null;
+  try {
+    const userPromise = supabase.auth.getUser();
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Supabase server auth timeout')), timeoutMs)
+    );
+    const { data } = await Promise.race([userPromise, timeoutPromise]);
+    return data?.user ?? null;
+  } catch (err) {
+    console.warn(
+      '[Supabase Server] Auth check bypassed:',
+      err instanceof Error ? err.message : String(err)
+    );
+    return null;
+  }
+}

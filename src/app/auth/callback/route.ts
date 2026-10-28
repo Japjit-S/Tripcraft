@@ -30,9 +30,17 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      return NextResponse.redirect(new URL(next, request.url));
+    try {
+      const exchangePromise = supabase.auth.exchangeCodeForSession(code);
+      const timeoutPromise = new Promise<{ error: Error }>((_, reject) =>
+        setTimeout(() => reject(new Error('Auth exchange timeout')), 3000)
+      );
+      const { error } = await Promise.race([exchangePromise, timeoutPromise]);
+      if (!error) {
+        return NextResponse.redirect(new URL(next, request.url));
+      }
+    } catch {
+      // Tolerate exchange failure or timeout
     }
   }
 

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, safeGetServerUser } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { getUserItinerariesFromDb, saveItineraryToDb } from '@/lib/supabase/itineraryRepo';
 import { GeneratedTrip } from '@/lib/tripStore';
@@ -17,12 +17,10 @@ export async function GET() {
     return NextResponse.json({ itineraries: [], supabaseConfigured: false });
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await safeGetServerUser(supabase);
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ itineraries: [], supabaseConfigured: true });
   }
 
   try {
@@ -92,9 +90,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await safeGetServerUser(supabase);
 
     if (!user) {
       return NextResponse.json({

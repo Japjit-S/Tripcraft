@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, safeGetServerUser } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { deleteDayNoteFromDb, getDayNotesFromDb, saveDayNoteToDb } from '@/lib/supabase/itineraryRepo';
 
@@ -22,12 +22,10 @@ export async function GET(
     return NextResponse.json({ notes: [] });
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await safeGetServerUser(supabase);
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized or database unavailable' }, { status: 401 });
   }
 
   const notes = await getDayNotesFromDb(supabase, dayId);
@@ -73,12 +71,10 @@ export async function POST(
       return NextResponse.json({ error: 'Database unavailable' }, { status: 500 });
     }
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await safeGetServerUser(supabase);
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized or database unavailable' }, { status: 401 });
     }
 
     const note = await saveDayNoteToDb(supabase, dayId, content);
@@ -127,12 +123,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Database unavailable' }, { status: 500 });
     }
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await safeGetServerUser(supabase);
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized or database unavailable' }, { status: 401 });
     }
 
     const deleted = await deleteDayNoteFromDb(supabase, noteId);
